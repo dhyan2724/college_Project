@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Chemical = require('../models/Chemical');
 const { authenticateToken, authorizeRoles } = require('../middleware/auth');
+const ActivityLog = require('../models/ActivityLog');
 
 // Get all chemicals
 router.get('/', authenticateToken, async (req, res) => {
@@ -39,6 +40,14 @@ router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) =>
 
     try {
         const newChemical = await chemical.save();
+        // Log activity
+        await ActivityLog.create({
+          action: 'add',
+          itemType: 'chemical',
+          itemId: newChemical._id,
+          itemName: newChemical.name,
+          user: req.user ? req.user.username : 'unknown',
+        });
         res.status(201).json(newChemical);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -62,6 +71,14 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin'), async (req, res
         });
 
         const updatedChemical = await chemical.save();
+        // Log activity
+        await ActivityLog.create({
+          action: 'edit',
+          itemType: 'chemical',
+          itemId: updatedChemical._id,
+          itemName: updatedChemical.name,
+          user: req.user ? req.user.username : 'unknown',
+        });
         res.json(updatedChemical);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -77,6 +94,14 @@ router.delete('/:id', authenticateToken, authorizeRoles('admin'), async (req, re
         }
 
         await chemical.deleteOne();
+        // Log activity
+        await ActivityLog.create({
+          action: 'delete',
+          itemType: 'chemical',
+          itemId: chemical._id,
+          itemName: chemical.name,
+          user: req.user ? req.user.username : 'unknown',
+        });
         res.json({ message: 'Chemical deleted' });
     } catch (error) {
         res.status(500).json({ message: error.message });

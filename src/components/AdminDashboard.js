@@ -1,6 +1,7 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../App';
+import api from '../services/api';
 import InventorySection from "./InventorySection";
 
 const AdminDashboard = () => {
@@ -31,6 +32,10 @@ const AdminDashboard = () => {
   const [newInstrumentStoragePlace, setNewInstrumentStoragePlace] = useState('');
   const [newInstrumentTotalQuantity, setNewInstrumentTotalQuantity] = useState('');
   const [newInstrumentCompany, setNewInstrumentCompany] = useState('');
+
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [loadingActivities, setLoadingActivities] = useState(true);
+  const [activityError, setActivityError] = useState(null);
 
   const navigate = useNavigate();
 
@@ -193,6 +198,22 @@ const AdminDashboard = () => {
   };
 
   const teachers = users.filter(user => user.role === 'faculty');
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      setLoadingActivities(true);
+      setActivityError(null);
+      try {
+        const logs = await api.fetchRecentActivityLogs();
+        setRecentActivities(logs);
+      } catch (err) {
+        setActivityError('Failed to load recent activity.');
+      } finally {
+        setLoadingActivities(false);
+      }
+    };
+    fetchActivities();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -457,7 +478,23 @@ const AdminDashboard = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
           <div className="space-y-4">
-            <p className="text-gray-600">No recent activity</p>
+            {loadingActivities ? (
+              <p className="text-gray-600">Loading...</p>
+            ) : activityError ? (
+              <p className="text-red-600">{activityError}</p>
+            ) : recentActivities.length === 0 ? (
+              <p className="text-gray-600">No recent activity</p>
+            ) : (
+              <ul className="divide-y divide-gray-200">
+                {recentActivities.map((log) => (
+                  <li key={log._id} className="py-2">
+                    <span className="font-semibold capitalize">{log.action}</span> {log.itemType} <span className="font-semibold">{log.itemName}</span>
+                    <span className="text-gray-500 ml-2">by {log.user || 'unknown'}</span>
+                    <span className="text-gray-400 ml-2 text-xs">{new Date(log.timestamp).toLocaleString()}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Glassware = require('../models/Glassware');
 const { authenticateToken, authorizeRoles } = require('../middleware/auth');
+const ActivityLog = require('../models/ActivityLog');
 
 // GET all glasswares
 router.get('/', authenticateToken, async (req, res) => {
@@ -37,6 +38,14 @@ router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) =>
 
   try {
     const newGlassware = await glassware.save();
+    // Log activity
+    await ActivityLog.create({
+      action: 'add',
+      itemType: 'glassware',
+      itemId: newGlassware._id,
+      itemName: newGlassware.name,
+      user: req.user ? req.user.username : 'unknown',
+    });
     res.status(201).json(newGlassware);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -60,6 +69,14 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin'), async (req, res
     });
 
     const updatedGlassware = await glassware.save();
+    // Log activity
+    await ActivityLog.create({
+      action: 'edit',
+      itemType: 'glassware',
+      itemId: updatedGlassware._id,
+      itemName: updatedGlassware.name,
+      user: req.user ? req.user.username : 'unknown',
+    });
     res.json(updatedGlassware);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -73,6 +90,14 @@ router.delete('/:id', authenticateToken, authorizeRoles('admin'), async (req, re
     if (!glassware) return res.status(404).json({ message: 'Glassware not found' });
     
     await Glassware.deleteOne({ _id: req.params.id });
+    // Log activity
+    await ActivityLog.create({
+      action: 'delete',
+      itemType: 'glassware',
+      itemId: glassware._id,
+      itemName: glassware.name,
+      user: req.user ? req.user.username : 'unknown',
+    });
     res.json({ message: 'Glassware deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Plasticware = require('../models/Plasticware');
 const { authenticateToken, authorizeRoles } = require('../middleware/auth');
+const ActivityLog = require('../models/ActivityLog');
 
 // GET all plasticwares
 router.get('/', authenticateToken, async (req, res) => {
@@ -37,6 +38,14 @@ router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) =>
 
   try {
     const newPlasticware = await plasticware.save();
+    // Log activity
+    await ActivityLog.create({
+      action: 'add',
+      itemType: 'plasticware',
+      itemId: newPlasticware._id,
+      itemName: newPlasticware.name,
+      user: req.user ? req.user.username : 'unknown',
+    });
     res.status(201).json(newPlasticware);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -60,6 +69,14 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin'), async (req, res
     });
 
     const updatedPlasticware = await plasticware.save();
+    // Log activity
+    await ActivityLog.create({
+      action: 'edit',
+      itemType: 'plasticware',
+      itemId: updatedPlasticware._id,
+      itemName: updatedPlasticware.name,
+      user: req.user ? req.user.username : 'unknown',
+    });
     res.json(updatedPlasticware);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -73,6 +90,14 @@ router.delete('/:id', authenticateToken, authorizeRoles('admin'), async (req, re
     if (!plasticware) return res.status(404).json({ message: 'Plasticware not found' });
     
     await Plasticware.deleteOne({ _id: req.params.id });
+    // Log activity
+    await ActivityLog.create({
+      action: 'delete',
+      itemType: 'plasticware',
+      itemId: plasticware._id,
+      itemName: plasticware.name,
+      user: req.user ? req.user.username : 'unknown',
+    });
     res.json({ message: 'Plasticware deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });

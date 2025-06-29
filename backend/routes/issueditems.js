@@ -6,6 +6,8 @@ const Glassware = require('../models/Glassware');
 const Plasticware = require('../models/Plasticware');
 const Instrument = require('../models/Instrument');
 const { authenticateToken, authorizeRoles } = require('../middleware/auth');
+const ActivityLog = require('../models/ActivityLog');
+const User = require('../models/User');
 
 // GET all issued items (admin/faculty see all, students see their own)
 router.get('/', authenticateToken, async (req, res) => {
@@ -148,7 +150,21 @@ router.post('/', authenticateToken, authorizeRoles('student', 'phd_scholar', 'di
     }
 
     const newIssuedItem = await issuedItem.save();
-    console.log('✅ Issued item created successfully:', newIssuedItem._id);
+    // Fetch student name
+    let studentName = '';
+    try {
+      const studentUser = await User.findById(req.body.issuedTo);
+      studentName = studentUser ? studentUser.fullName : req.body.issuedTo;
+    } catch (e) { studentName = req.body.issuedTo; }
+    // Log activity for approval/issue
+    await ActivityLog.create({
+      action: 'approve',
+      itemType: req.body.itemType,
+      itemId: newIssuedItem._id,
+      itemName: inventoryItem ? inventoryItem.name : '',
+      user: req.user ? req.user.fullName || req.user.username : 'unknown',
+      details: `Approved by: ${req.user ? req.user.fullName || req.user.username : 'unknown'}, Student: ${studentName}`
+    });
     res.status(201).json(newIssuedItem);
   } catch (err) {
     console.error('❌ Error issuing item:', err);
@@ -228,6 +244,21 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty'), asyn
           }
           break;
       }
+      // Fetch student name
+      let studentName = '';
+      try {
+        const studentUser = await User.findById(issuedItem.issuedTo);
+        studentName = studentUser ? studentUser.fullName : issuedItem.issuedTo;
+      } catch (e) { studentName = issuedItem.issuedTo; }
+      // Log activity for return
+      await ActivityLog.create({
+        action: 'return',
+        itemType: issuedItem.itemType,
+        itemId: issuedItem._id,
+        itemName: inventoryItem ? inventoryItem.name : '',
+        user: req.user ? req.user.fullName || req.user.username : 'unknown',
+        details: `Returned by: ${studentName}, Processed by: ${req.user ? req.user.fullName || req.user.username : 'unknown'}`
+      });
     }
 
     const updatedIssuedItem = await issuedItem.save();

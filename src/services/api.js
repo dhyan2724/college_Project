@@ -75,6 +75,9 @@ export const createPendingRequest = (data) => fetch(`${API_URL}/pendingrequests`
 export const updatePendingRequest = (id, data) => fetch(`${API_URL}/pendingrequests/${id}`, { method: 'PATCH', headers: headers(), body: JSON.stringify(data) }).then(handleResponse);
 export const deletePendingRequest = (id) => fetch(`${API_URL}/pendingrequests/${id}`, { method: 'DELETE', headers: headers() }).then(handleResponse);
 
+// Recent Activity Logs
+export const fetchRecentActivityLogs = () => fetch(`${API_URL}/activitylogs/recent`, { headers: headers() }).then(handleResponse);
+
 export default {
   fetchChemicals,
   createChemical,
@@ -108,5 +111,6 @@ export default {
   createPendingRequest,
   updatePendingRequest,
   deletePendingRequest,
+  fetchRecentActivityLogs,
 };
  

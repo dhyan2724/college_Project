@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const PendingRequest = require('../models/PendingRequest');
 const { authenticateToken } = require('../middleware/auth');
+const ActivityLog = require('../models/ActivityLog');
 
 // GET all pending requests
 router.get('/', authenticateToken, async (req, res) => {
@@ -52,6 +53,15 @@ router.post('/', authenticateToken, async (req, res) => {
 
   try {
     const newPendingRequest = await pendingRequest.save();
+    // Log activity for request
+    await ActivityLog.create({
+      action: 'request',
+      itemType: 'pendingRequest',
+      itemId: newPendingRequest._id,
+      itemName: req.body.items && req.body.items.length > 0 ? req.body.items.map(i => i.itemType).join(', ') : '',
+      user: req.user ? req.user.fullName || req.user.username : 'unknown',
+      details: `Purpose: ${req.body.purpose}`
+    });
     res.status(201).json(newPendingRequest);
   } catch (err) {
     res.status(400).json({ message: err.message });
