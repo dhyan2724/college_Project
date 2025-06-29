@@ -16,7 +16,8 @@ router.get('/', authenticateToken, async (req, res) => {
       .populate('items.itemId');
     res.json(pendingRequests);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Error in GET /pendingrequests:', err); // Log the error to the backend terminal
+    res.status(500).json({ message: 'Internal server error', error: err.message, stack: err.stack });
   }
 });
 

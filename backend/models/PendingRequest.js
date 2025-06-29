@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const ItemSchema = new mongoose.Schema({
-  itemType: { type: String, enum: ['chemical', 'glassware', 'plasticware', 'instrument'], required: true },
+  itemType: { type: String, enum: ['Chemical', 'Glassware', 'Plasticware', 'Instrument'], required: true },
   itemId: { type: mongoose.Schema.Types.ObjectId, required: true, refPath: 'items.itemType' },
   quantity: { type: Number },
   totalWeightRequested: { type: Number },

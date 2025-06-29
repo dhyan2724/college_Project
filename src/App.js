@@ -61,12 +61,12 @@ function App() {
                 fetch(`${API_URL}/plasticwares`, { headers }),
                 fetch(`${API_URL}/instruments`, { headers }),
                 fetch(`${API_URL}/pendingrequests`, { headers }),
+                fetch(`${API_URL}/issueditems`, { headers }),
             ];
 
             let isAdminOrFaculty = user && (user.role === 'admin' || user.role === 'faculty');
             if (isAdminOrFaculty) {
                 fetches.push(fetch(`${API_URL}/users`, { headers }));
-                fetches.push(fetch(`${API_URL}/issueditems`, { headers }));
             }
 
             const responses = await Promise.all(fetches);
@@ -76,7 +76,7 @@ function App() {
                 return;
             }
 
-            const [chemicalsData, glasswaresData, plasticwaresData, instrumentsData, pendingRequestsData, usersData, issuedItemsData] =
+            const [chemicalsData, glasswaresData, plasticwaresData, instrumentsData, pendingRequestsData, issuedItemsData, usersData] =
                 await Promise.all(responses.map(res => res.json()));
 
             setChemicals(chemicalsData);
@@ -84,9 +84,9 @@ function App() {
             setPlasticwares(plasticwaresData);
             setInstruments(instrumentsData);
             setPendingRequests(pendingRequestsData);
+            setIssuedItems(issuedItemsData);
             if (isAdminOrFaculty) {
                 setUsers(usersData);
-                setIssuedItems(issuedItemsData);
             }
         } catch (error) {
             console.error('Error fetching data:', error);

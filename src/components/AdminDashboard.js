@@ -200,7 +200,6 @@ const AdminDashboard = () => {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
           <div className="flex gap-2">
-            <button onClick={() => navigate('/register-book')} className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">Register Book Entry</button>
             <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
           </div>
         </div>

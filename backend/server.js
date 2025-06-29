@@ -8,6 +8,7 @@ const plasticwaresRouter = require('./routes/plasticwares');
 const instrumentsRouter = require('./routes/instruments');
 const issuedItemsRouter = require('./routes/issueditems');
 const pendingRequestsRouter = require('./routes/pendingrequests');
+const labRegistersRouter = require('./routes/labregisters');
 
 require('dotenv').config();
 
@@ -35,6 +36,7 @@ app.use('/api/plasticwares', plasticwaresRouter);
 app.use('/api/instruments', instrumentsRouter);
 app.use('/api/issueditems', issuedItemsRouter);
 app.use('/api/pendingrequests', pendingRequestsRouter);
+app.use('/api/labregisters', labRegistersRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);

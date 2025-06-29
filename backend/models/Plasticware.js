@@ -5,6 +5,7 @@ const PlasticwareSchema = new mongoose.Schema({
   type: { type: String, required: true, trim: true },
   storagePlace: { type: String, required: true, trim: true },
   totalQuantity: { type: Number, required: true },
+  availableQuantity: { type: Number, required: true }, // what's actually available
   company: { type: String, trim: true },
   dateOfEntry: { type: Date, default: Date.now },
   plasticwareId: { type: String, unique: true, required: true }, // Auto-generated
@@ -13,6 +14,10 @@ const PlasticwareSchema = new mongoose.Schema({
 PlasticwareSchema.pre('validate', function(next) {
   if (!this.plasticwareId) {
     this.plasticwareId = 'PLASTIC-' + Date.now();
+  }
+  // Set availableQuantity to totalQuantity if not specified
+  if (this.availableQuantity === undefined) {
+    this.availableQuantity = this.totalQuantity;
   }
   next();
 });

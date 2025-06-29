@@ -1,4 +1,4 @@
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const getToken = () => localStorage.getItem('token');
 
@@ -47,12 +47,33 @@ export const deleteUser = (id) => fetch(`${API_URL}/users/${id}`, { method: 'DEL
 
 // Issued Items
 export const fetchIssuedItems = () => fetch(`${API_URL}/issueditems`, { headers: headers() }).then(handleResponse);
+export const createIssuedItem = (data) =>
+  fetch(`${API_URL}/issueditems`, {
+    method: 'POST',
+    headers: headers(),
+    body: JSON.stringify(data),
+  }).then(handleResponse);
+export const updateIssuedItem = (id, data) =>
+  fetch(`${API_URL}/issueditems/${id}`, {
+    method: 'PATCH',
+    headers: headers(),
+    body: JSON.stringify(data),
+  }).then(handleResponse);
 
 // Lab Register
 export const createLabRegister = (data) => fetch(`${API_URL}/labregisters`, { method: 'POST', headers: headers(), body: JSON.stringify(data) }).then(handleResponse);
+export const fetchLabRegisters = () => fetch(`${API_URL}/labregisters`, { headers: headers() }).then(handleResponse);
+export const updateLabRegister = (id, data) => fetch(`${API_URL}/labregisters/${id}`, { method: 'PATCH', headers: headers(), body: JSON.stringify(data) }).then(handleResponse);
+export const deleteLabRegister = (id) => fetch(`${API_URL}/labregisters/${id}`, { method: 'DELETE', headers: headers() }).then(handleResponse);
 
 // Teachers
 export const fetchTeachers = () => fetch(`${API_URL}/users/teachers`).then(handleResponse);
+
+// Pending Requests
+export const fetchPendingRequests = () => fetch(`${API_URL}/pendingrequests`, { headers: headers() }).then(handleResponse);
+export const createPendingRequest = (data) => fetch(`${API_URL}/pendingrequests`, { method: 'POST', headers: headers(), body: JSON.stringify(data) }).then(handleResponse);
+export const updatePendingRequest = (id, data) => fetch(`${API_URL}/pendingrequests/${id}`, { method: 'PATCH', headers: headers(), body: JSON.stringify(data) }).then(handleResponse);
+export const deletePendingRequest = (id) => fetch(`${API_URL}/pendingrequests/${id}`, { method: 'DELETE', headers: headers() }).then(handleResponse);
 
 export default {
   fetchChemicals,
@@ -76,7 +97,16 @@ export default {
   updateUser,
   deleteUser,
   fetchIssuedItems,
+  createIssuedItem,
+  updateIssuedItem,
   createLabRegister,
+  fetchLabRegisters,
+  updateLabRegister,
+  deleteLabRegister,
   fetchTeachers,
+  fetchPendingRequests,
+  createPendingRequest,
+  updatePendingRequest,
+  deletePendingRequest,
 };
  
