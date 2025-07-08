@@ -4,6 +4,8 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { authenticateToken, JWT_SECRET, authorizeRoles } = require('../middleware/auth');
+const nodemailer = require('nodemailer');
+require('dotenv').config();
 
 // GET all teachers (public)
 router.get('/teachers', async (req, res) => {
@@ -125,6 +127,45 @@ router.post('/', async (req, res) => {
       JWT_SECRET,
       { expiresIn: '24h' }
     );
+
+    // Send welcome email if email is provided
+    if (newUser.email) {
+      // Configure transporter (replace with your SMTP credentials)
+      let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS
+        }
+      });
+
+      let mailOptions = {
+        from: `biomedical science laboratory <${process.env.EMAIL_USER}>`,
+        to: newUser.email,
+        subject: 'Welcome to Biomedical Science Laboratory',
+        html: `
+          <p>Dear ${newUser.fullName || newUser.username},</p>
+          <p>Welcome to Biomedical Science Laboratory!</p>
+          <p>Your account has been created.</p>
+          <p>
+            <b>Username:</b> ${newUser.username}<br>
+            <b>Password:</b> ${req.body.password}
+          </p>
+          <p>Please keep this information safe.</p>
+          <p>Best regards,<br>
+          Biomedical Science Laboratory Team</p>
+          <img src="https://aniportalimages.s3.amazonaws.com/media/details/ANI-20250218121007.jpg" alt="Navrachana University Logo" width="200"/>
+        `
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error('Error sending welcome email:', error);
+        } else {
+          console.log('Welcome email sent:', info.response);
+        }
+      });
+    }
 
     // Send response without password
     const userResponse = newUser.toObject();

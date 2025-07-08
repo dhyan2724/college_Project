@@ -18,6 +18,7 @@ const AdminDashboard = () => {
   const [newChemicalStoragePlace, setNewChemicalStoragePlace] = useState('Cupboard');
   const [newChemicalTotalWeight, setNewChemicalTotalWeight] = useState('');
   const [newChemicalCompany, setNewChemicalCompany] = useState('');
+  const [newChemicalCatalogNumber, setNewChemicalCatalogNumber] = useState("");
 
   const [showAddGlasswareForm, setShowAddGlasswareForm] = useState(false);
   const [newGlasswareName, setNewGlasswareName] = useState('');
@@ -25,6 +26,7 @@ const AdminDashboard = () => {
   const [newGlasswareStoragePlace, setNewGlasswareStoragePlace] = useState('');
   const [newGlasswareTotalQuantity, setNewGlasswareTotalQuantity] = useState('');
   const [newGlasswareCompany, setNewGlasswareCompany] = useState('');
+  const [newGlasswareCatalogNumber, setNewGlasswareCatalogNumber] = useState("");
 
   const [showAddInstrumentForm, setShowAddInstrumentForm] = useState(false);
   const [newInstrumentName, setNewInstrumentName] = useState('');
@@ -32,6 +34,14 @@ const AdminDashboard = () => {
   const [newInstrumentStoragePlace, setNewInstrumentStoragePlace] = useState('');
   const [newInstrumentTotalQuantity, setNewInstrumentTotalQuantity] = useState('');
   const [newInstrumentCompany, setNewInstrumentCompany] = useState('');
+  const [newInstrumentCatalogNumber, setNewInstrumentCatalogNumber] = useState("");
+
+  const [showAddPlasticwareForm, setShowAddPlasticwareForm] = useState(false);
+  const [newPlasticwareName, setNewPlasticwareName] = useState('');
+  const [newPlasticwareStoragePlace, setNewPlasticwareStoragePlace] = useState('');
+  const [newPlasticwareTotalQuantity, setNewPlasticwareTotalQuantity] = useState('');
+  const [newPlasticwareCompany, setNewPlasticwareCompany] = useState('');
+  const [newPlasticwareCatalogNumber, setNewPlasticwareCatalogNumber] = useState("");
 
   const [recentActivities, setRecentActivities] = useState([]);
   const [loadingActivities, setLoadingActivities] = useState(true);
@@ -92,6 +102,7 @@ const AdminDashboard = () => {
           storagePlace: newChemicalStoragePlace,
           totalWeight: parseFloat(newChemicalTotalWeight),
           company: newChemicalCompany,
+          catalogNumber: newChemicalCatalogNumber,
         }),
       });
 
@@ -103,6 +114,7 @@ const AdminDashboard = () => {
         setNewChemicalStoragePlace('Cupboard');
         setNewChemicalTotalWeight('');
         setNewChemicalCompany('');
+        setNewChemicalCatalogNumber('');
         fetchData(); // Refresh chemical data after adding a new chemical
       } else {
         const errorData = await response.json();
@@ -131,6 +143,7 @@ const AdminDashboard = () => {
           storagePlace: newGlasswareStoragePlace,
           totalQuantity: parseFloat(newGlasswareTotalQuantity),
           company: newGlasswareCompany,
+          catalogNumber: newGlasswareCatalogNumber,
         }),
       });
 
@@ -142,6 +155,7 @@ const AdminDashboard = () => {
         setNewGlasswareStoragePlace('');
         setNewGlasswareTotalQuantity('');
         setNewGlasswareCompany('');
+        setNewGlasswareCatalogNumber('');
         fetchData(); // Refresh glassware data after adding new glassware
       } else {
         const errorData = await response.json();
@@ -169,6 +183,7 @@ const AdminDashboard = () => {
           storagePlace: newInstrumentStoragePlace,
           totalQuantity: parseFloat(newInstrumentTotalQuantity),
           company: newInstrumentCompany,
+          catalogNumber: newInstrumentCatalogNumber,
         }),
       });
 
@@ -180,6 +195,7 @@ const AdminDashboard = () => {
         setNewInstrumentStoragePlace('');
         setNewInstrumentTotalQuantity('');
         setNewInstrumentCompany('');
+        setNewInstrumentCatalogNumber('');
         fetchData(); // Refresh instrument data after adding new instrument
       } else {
         const errorData = await response.json();
@@ -189,6 +205,42 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error adding instrument:', error);
       alert('An error occurred while adding the instrument.');
+    }
+  };
+
+  const handleAddPlasticware = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/plasticwares`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name: newPlasticwareName,
+          storagePlace: newPlasticwareStoragePlace,
+          totalQuantity: parseFloat(newPlasticwareTotalQuantity),
+          company: newPlasticwareCompany,
+          catalogNumber: newPlasticwareCatalogNumber,
+        }),
+      });
+      if (response.ok) {
+        alert('Plasticware added successfully!');
+        setShowAddPlasticwareForm(false);
+        setNewPlasticwareName('');
+        setNewPlasticwareStoragePlace('');
+        setNewPlasticwareTotalQuantity('');
+        setNewPlasticwareCompany('');
+        setNewPlasticwareCatalogNumber('');
+        fetchData();
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to add plasticware: ${errorData.message}`);
+      }
+    } catch (error) {
+      alert('An error occurred while adding the plasticware.');
     }
   };
 
@@ -258,6 +310,12 @@ const AdminDashboard = () => {
               Add Glassware
             </button>
             <button 
+              onClick={() => setShowAddPlasticwareForm(true)}
+              className="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600"
+            >
+              Add Plasticware
+            </button>
+            <button 
               onClick={() => setShowAddInstrumentForm(true)}
               className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
             >
@@ -287,6 +345,10 @@ const AdminDashboard = () => {
               <div>
                 <label htmlFor="chemicalName" className="block text-sm font-medium text-gray-700">Chemical Name</label>
                 <input type="text" id="chemicalName" value={newChemicalName} onChange={e => setNewChemicalName(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+              </div>
+              <div>
+                <label htmlFor="chemicalCatalogNumber" className="block text-sm font-medium text-gray-700">Catalog Number</label>
+                <input type="text" id="chemicalCatalogNumber" value={newChemicalCatalogNumber} onChange={e => setNewChemicalCatalogNumber(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
               <div>
                 <label htmlFor="chemicalType" className="block text-sm font-medium text-gray-700">Type</label>
@@ -330,9 +392,10 @@ const AdminDashboard = () => {
                 <input type="text" id="glasswareName" value={newGlasswareName} onChange={e => setNewGlasswareName(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
               <div>
-                <label htmlFor="glasswareType" className="block text-sm font-medium text-gray-700">Type</label>
-                <input type="text" id="glasswareType" value={newGlasswareType} onChange={e => setNewGlasswareType(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+                <label htmlFor="glasswareCatalogNumber" className="block text-sm font-medium text-gray-700">Catalog Number</label>
+                <input type="text" id="glasswareCatalogNumber" value={newGlasswareCatalogNumber} onChange={e => setNewGlasswareCatalogNumber(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
+              
               <div>
                 <label htmlFor="glasswareStoragePlace" className="block text-sm font-medium text-gray-700">Storage Place</label>
                 <input type="text" id="glasswareStoragePlace" value={newGlasswareStoragePlace} onChange={e => setNewGlasswareStoragePlace(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
@@ -363,9 +426,10 @@ const AdminDashboard = () => {
                 <input type="text" id="instrumentName" value={newInstrumentName} onChange={e => setNewInstrumentName(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
               <div>
-                <label htmlFor="instrumentType" className="block text-sm font-medium text-gray-700">Type</label>
-                <input type="text" id="instrumentType" value={newInstrumentType} onChange={e => setNewInstrumentType(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+                <label htmlFor="instrumentCatalogNumber" className="block text-sm font-medium text-gray-700">Catalog Number</label>
+                <input type="text" id="instrumentCatalogNumber" value={newInstrumentCatalogNumber} onChange={e => setNewInstrumentCatalogNumber(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
+              
               <div>
                 <label htmlFor="instrumentStoragePlace" className="block text-sm font-medium text-gray-700">Storage Place</label>
                 <input type="text" id="instrumentStoragePlace" value={newInstrumentStoragePlace} onChange={e => setNewInstrumentStoragePlace(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
@@ -381,6 +445,39 @@ const AdminDashboard = () => {
               <div className="flex space-x-4">
                 <button type="submit" className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">Add Instrument</button>
                 <button type="button" onClick={() => setShowAddInstrumentForm(false)} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Add Plasticware Form */}
+        {showAddPlasticwareForm && (
+          <div className="bg-white rounded-lg shadow p-6 mb-8">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New Plasticware</h2>
+            <form onSubmit={handleAddPlasticware} className="space-y-4">
+              <div>
+                <label htmlFor="plasticwareName" className="block text-sm font-medium text-gray-700">Plasticware Name</label>
+                <input type="text" id="plasticwareName" value={newPlasticwareName} onChange={e => setNewPlasticwareName(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+              </div>
+              <div>
+                <label htmlFor="plasticwareCatalogNumber" className="block text-sm font-medium text-gray-700">Catalog Number</label>
+                <input type="text" id="plasticwareCatalogNumber" value={newPlasticwareCatalogNumber} onChange={e => setNewPlasticwareCatalogNumber(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+              </div>
+              <div>
+                <label htmlFor="plasticwareStoragePlace" className="block text-sm font-medium text-gray-700">Storage Place</label>
+                <input type="text" id="plasticwareStoragePlace" value={newPlasticwareStoragePlace} onChange={e => setNewPlasticwareStoragePlace(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+              </div>
+              <div>
+                <label htmlFor="plasticwareTotalQuantity" className="block text-sm font-medium text-gray-700">Total Quantity</label>
+                <input type="number" id="plasticwareTotalQuantity" value={newPlasticwareTotalQuantity} onChange={e => setNewPlasticwareTotalQuantity(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+              </div>
+              <div>
+                <label htmlFor="plasticwareCompany" className="block text-sm font-medium text-gray-700">Company (optional)</label>
+                <input type="text" id="plasticwareCompany" value={newPlasticwareCompany} onChange={e => setNewPlasticwareCompany(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+              </div>
+              <div className="flex space-x-4">
+                <button type="submit" className="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600">Add Plasticware</button>
+                <button type="button" onClick={() => setShowAddPlasticwareForm(false)} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
               </div>
             </form>
           </div>

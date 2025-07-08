@@ -14,6 +14,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments }) 
   const [editItem, setEditItem] = useState(null);
   const [editCategory, setEditCategory] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); // <-- Add search state
 
   // Combine all categories for "all" view
   const getAllInventory = () => {
@@ -48,6 +49,19 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments }) 
     }));
   };
 
+  // Filtered inventory based on search query
+  const getFilteredInventory = () => {
+    const inventory = getCurrentInventory();
+    if (!searchQuery.trim()) return inventory;
+    const query = searchQuery.toLowerCase();
+    return inventory.filter(item =>
+      (item.name && item.name.toLowerCase().includes(query)) ||
+      (item.catalogNumber && item.catalogNumber.toLowerCase().includes(query)) ||
+      (item.type && item.type.toLowerCase().includes(query)) ||
+      (item.company && item.company.toLowerCase().includes(query))
+    );
+  };
+
   // Download helpers
   const downloadExcel = (data, filename) => {
     const ws = XLSX.utils.json_to_sheet(data);
@@ -60,6 +74,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments }) 
   const columnsByCategory = {
     chemicals: [
       { key: 'name', label: 'Name' },
+      { key: 'catalogNumber', label: 'Catalog Number' },
       { key: 'type', label: 'Type' },
       { key: 'storagePlace', label: 'Storage Place' },
       { key: 'totalWeight', label: 'Total Weight (g)' },
@@ -69,7 +84,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments }) 
     ],
     glasswares: [
       { key: 'name', label: 'Name' },
-      { key: 'type', label: 'Type' },
+      { key: 'catalogNumber', label: 'Catalog Number' },
       { key: 'storagePlace', label: 'Storage Place' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'availableQuantity', label: 'Available Quantity' },
@@ -78,7 +93,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments }) 
     ],
     plasticwares: [
       { key: 'name', label: 'Name' },
-      { key: 'type', label: 'Type' },
+      { key: 'catalogNumber', label: 'Catalog Number' },
       { key: 'storagePlace', label: 'Storage Place' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'availableQuantity', label: 'Available Quantity' },
@@ -87,7 +102,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments }) 
     ],
     instruments: [
       { key: 'name', label: 'Name' },
-      { key: 'type', label: 'Type' },
+      { key: 'catalogNumber', label: 'Catalog Number' },
       { key: 'storagePlace', label: 'Storage Place' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'availableQuantity', label: 'Available Quantity' },
@@ -97,6 +112,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments }) 
     all: [
       { key: 'category', label: 'Category' },
       { key: 'name', label: 'Name' },
+      { key: 'catalogNumber', label: 'Catalog Number' },
       { key: 'actions', label: 'Actions' },
     ],
   };
@@ -197,6 +213,16 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments }) 
           </button>
         ))}
       </div>
+      {/* Search Bar */}
+      <div className="mb-4 flex justify-end">
+        <input
+          type="text"
+          className="border p-2 rounded w-full max-w-xs"
+          placeholder="Search by name, type, or company..."
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+        />
+      </div>
       <div className="overflow-x-auto">
         <table className="min-w-full border">
           <thead>
@@ -207,7 +233,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments }) 
             </tr>
           </thead>
           <tbody>
-            {getCurrentInventory().map((item, idx) => (
+            {getFilteredInventory().map((item, idx) => (
               <tr key={item._id || idx}>
                 {columnsByCategory[selectedCategory].map(col => (
                   col.key === 'actions' ? (
@@ -239,10 +265,17 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments }) 
               />
               <input
                 className="border p-2 mb-2 w-full"
+                value={editItem.catalogNumber || ''}
+                onChange={e => setEditItem({ ...editItem, catalogNumber: e.target.value })}
+                placeholder="Catalog Number"
+                required
+              />
+              <input
+                className="border p-2 mb-2 w-full"
                 value={editItem.type || ''}
                 onChange={e => setEditItem({ ...editItem, type: e.target.value })}
                 placeholder="Type"
-                required
+                required={editCategory === 'chemicals' || editCategory === 'glasswares' || editCategory === 'plasticwares' || editCategory === 'instruments'}
               />
               <input
                 className="border p-2 mb-2 w-full"

@@ -7,6 +7,7 @@ const ChemicalSchema = new mongoose.Schema({
   totalWeight: { type: Number, required: true }, // in grams
   availableWeight: { type: Number, required: true }, // in grams - what's actually available
   company: { type: String, trim: true },
+  catalogNumber: { type: String, required: true, unique: true, trim: true }, // Catalog Number
   dateOfEntry: { type: Date, default: Date.now },
   chemicalId: { type: String, unique: true, required: true }, // Will be auto-generated
 });

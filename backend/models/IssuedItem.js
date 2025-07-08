@@ -16,6 +16,7 @@ const IssuedItemSchema = new mongoose.Schema({
   returnDate: { type: Date },
   status: { type: String, enum: ['issued', 'returned'], default: 'issued' },
   notes: { type: String },
+  pendingRequestId: { type: mongoose.Schema.Types.ObjectId, ref: 'PendingRequest' },
 });
 
 module.exports = mongoose.model('IssuedItem', IssuedItemSchema); 

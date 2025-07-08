@@ -15,12 +15,21 @@ const StudentDashboard = () => {
   const [desiredReturnTime, setDesiredReturnTime] = useState('');
   const [notes, setNotes] = useState('');
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('All');
 
   const ITEM_TYPE_MAP = {
     chemical: 'Chemical',
     glassware: 'Glassware',
     plasticware: 'Plasticware',
     instrument: 'Instrument',
+  };
+
+  // Helper to get filtered items by category and search
+  const getFilteredItems = (items, category) => {
+    return items.filter(item =>
+      (!searchTerm || item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
   };
 
   useEffect(() => {
@@ -211,97 +220,109 @@ const StudentDashboard = () => {
 
       {activeTab === 'inventory' && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold text-blue-800 mb-2">Chemicals</h3>
-              <p className="text-blue-600">{chemicals.length} items available</p>
-            </div>
-            <div className="bg-green-50 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold text-green-800 mb-2">Glassware</h3>
-              <p className="text-green-600">{glasswares.length} items available</p>
-            </div>
-            <div className="bg-purple-50 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold text-purple-800 mb-2">Plasticware</h3>
-              <p className="text-purple-600">{plasticwares.length} items available</p>
-            </div>
-            <div className="bg-orange-50 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold text-orange-800 mb-2">Instruments</h3>
-              <p className="text-orange-600">{instruments.length} items available</p>
-            </div>
+          {/* Search and Category Filter */}
+          <div className="flex flex-col md:flex-row md:items-center md:space-x-4 mb-4">
+            <input
+              type="text"
+              placeholder="Search items..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="border border-gray-300 rounded px-3 py-2 mb-2 md:mb-0 w-full md:w-1/3"
+            />
+            <select
+              value={categoryFilter}
+              onChange={e => setCategoryFilter(e.target.value)}
+              className="border border-gray-300 rounded px-3 py-2 w-full md:w-1/4"
+            >
+              <option value="All">All Categories</option>
+              <option value="Chemicals">Chemicals</option>
+              <option value="Glassware">Glassware</option>
+              <option value="Plasticware">Plasticware</option>
+              <option value="Instruments">Instruments</option>
+            </select>
           </div>
 
-          <div>
-            <h3 className="text-xl font-semibold mb-4 text-blue-800">Available Chemicals</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {chemicals.map(chemical => (
-                <div key={chemical._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                  <h4 className="font-semibold text-gray-800">{chemical.name}</h4>
-                  <p className="text-sm text-gray-600 mb-2">Available: {chemical.availableWeight}g</p>
-                  <p className="text-sm text-gray-600 mb-3">Weight: {chemical.weightPerUnit}g</p>
-                  <button
-                    onClick={() => addToCart(chemical, 'chemical')}
-                    className="w-full bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition-colors"
-                  >
-                    Add to Cart
-                  </button>
-                </div>
-              ))}
+          {/* Inventory Grids with Filters */}
+          {(categoryFilter === 'All' || categoryFilter === 'Chemicals') && (
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-blue-800">Available Chemicals</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {getFilteredItems(chemicals, 'Chemicals').map(chemical => (
+                  <div key={chemical._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <h4 className="font-semibold text-gray-800">{chemical.name}</h4>
+                    <p className="text-sm text-gray-600 mb-2">Available: {chemical.availableWeight}gm</p>
+                    <p className="text-sm text-gray-600 mb-3">Weight: {chemical.weightPerUnit}gm</p>
+                    <button
+                      onClick={() => addToCart(chemical, 'chemical')}
+                      className="w-full bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition-colors"
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          <div>
-            <h3 className="text-xl font-semibold mb-4 text-green-800">Available Glassware</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {glasswares.map(glassware => (
-                <div key={glassware._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                  <h4 className="font-semibold text-gray-800">{glassware.name}</h4>
-                  <p className="text-sm text-gray-600 mb-2">Available: {glassware.availableQuantity} units</p>
-                  <button
-                    onClick={() => addToCart(glassware, 'glassware')}
-                    className="w-full bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition-colors"
-                  >
-                    Add to Cart
-                  </button>
-                </div>
-              ))}
+          {(categoryFilter === 'All' || categoryFilter === 'Glassware') && (
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-green-800">Available Glassware</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {getFilteredItems(glasswares, 'Glassware').map(glassware => (
+                  <div key={glassware._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <h4 className="font-semibold text-gray-800">{glassware.name}</h4>
+                    <p className="text-sm text-gray-600 mb-2">Available: {glassware.availableQuantity} units</p>
+                    <button
+                      onClick={() => addToCart(glassware, 'glassware')}
+                      className="w-full bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition-colors"
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          <div>
-            <h3 className="text-xl font-semibold mb-4 text-purple-800">Available Plasticware</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {plasticwares.map(plasticware => (
-                <div key={plasticware._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                  <h4 className="font-semibold text-gray-800">{plasticware.name}</h4>
-                  <p className="text-sm text-gray-600 mb-2">Available: {plasticware.availableQuantity} units</p>
-                  <button
-                    onClick={() => addToCart(plasticware, 'plasticware')}
-                    className="w-full bg-purple-500 text-white px-3 py-2 rounded hover:bg-purple-600 transition-colors"
-                  >
-                    Add to Cart
-                  </button>
-                </div>
-              ))}
+          {(categoryFilter === 'All' || categoryFilter === 'Plasticware') && (
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-purple-800">Available Plasticware</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {getFilteredItems(plasticwares, 'Plasticware').map(plasticware => (
+                  <div key={plasticware._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <h4 className="font-semibold text-gray-800">{plasticware.name}</h4>
+                    <p className="text-sm text-gray-600 mb-2">Available: {plasticware.availableQuantity} units</p>
+                    <button
+                      onClick={() => addToCart(plasticware, 'plasticware')}
+                      className="w-full bg-purple-500 text-white px-3 py-2 rounded hover:bg-purple-600 transition-colors"
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          <div>
-            <h3 className="text-xl font-semibold mb-4 text-orange-800">Available Instruments</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {instruments.map(instrument => (
-                <div key={instrument._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                  <h4 className="font-semibold text-gray-800">{instrument.name}</h4>
-                  <p className="text-sm text-gray-600 mb-2">Available: {instrument.availableQuantity} units</p>
-                  <button
-                    onClick={() => addToCart(instrument, 'instrument')}
-                    className="w-full bg-orange-500 text-white px-3 py-2 rounded hover:bg-orange-600 transition-colors"
-                  >
-                    Add to Cart
-                  </button>
-                </div>
-              ))}
+          {(categoryFilter === 'All' || categoryFilter === 'Instruments') && (
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-orange-800">Available Instruments</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {getFilteredItems(instruments, 'Instruments').map(instrument => (
+                  <div key={instrument._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <h4 className="font-semibold text-gray-800">{instrument.name}</h4>
+                    <p className="text-sm text-gray-600 mb-2">Available: {instrument.availableQuantity} units</p>
+                    <button
+                      onClick={() => addToCart(instrument, 'instrument')}
+                      className="w-full bg-orange-500 text-white px-3 py-2 rounded hover:bg-orange-600 transition-colors"
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
 
@@ -337,7 +358,7 @@ const StudentDashboard = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Item</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Weight (g)</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Weight (gm)</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                   </tr>
                 </thead>
@@ -351,7 +372,9 @@ const StudentDashboard = () => {
                         {item.type}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {item.type !== 'Instrument' ? (
+                        {item.type === 'Chemical' ? (
+                          <span>-</span>
+                        ) : item.type !== 'Instrument' ? (
                           <input
                             type="number"
                             min="1"

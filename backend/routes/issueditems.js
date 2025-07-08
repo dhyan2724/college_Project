@@ -15,6 +15,8 @@ router.get('/', authenticateToken, async (req, res) => {
     let filter = {};
     if (req.user.role === 'student') {
       filter.issuedTo = req.user.id;
+    } else if (req.user.role === 'faculty') {
+      filter.facultyInCharge = req.user.id;
     }
     // Optionally, add similar logic for phd_scholar, dissertation_student
     const issuedItems = await IssuedItem.find(filter).populate('issuedTo').populate('itemId');
@@ -44,6 +46,23 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
 // POST a new issued item (students, phd, dissertation, faculty)
 router.post('/', authenticateToken, authorizeRoles('student', 'phd_scholar', 'dissertation_student', 'faculty'), async (req, res) => {
+  // Prevent duplicate issuance for the same request
+  if (req.body.pendingRequestId) {
+    const PendingRequest = require('../models/PendingRequest');
+    const pendingRequest = await PendingRequest.findById(req.body.pendingRequestId);
+    if (!pendingRequest) {
+      return res.status(404).json({ message: 'Pending request not found' });
+    }
+    if (pendingRequest.status !== 'pending') {
+      return res.status(400).json({ message: 'This request has already been processed.' });
+    }
+    // Check if an issued item already exists for this request (optional, if you want to enforce 1:1)
+    const existingIssued = await IssuedItem.findOne({ pendingRequestId: req.body.pendingRequestId });
+    if (existingIssued) {
+      return res.status(400).json({ message: 'This request has already been issued.' });
+    }
+  }
+
   const issuedItem = new IssuedItem({
     itemType: req.body.itemType,
     itemId: req.body.itemId,
@@ -59,7 +78,8 @@ router.post('/', authenticateToken, authorizeRoles('student', 'phd_scholar', 'di
     issueDate: new Date(),
     returnDate: req.body.returnDate,
     status: 'issued',
-    notes: req.body.notes
+    notes: req.body.notes,
+    ...(req.body.pendingRequestId && { pendingRequestId: req.body.pendingRequestId })
   });
 
   try {
@@ -150,6 +170,11 @@ router.post('/', authenticateToken, authorizeRoles('student', 'phd_scholar', 'di
     }
 
     const newIssuedItem = await issuedItem.save();
+    // If linked to a pending request, mark it as approved
+    if (req.body.pendingRequestId) {
+      const PendingRequest = require('../models/PendingRequest');
+      await PendingRequest.findByIdAndUpdate(req.body.pendingRequestId, { status: 'approved' });
+    }
     // Fetch student name
     let studentName = '';
     try {

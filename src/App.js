@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import AdminDashboard from './components/AdminDashboard';
+import Header from './components/Header';
 import LoginPage from './components/LoginPage';
 import RegisterBookForm from './components/RegisterBookForm';
 import StudentDashboard from './components/StudentDashboard';
@@ -147,6 +148,7 @@ function App() {
 
     return (
         <AuthContext.Provider value={{ user, login, logout, chemicals, setChemicals, glasswares, setGlasswares, plasticwares, setPlasticwares, instruments, setInstruments, users, setUsers, issuedItems, setIssuedItems, pendingRequests, setPendingRequests, fetchData, API_URL }}>
+            <Header />
             <Router>
                 <Routes>
                     <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage />} />

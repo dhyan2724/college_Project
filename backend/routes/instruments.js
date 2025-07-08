@@ -33,6 +33,7 @@ router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) =>
     storagePlace: req.body.storagePlace,
     totalQuantity: req.body.totalQuantity,
     company: req.body.company,
+    catalogNumber: req.body.catalogNumber, // <-- add this
     // dateOfEntry and instrumentId are auto-generated
   });
 
@@ -61,7 +62,7 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin'), async (req, res
     }
 
     // Only allow updating certain fields
-    const updatableFields = ['name', 'type', 'storagePlace', 'totalQuantity', 'company'];
+    const updatableFields = ['name', 'type', 'storagePlace', 'totalQuantity', 'company', 'catalogNumber']; // <-- add catalogNumber
     updatableFields.forEach(field => {
       if (req.body[field] !== undefined) {
         instrument[field] = req.body[field];

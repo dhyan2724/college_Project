@@ -7,6 +7,7 @@ const GlasswareSchema = new mongoose.Schema({
   totalQuantity: { type: Number, required: true },
   availableQuantity: { type: Number, required: true }, // what's actually available
   company: { type: String, trim: true },
+  catalogNumber: { type: String, required: true, unique: true, trim: true }, // Catalog Number
   dateOfEntry: { type: Date, default: Date.now },
   glasswareId: { type: String, unique: true, required: true }, // Auto-generated
 });

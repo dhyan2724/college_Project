@@ -63,6 +63,7 @@ const TeacherDashboard = () => {
           purpose: request.purpose,
           returnDate: request.desiredReturnTime,
           notes: request.notes,
+          pendingRequestId: request._id, // <-- add this line
         });
       }
       alert('Item(s) issued!');
@@ -93,6 +94,12 @@ const TeacherDashboard = () => {
     } catch (err) {
       alert('Failed to return item: ' + (err.message || err));
     }
+  };
+
+  // Helper: Check if a request has already been issued
+  const isRequestIssued = (request) => {
+    // If any issuedItem has pendingRequestId matching this request's _id, consider it issued
+    return issuedItems.some(item => item.pendingRequestId === request._id);
   };
 
   return (
@@ -203,13 +210,11 @@ const TeacherDashboard = () => {
                           >Reject</button>
                         </div>
                       )}
-                      {request.status === 'approved' && (
+                      {request.status === 'approved' && !isRequestIssued(request) && (
                         <button
                           onClick={() => handleIssueItem(request)}
-                          className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 text-xs mt-2"
-                        >
-                          Issue Item
-                        </button>
+                          className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 text-xs ml-2"
+                        >Issue Item</button>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{new Date(request.requestDate).toLocaleDateString()}</td>
@@ -219,7 +224,7 @@ const TeacherDashboard = () => {
             </table>
           </div>
         ) : (
-          <p className="text-gray-600">No pending requests assigned to you</p>
+          <p className="text-gray-600">No pending requests</p>
         )}
       </div>
     </div>
