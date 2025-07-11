@@ -53,7 +53,7 @@ router.post('/', authenticateToken, authorizeRoles('student', 'phd_scholar', 'di
     if (!pendingRequest) {
       return res.status(404).json({ message: 'Pending request not found' });
     }
-    if (pendingRequest.status !== 'pending') {
+    if (pendingRequest.status !== 'pending' && pendingRequest.status !== 'approved') {
       return res.status(400).json({ message: 'This request has already been processed.' });
     }
     // Check if an issued item already exists for this request (optional, if you want to enforce 1:1)

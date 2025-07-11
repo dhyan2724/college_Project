@@ -9,6 +9,7 @@ const StudentRegisterPage = () => {
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
   const [rollNo, setRollNo] = useState('');
+  const [category, setCategory] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -26,6 +27,7 @@ const StudentRegisterPage = () => {
           fullName,
           rollNo,
           role: 'student',
+          category, // Add category to request
         }),
       });
       if (response.ok) {
@@ -43,6 +45,10 @@ const StudentRegisterPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">Division of Biomedical and Life Sciences</h1>
+        <p className="text-gray-600">Laboratory Management System</p>
+      </div>
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-96">
         <h2 className="text-2xl font-bold mb-4 text-center">Student Registration</h2>
         <input
@@ -85,6 +91,18 @@ const StudentRegisterPage = () => {
           onChange={e => setRollNo(e.target.value)}
           required
         />
+        {/* Category Dropdown */}
+        <select
+          className="w-full mb-4 p-2 border rounded"
+          value={category}
+          onChange={e => setCategory(e.target.value)}
+          required
+        >
+          <option value="">Select Program</option>
+          <option value="UG/PG">UG/PG</option>
+          <option value="PhD">PhD</option>
+          <option value="Project Student">Project Student</option>
+        </select>
         <button type="submit" className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600" disabled={loading}>
           {loading ? 'Registering...' : 'Register'}
         </button>

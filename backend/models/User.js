@@ -37,6 +37,14 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     sparse: true // Allows null values for non-student roles without violating unique constraint
   },
+  category: {
+    type: String,
+    enum: ['UG/PG', 'PhD', 'Project Student'],
+    required: function() {
+      return this.role === 'student';
+    },
+    trim: true,
+  },
   lastLogin: {
     type: Date,
     default: Date.now

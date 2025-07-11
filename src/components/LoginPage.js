@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { AuthContext } from '../App';
 
 const LoginPage = () => {
@@ -16,6 +16,10 @@ const LoginPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">Division of Biomedical and Life Sciences</h1>
+        <p className="text-gray-600">Laboratory Management System</p>
+      </div>
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-80">
         <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
         <input
