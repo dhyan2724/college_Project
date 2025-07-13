@@ -78,6 +78,12 @@ export const deletePendingRequest = (id) => fetch(`${API_URL}/pendingrequests/${
 // Recent Activity Logs
 export const fetchRecentActivityLogs = () => fetch(`${API_URL}/activitylogs/recent`, { headers: headers() }).then(handleResponse);
 
+// Miscellaneous
+export const fetchMiscellaneous = () => fetch(`${API_URL}/miscellaneous`, { headers: headers() }).then(handleResponse);
+export const createMiscellaneous = (data) => fetch(`${API_URL}/miscellaneous`, { method: 'POST', headers: headers(), body: JSON.stringify(data) }).then(handleResponse);
+export const updateMiscellaneous = (id, data) => fetch(`${API_URL}/miscellaneous/${id}`, { method: 'PATCH', headers: headers(), body: JSON.stringify(data) }).then(handleResponse);
+export const deleteMiscellaneous = (id) => fetch(`${API_URL}/miscellaneous/${id}`, { method: 'DELETE', headers: headers() }).then(handleResponse);
+
 export default {
   fetchChemicals,
   createChemical,
@@ -112,5 +118,9 @@ export default {
   updatePendingRequest,
   deletePendingRequest,
   fetchRecentActivityLogs,
+  fetchMiscellaneous,
+  createMiscellaneous,
+  updateMiscellaneous,
+  deleteMiscellaneous,
 };
  

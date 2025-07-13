@@ -10,6 +10,7 @@ const issuedItemsRouter = require('./routes/issueditems');
 const pendingRequestsRouter = require('./routes/pendingrequests');
 const labRegistersRouter = require('./routes/labregisters');
 const activityLogsRouter = require('./routes/activitylogs');
+const miscellaneousRouter = require('./routes/miscellaneous');
 
 require('dotenv').config();
 
@@ -39,6 +40,7 @@ app.use('/api/issueditems', issuedItemsRouter);
 app.use('/api/pendingrequests', pendingRequestsRouter);
 app.use('/api/labregisters', labRegistersRouter);
 app.use('/api/activitylogs', activityLogsRouter);
+app.use('/api/miscellaneous', miscellaneousRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);

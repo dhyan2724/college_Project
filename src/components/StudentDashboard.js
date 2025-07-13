@@ -4,7 +4,7 @@ import { AuthContext } from '../App';
 import api from '../services/api';
 
 const StudentDashboard = () => {
-  const { user, chemicals, glasswares, plasticwares, instruments, pendingRequests, issuedItems, fetchData, logout } = useContext(AuthContext);
+  const { user, chemicals, glasswares, plasticwares, instruments, miscellaneous, pendingRequests, issuedItems, fetchData, logout } = useContext(AuthContext);
   const [showRequestForm, setShowRequestForm] = useState(false);
   const [activeTab, setActiveTab] = useState('inventory');
   const [cart, setCart] = useState([]);
@@ -23,6 +23,7 @@ const StudentDashboard = () => {
     glassware: 'Glassware',
     plasticware: 'Plasticware',
     instrument: 'Instrument',
+    miscellaneous: 'Miscellaneous',
   };
 
   // Helper to get filtered items by category and search
@@ -134,6 +135,8 @@ const StudentDashboard = () => {
         return plasticwares;
       case 'instrument':
         return instruments;
+      case 'miscellaneous':
+        return miscellaneous;
       default:
         return [];
     }
@@ -239,6 +242,7 @@ const StudentDashboard = () => {
               <option value="Glassware">Glassware</option>
               <option value="Plasticware">Plasticware</option>
               <option value="Instruments">Instruments</option>
+              <option value="Miscellaneous">Miscellaneous</option>
             </select>
           </div>
 
@@ -315,6 +319,28 @@ const StudentDashboard = () => {
                     <button
                       onClick={() => addToCart(instrument, 'instrument')}
                       className="w-full bg-orange-500 text-white px-3 py-2 rounded hover:bg-orange-600 transition-colors"
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Inventory Tab: Add Miscellaneous section */}
+          {(categoryFilter === 'All' || categoryFilter === 'Miscellaneous') && (
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-gray-800">Available Miscellaneous</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {getFilteredItems(miscellaneous, 'Miscellaneous').map(item => (
+                  <div key={item._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <h4 className="font-semibold text-gray-800">{item.name}</h4>
+                    <p className="text-sm text-gray-600 mb-2">Available: {item.availableQuantity} units</p>
+                    <p className="text-sm text-gray-600 mb-3">Description: {item.description}</p>
+                    <button
+                      onClick={() => addToCart(item, 'miscellaneous')}
+                      className="w-full bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 transition-colors"
                     >
                       Add to Cart
                     </button>

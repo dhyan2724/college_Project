@@ -7,9 +7,10 @@ const categories = [
   { key: "glasswares", label: "Glasswares" },
   { key: "plasticwares", label: "Plasticwares" },
   { key: "instruments", label: "Instruments" },
+  { key: "miscellaneous", label: "Miscellaneous" },
 ];
 
-const InventorySection = ({ chemicals, glasswares, plasticwares, instruments }) => {
+const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, miscellaneous }) => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [editItem, setEditItem] = useState(null);
   const [editCategory, setEditCategory] = useState(null);
@@ -23,7 +24,8 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments }) 
       const items = (cat.key === "chemicals" ? chemicals :
                     cat.key === "glasswares" ? glasswares :
                     cat.key === "plasticwares" ? plasticwares :
-                    cat.key === "instruments" ? instruments : []);
+                    cat.key === "instruments" ? instruments :
+                    cat.key === "miscellaneous" ? miscellaneous : []);
       if (items && items.length > 0) {
         all = all.concat(
           items.map(item => ({
@@ -43,6 +45,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments }) 
     if (selectedCategory === "glasswares") items = glasswares;
     if (selectedCategory === "plasticwares") items = plasticwares;
     if (selectedCategory === "instruments") items = instruments;
+    if (selectedCategory === "miscellaneous") items = miscellaneous;
     return (items || []).map(item => ({
       ...item,
       category: categories.find(c => c.key === selectedCategory).label,
@@ -109,6 +112,16 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments }) 
       { key: 'company', label: 'Company' },
       { key: 'actions', label: 'Actions' },
     ],
+    miscellaneous: [
+      { key: 'name', label: 'Name' },
+      { key: 'description', label: 'Description' },
+      { key: 'catalogNumber', label: 'Catalog Number' },
+      { key: 'storagePlace', label: 'Type' },
+      { key: 'totalQuantity', label: 'Total Quantity' },
+      { key: 'availableQuantity', label: 'Available Quantity' },
+      { key: 'company', label: 'Company' },
+      { key: 'actions', label: 'Actions' },
+    ],
     all: [
       { key: 'category', label: 'Category' },
       { key: 'name', label: 'Name' },
@@ -137,6 +150,8 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments }) 
           actualCategory = 'plasticwares';
         } else if (instruments && instruments.find(i => i._id === id)) {
           actualCategory = 'instruments';
+        } else if (miscellaneous && miscellaneous.find(m => m._id === id)) {
+          actualCategory = 'miscellaneous';
         }
       }
     }
@@ -148,6 +163,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments }) 
       if (actualCategory === 'glasswares') await api.deleteGlassware(id);
       if (actualCategory === 'plasticwares') await api.deletePlasticware(id);
       if (actualCategory === 'instruments') await api.deleteInstrument(id);
+      if (actualCategory === 'miscellaneous') await api.deleteMiscellaneous(id);
       console.log('Delete successful, reloading page...');
       window.location.reload();
     } catch (error) {
@@ -168,6 +184,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments }) 
       if (editCategory === 'glasswares') await api.updateGlassware(editItem._id, editItem);
       if (editCategory === 'plasticwares') await api.updatePlasticware(editItem._id, editItem);
       if (editCategory === 'instruments') await api.updateInstrument(editItem._id, editItem);
+      if (editCategory === 'miscellaneous') await api.updateMiscellaneous(editItem._id, editItem);
       setShowEditModal(false);
       window.location.reload();
     } catch (error) {

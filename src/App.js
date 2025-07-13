@@ -22,6 +22,7 @@ function App() {
     const [users, setUsers] = useState([]);
     const [issuedItems, setIssuedItems] = useState([]);
     const [pendingRequests, setPendingRequests] = useState([]);
+    const [miscellaneous, setMiscellaneous] = useState([]);
 
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
@@ -64,6 +65,7 @@ function App() {
                 fetch(`${API_URL}/instruments`, { headers }),
                 fetch(`${API_URL}/pendingrequests`, { headers }),
                 fetch(`${API_URL}/issueditems`, { headers }),
+                fetch(`${API_URL}/miscellaneous`, { headers }),
             ];
 
             let isAdminOrFaculty = user && (user.role === 'admin' || user.role === 'faculty');
@@ -78,7 +80,7 @@ function App() {
                 return;
             }
 
-            const [chemicalsData, glasswaresData, plasticwaresData, instrumentsData, pendingRequestsData, issuedItemsData, usersData] =
+            const [chemicalsData, glasswaresData, plasticwaresData, instrumentsData, pendingRequestsData, issuedItemsData, miscellaneousData, usersData] =
                 await Promise.all(responses.map(res => res.json()));
 
             setChemicals(chemicalsData);
@@ -87,6 +89,7 @@ function App() {
             setInstruments(instrumentsData);
             setPendingRequests(pendingRequestsData);
             setIssuedItems(issuedItemsData);
+            setMiscellaneous(miscellaneousData);
             if (isAdminOrFaculty) {
                 setUsers(usersData);
             }
@@ -145,10 +148,11 @@ function App() {
         setUsers([]);
         setIssuedItems([]);
         setPendingRequests([]);
+        setMiscellaneous([]);
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, chemicals, setChemicals, glasswares, setGlasswares, plasticwares, setPlasticwares, instruments, setInstruments, users, setUsers, issuedItems, setIssuedItems, pendingRequests, setPendingRequests, fetchData, API_URL }}>
+        <AuthContext.Provider value={{ user, login, logout, chemicals, setChemicals, glasswares, setGlasswares, plasticwares, setPlasticwares, instruments, setInstruments, users, setUsers, issuedItems, setIssuedItems, pendingRequests, setPendingRequests, miscellaneous, setMiscellaneous, fetchData, API_URL }}>
             <Header />
             <Router>
                 <Routes>
@@ -172,7 +176,7 @@ function App() {
                             )
                         }
                     />
-                    <Route path="/admin" element={user && user.role === 'admin' ? <AdminDashboard /> : <Navigate to="/login" replace />} />
+                    <Route path="/admin" element={user && user.role === 'admin' ? <AdminDashboard miscellaneous={miscellaneous} setMiscellaneous={setMiscellaneous} /> : <Navigate to="/login" replace />} />
                     <Route path="/teacher" element={user && user.role === 'faculty' ? <TeacherDashboard /> : <Navigate to="/login" replace />} />
                     <Route path="/student" element={user && user.role === 'student' ? <StudentDashboard /> : <Navigate to="/login" replace />} />
                     <Route path="/register-book" element={user ? <RegisterBookForm /> : <Navigate to="/login" replace />} />

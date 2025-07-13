@@ -4,7 +4,7 @@ import { AuthContext } from '../App';
 import api from '../services/api';
 import InventorySection from "./InventorySection";
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
   const { chemicals, glasswares, instruments, users, setUsers, fetchData, API_URL, logout } = useContext(AuthContext);
   const [showCreateTeacherForm, setShowCreateTeacherForm] = useState(false);
   const [newTeacherUsername, setNewTeacherUsername] = useState('');
@@ -42,6 +42,14 @@ const AdminDashboard = () => {
   const [newPlasticwareTotalQuantity, setNewPlasticwareTotalQuantity] = useState('');
   const [newPlasticwareCompany, setNewPlasticwareCompany] = useState('');
   const [newPlasticwareCatalogNumber, setNewPlasticwareCatalogNumber] = useState("");
+
+  const [showAddMiscForm, setShowAddMiscForm] = useState(false);
+  const [newMiscName, setNewMiscName] = useState('');
+  const [newMiscDescription, setNewMiscDescription] = useState('');
+  const [newMiscStoragePlace, setNewMiscStoragePlace] = useState('');
+  const [newMiscTotalQuantity, setNewMiscTotalQuantity] = useState('');
+  const [newMiscCompany, setNewMiscCompany] = useState('');
+  const [newMiscCatalogNumber, setNewMiscCatalogNumber] = useState('');
 
   const [recentActivities, setRecentActivities] = useState([]);
   const [loadingActivities, setLoadingActivities] = useState(true);
@@ -244,6 +252,44 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleAddMiscellaneous = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/miscellaneous`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name: newMiscName,
+          description: newMiscDescription,
+          storagePlace: newMiscStoragePlace,
+          totalQuantity: parseFloat(newMiscTotalQuantity),
+          company: newMiscCompany,
+          catalogNumber: newMiscCatalogNumber,
+        }),
+      });
+      if (response.ok) {
+        alert('Miscellaneous item added successfully!');
+        setShowAddMiscForm(false);
+        setNewMiscName('');
+        setNewMiscDescription('');
+        setNewMiscStoragePlace('');
+        setNewMiscTotalQuantity('');
+        setNewMiscCompany('');
+        setNewMiscCatalogNumber('');
+        fetchData();
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to add miscellaneous item: ${errorData.message}`);
+      }
+    } catch (error) {
+      alert('An error occurred while adding the miscellaneous item.');
+    }
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -296,7 +342,7 @@ const AdminDashboard = () => {
         {/* Quick Actions */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <button 
               onClick={() => setShowAddChemicalForm(true)}
               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
@@ -322,6 +368,12 @@ const AdminDashboard = () => {
               Add Instrument
             </button>
             <button 
+              onClick={() => setShowAddMiscForm(true)}
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+            >
+              Add Miscellaneous
+            </button>
+            <button 
               onClick={() => setShowCreateTeacherForm(true)}
               className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
             >
@@ -335,6 +387,8 @@ const AdminDashboard = () => {
           chemicals={chemicals} 
           glasswares={glasswares} 
           instruments={instruments} 
+          plasticwares={miscellaneous}
+          miscellaneous={miscellaneous}
         />
 
         {/* Add Chemical Form */}
@@ -478,6 +532,47 @@ const AdminDashboard = () => {
               <div className="flex space-x-4">
                 <button type="submit" className="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600">Add Plasticware</button>
                 <button type="button" onClick={() => setShowAddPlasticwareForm(false)} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Add Miscellaneous Form */}
+        {showAddMiscForm && (
+          <div className="bg-white rounded-lg shadow p-6 mb-8">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New Miscellaneous Item</h2>
+            <form onSubmit={handleAddMiscellaneous} className="space-y-4">
+              <div>
+                <label htmlFor="miscName" className="block text-sm font-medium text-gray-700">Name</label>
+                <input type="text" id="miscName" value={newMiscName} onChange={e => setNewMiscName(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+              </div>
+              <div>
+                <label htmlFor="miscDescription" className="block text-sm font-medium text-gray-700">Description</label>
+                <input type="text" id="miscDescription" value={newMiscDescription} onChange={e => setNewMiscDescription(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+              </div>
+              <div>
+                <label htmlFor="miscCatalogNumber" className="block text-sm font-medium text-gray-700">Catalog Number</label>
+                <input type="text" id="miscCatalogNumber" value={newMiscCatalogNumber} onChange={e => setNewMiscCatalogNumber(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+              </div>
+              <div>
+                <label htmlFor="miscStoragePlace" className="block text-sm font-medium text-gray-700">Type</label>
+                <select id="miscStoragePlace" value={newMiscStoragePlace} onChange={e => setNewMiscStoragePlace(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required>
+                  <option value="a">a</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="miscTotalQuantity" className="block text-sm font-medium text-gray-700">Total Quantity</label>
+                <input type="number" id="miscTotalQuantity" value={newMiscTotalQuantity} onChange={e => setNewMiscTotalQuantity(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+              </div>
+              <div>
+                <label htmlFor="miscCompany" className="block text-sm font-medium text-gray-700">Company (optional)</label>
+                <input type="text" id="miscCompany" value={newMiscCompany} onChange={e => setNewMiscCompany(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+              </div>
+              <div className="flex space-x-4">
+                <button type="submit" className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Add Miscellaneous</button>
+                <button type="button" onClick={() => setShowAddMiscForm(false)} className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">Cancel</button>
               </div>
             </form>
           </div>
