@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import AdminDashboard from './components/AdminDashboard';
+import Footer from './components/Footer';
 import Header from './components/Header';
 import LoginPage from './components/LoginPage';
 import RegisterBookForm from './components/RegisterBookForm';
@@ -177,6 +178,7 @@ function App() {
                     <Route path="/register-book" element={user ? <RegisterBookForm /> : <Navigate to="/login" replace />} />
                 </Routes>
             </Router>
+            <Footer />
         </AuthContext.Provider>
     );
 }
