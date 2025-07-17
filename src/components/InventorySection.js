@@ -8,9 +8,12 @@ const categories = [
   { key: "plasticwares", label: "Plasticwares" },
   { key: "instruments", label: "Instruments" },
   { key: "miscellaneous", label: "Miscellaneous" },
+  { key: "specimens", label: "Specimens" },
+  { key: "slides", label: "Slides" },
+  { key: "minorinstruments", label: "Minor Instruments" },
 ];
 
-const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, miscellaneous }) => {
+const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, miscellaneous, specimens = [], slides = [], minorinstruments = [] }) => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [editItem, setEditItem] = useState(null);
   const [editCategory, setEditCategory] = useState(null);
@@ -25,7 +28,10 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
                     cat.key === "glasswares" ? glasswares :
                     cat.key === "plasticwares" ? plasticwares :
                     cat.key === "instruments" ? instruments :
-                    cat.key === "miscellaneous" ? miscellaneous : []);
+                    cat.key === "miscellaneous" ? miscellaneous :
+                    cat.key === "specimens" ? specimens :
+                    cat.key === "slides" ? slides :
+                    cat.key === "minorinstruments" ? minorinstruments : []);
       if (items && items.length > 0) {
         all = all.concat(
           items.map(item => ({
@@ -46,6 +52,9 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
     if (selectedCategory === "plasticwares") items = plasticwares;
     if (selectedCategory === "instruments") items = instruments;
     if (selectedCategory === "miscellaneous") items = miscellaneous;
+    if (selectedCategory === "specimens") items = specimens;
+    if (selectedCategory === "slides") items = slides;
+    if (selectedCategory === "minorinstruments") items = minorinstruments;
     return (items || []).map(item => ({
       ...item,
       category: categories.find(c => c.key === selectedCategory).label,
@@ -116,7 +125,32 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
       { key: 'name', label: 'Name' },
       { key: 'description', label: 'Description' },
       { key: 'catalogNumber', label: 'Catalog Number' },
-      { key: 'storagePlace', label: 'Type' },
+      { key: 'totalQuantity', label: 'Total Quantity' },
+      { key: 'availableQuantity', label: 'Available Quantity' },
+      { key: 'company', label: 'Company' },
+      { key: 'actions', label: 'Actions' },
+    ],
+    specimens: [
+      { key: 'name', label: 'Name' },
+      { key: 'type', label: 'Type (Plant/Animal)' },
+      { key: 'catalogNumber', label: 'Catalog Number' },
+      { key: 'totalQuantity', label: 'Total Quantity' },
+      { key: 'availableQuantity', label: 'Available Quantity' },
+      { key: 'company', label: 'Company' },
+      { key: 'actions', label: 'Actions' },
+    ],
+    slides: [
+      { key: 'name', label: 'Name' },
+      { key: 'catalogNumber', label: 'Catalog Number' },
+      { key: 'totalQuantity', label: 'Total Quantity' },
+      { key: 'availableQuantity', label: 'Available Quantity' },
+      { key: 'company', label: 'Company' },
+      { key: 'actions', label: 'Actions' },
+    ],
+    minorinstruments: [
+      { key: 'name', label: 'Name' },
+      { key: 'type', label: 'Type (Kit/Module)' },
+      { key: 'catalogNumber', label: 'Catalog Number' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'availableQuantity', label: 'Available Quantity' },
       { key: 'company', label: 'Company' },

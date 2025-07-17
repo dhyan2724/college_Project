@@ -4,7 +4,7 @@ import { AuthContext } from '../App';
 import api from '../services/api';
 
 const StudentDashboard = () => {
-  const { user, chemicals, glasswares, plasticwares, instruments, miscellaneous, pendingRequests, issuedItems, fetchData, logout } = useContext(AuthContext);
+  const { user, chemicals, glasswares, plasticwares, instruments, miscellaneous, specimens = [], slides = [], minorinstruments = [], pendingRequests, issuedItems, fetchData, logout } = useContext(AuthContext);
   const [showRequestForm, setShowRequestForm] = useState(false);
   const [activeTab, setActiveTab] = useState('inventory');
   const [cart, setCart] = useState([]);
@@ -24,6 +24,9 @@ const StudentDashboard = () => {
     plasticware: 'Plasticware',
     instrument: 'Instrument',
     miscellaneous: 'Miscellaneous',
+    specimen: 'Specimen',
+    slide: 'Slide',
+    minorinstrument: 'Minor Instrument',
   };
 
   // Helper to get filtered items by category and search
@@ -243,6 +246,9 @@ const StudentDashboard = () => {
               <option value="Plasticware">Plasticware</option>
               <option value="Instruments">Instruments</option>
               <option value="Miscellaneous">Miscellaneous</option>
+              <option value="Specimens">Specimens</option>
+              <option value="Slides">Slides</option>
+              <option value="Minor Instruments">Minor Instruments</option>
             </select>
           </div>
 
@@ -341,6 +347,65 @@ const StudentDashboard = () => {
                     <button
                       onClick={() => addToCart(item, 'miscellaneous')}
                       className="w-full bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 transition-colors"
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {(categoryFilter === 'All' || categoryFilter === 'Specimens') && (
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-green-900">Available Specimens</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {getFilteredItems(specimens, 'Specimens').map(specimen => (
+                  <div key={specimen._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <h4 className="font-semibold text-gray-800">{specimen.name}</h4>
+                    <p className="text-sm text-gray-600 mb-2">Type: {specimen.type}</p>
+                    <p className="text-sm text-gray-600 mb-2">Available: {specimen.availableQuantity} units</p>
+                    <button
+                      onClick={() => addToCart(specimen, 'specimen')}
+                      className="w-full bg-green-700 text-white px-3 py-2 rounded hover:bg-green-800 transition-colors"
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {(categoryFilter === 'All' || categoryFilter === 'Slides') && (
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-cyan-900">Available Slides</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {getFilteredItems(slides, 'Slides').map(slide => (
+                  <div key={slide._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <h4 className="font-semibold text-gray-800">{slide.name}</h4>
+                    <p className="text-sm text-gray-600 mb-2">Available: {slide.availableQuantity} units</p>
+                    <button
+                      onClick={() => addToCart(slide, 'slide')}
+                      className="w-full bg-cyan-700 text-white px-3 py-2 rounded hover:bg-cyan-800 transition-colors"
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {(categoryFilter === 'All' || categoryFilter === 'Minor Instruments') && (
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-fuchsia-900">Available Minor Instruments</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {getFilteredItems(minorinstruments, 'Minor Instruments').map(minor => (
+                  <div key={minor._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <h4 className="font-semibold text-gray-800">{minor.name}</h4>
+                    <p className="text-sm text-gray-600 mb-2">Type: {minor.type}</p>
+                    <p className="text-sm text-gray-600 mb-2">Available: {minor.availableQuantity} units</p>
+                    <button
+                      onClick={() => addToCart(minor, 'minorinstrument')}
+                      className="w-full bg-fuchsia-700 text-white px-3 py-2 rounded hover:bg-fuchsia-800 transition-colors"
                     >
                       Add to Cart
                     </button>
