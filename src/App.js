@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import AdminDashboard from './components/AdminDashboard';
+import AIFaqPage from './components/AIFaqPage';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import LoginPage from './components/LoginPage';
@@ -177,6 +178,7 @@ function App() {
                         }
                     />
                     <Route path="/admin" element={user && user.role === 'admin' ? <AdminDashboard miscellaneous={miscellaneous} setMiscellaneous={setMiscellaneous} /> : <Navigate to="/login" replace />} />
+                    <Route path="/admin/ai-faq" element={user && user.role === 'admin' ? <AIFaqPage /> : <Navigate to="/login" replace />} />
                     <Route path="/teacher" element={user && user.role === 'faculty' ? <TeacherDashboard /> : <Navigate to="/login" replace />} />
                     <Route path="/student" element={user && user.role === 'student' ? <StudentDashboard /> : <Navigate to="/login" replace />} />
                     <Route path="/register-book" element={user ? <RegisterBookForm /> : <Navigate to="/login" replace />} />

@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../App';
 import api from '../services/api';
+import AIFaqPage from './AIFaqPage';
 import InventorySection from "./InventorySection";
 
 const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
@@ -337,6 +338,17 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
   const [newMinorInstrumentCompany, setNewMinorInstrumentCompany] = useState('');
   const [newMinorInstrumentCatalogNumber, setNewMinorInstrumentCatalogNumber] = useState('');
 
+  const [showCreateUserForm, setShowCreateUserForm] = useState(false);
+  const [newUserUsername, setNewUserUsername] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserFullName, setNewUserFullName] = useState('');
+  const [newUserRole, setNewUserRole] = useState('student');
+  const [newUserRollNo, setNewUserRollNo] = useState('');
+  const [newUserCategory, setNewUserCategory] = useState('UG/PG');
+
+  const [showFaqModal, setShowFaqModal] = useState(false);
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
@@ -345,6 +357,14 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
           <div className="flex gap-2">
             <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
           </div>
+        </div>
+        <div className="flex justify-end mb-4">
+          <button
+            className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800"
+            onClick={() => setShowCreateUserForm(true)}
+          >
+            Add User
+          </button>
         </div>
         
         {/* Stats Overview */}
@@ -782,6 +802,85 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
           </div>
         )}
 
+        {/* Create New User Form */}
+        {showCreateUserForm && (
+          <div className="bg-white rounded-lg shadow p-6 mb-8">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Create New User</h2>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                try {
+                  await api.createUser({
+                    username: newUserUsername,
+                    password: newUserPassword,
+                    email: newUserEmail,
+                    fullName: newUserFullName,
+                    role: newUserRole,
+                    ...(newUserRole === 'student' ? { rollNo: newUserRollNo, category: newUserCategory } : {})
+                  });
+                  alert('User created successfully!');
+                  setShowCreateUserForm(false);
+                  setNewUserUsername('');
+                  setNewUserPassword('');
+                  setNewUserEmail('');
+                  setNewUserFullName('');
+                  setNewUserRole('student');
+                  setNewUserRollNo('');
+                  setNewUserCategory('UG/PG');
+                  fetchData();
+                } catch (err) {
+                  alert('Failed to create user: ' + err.message);
+                }
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Username</label>
+                <input type="text" className="border p-2 rounded w-full" value={newUserUsername} onChange={e => setNewUserUsername(e.target.value)} required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" className="border p-2 rounded w-full" value={newUserPassword} onChange={e => setNewUserPassword(e.target.value)} required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" className="border p-2 rounded w-full" value={newUserEmail} onChange={e => setNewUserEmail(e.target.value)} required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                <input type="text" className="border p-2 rounded w-full" value={newUserFullName} onChange={e => setNewUserFullName(e.target.value)} required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Role</label>
+                <select className="border p-2 rounded w-full" value={newUserRole} onChange={e => setNewUserRole(e.target.value)} required>
+                  <option value="student">Student</option>
+                  <option value="faculty">Teacher</option>
+                </select>
+              </div>
+              {newUserRole === 'student' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Roll No</label>
+                    <input type="text" className="border p-2 rounded w-full" value={newUserRollNo} onChange={e => setNewUserRollNo(e.target.value)} required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Category</label>
+                    <select className="border p-2 rounded w-full" value={newUserCategory} onChange={e => setNewUserCategory(e.target.value)} required>
+                      <option value="UG/PG">UG/PG</option>
+                      <option value="PhD">PhD</option>
+                      <option value="Project Student">Project Student</option>
+                    </select>
+                  </div>
+                </>
+              )}
+              <div className="flex space-x-4">
+                <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Create User</button>
+                <button type="button" onClick={() => setShowCreateUserForm(false)} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
+              </div>
+            </form>
+          </div>
+        )}
+
         {/* Manage Teacher Accounts */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Manage Teacher Accounts</h2>
@@ -799,6 +898,41 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
             </ul>
           ) : (
             <p className="text-gray-600">No teacher accounts found.</p>
+          )}
+        </div>
+
+        {/* Manage All Users */}
+        <div className="bg-white rounded-lg shadow p-6 mb-8">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Manage All Users</h2>
+          {users.length > 0 ? (
+            <ul className="divide-y divide-gray-200">
+              {users.map(user => (
+                <li key={user._id} className="py-4 flex justify-between items-center">
+                  <div>
+                    <p className="text-lg font-semibold text-gray-900">{user.fullName} ({user.username})</p>
+                    <p className="text-sm text-gray-600">{user.email} | Role: {user.role}</p>
+                  </div>
+                  <button
+                    className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                    onClick={async () => {
+                      if (window.confirm(`Are you sure you want to delete user ${user.fullName}?`)) {
+                        try {
+                          await api.deleteUser(user._id);
+                          alert('User deleted successfully!');
+                          fetchData();
+                        } catch (err) {
+                          alert('Failed to delete user: ' + err.message);
+                        }
+                      }
+                    }}
+                  >
+                    Delete
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-600">No users found.</p>
           )}
         </div>
 
@@ -824,6 +958,25 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
               </ul>
             )}
           </div>
+        </div>
+
+        {/* Floating FAQ Button */}
+        <div>
+          <button
+            className="fixed bottom-8 right-8 w-16 h-16 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center text-3xl hover:bg-blue-700 z-50"
+            style={{ outline: 'none', border: 'none' }}
+            onClick={() => setShowFaqModal(true)}
+            aria-label="Open FAQ"
+          >
+            ?
+          </button>
+          {showFaqModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+              <div className="relative">
+                <AIFaqPage onClose={() => setShowFaqModal(false)} />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
