@@ -41,7 +41,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     enum: ['UG/PG', 'PhD', 'Project Student'],
     required: function() {
-      return this.role === 'student';
+      return this.role === 'student' || this.role === 'phd_scholar' || this.role === 'dissertation_student';
     },
     trim: true,
   },
@@ -53,5 +53,13 @@ const UserSchema = new mongoose.Schema({
 
 // Add index for faster lookups
 UserSchema.index({ rollNo: 1 }, { sparse: true });
+
+// Pre-save middleware to normalize role to lowercase
+UserSchema.pre('save', function(next) {
+  if (this.role) {
+    this.role = this.role.toLowerCase();
+  }
+  next();
+});
 
 module.exports = mongoose.model('User', UserSchema); 

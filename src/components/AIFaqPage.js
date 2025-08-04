@@ -298,7 +298,7 @@ const AIFaqPage = ({ onClose }) => {
     doc.setFont('helvetica', 'normal');
     doc.text(`• Item type: ${usageData[0]?.itemType}`, 25, finalY + 8);
     doc.text(`• Item name: ${usageData[0]?.itemName}`, 25, finalY + 13);
-    doc.text(`• Average quantity per usage: ${(totalQuantity / usageData.length).toFixed(2)} ${usageData[0]?.itemType === 'Chemical' ? 'g' : 'units'}`, 25, finalY + 18);
+    doc.text(`• Average quantity per usage: ${(totalQuantity / usageData.length).toFixed(2)} ${usageData[0]?.itemType === 'Chemical' ? 'ml' : 'units'}`, 25, finalY + 18);
     
     // Add usage frequency by user
     const userUsage = {};

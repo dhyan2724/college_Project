@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../App';
 import api from '../services/api';
-import InventorySection from "./InventorySection";
 import AIFaqPage from './AIFaqPage';
+import InventorySection from "./InventorySection";
 
 const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
   const { chemicals, glasswares, instruments, users, setUsers, fetchData, API_URL, logout } = useContext(AuthContext);

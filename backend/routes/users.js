@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { authenticateToken, JWT_SECRET, authorizeRoles } = require('../middleware/auth');
 const nodemailer = require('nodemailer');
+const https = require('https');
 require('dotenv').config();
 
 // GET all teachers (public)
@@ -109,7 +110,8 @@ router.post('/', async (req, res) => {
       role: req.body.role,
       email: req.body.email,
       fullName: req.body.fullName,
-      rollNo: req.body.rollNo
+      rollNo: req.body.rollNo,
+      category: req.body.category
     });
 
     const newUser = await user.save();
@@ -128,43 +130,89 @@ router.post('/', async (req, res) => {
       { expiresIn: '24h' }
     );
 
-    // Send welcome email if email is provided
-    if (newUser.email) {
-      // Configure transporter (replace with your SMTP credentials)
-      let transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS
-        }
-      });
+        // Send welcome email using manual access token from Graph Explorer
+    if (newUser.email && process.env.EMAIL_USER && process.env.EMAIL_ACCESS_TOKEN) {
+      try {
+        // Send email using Microsoft Graph API with manual token
+        const emailData = {
+          message: {
+            subject: 'Welcome to Biomedical Science Laboratory',
+            body: {
+              contentType: 'HTML',
+              content: `
+                <p>Dear ${newUser.fullName || newUser.username},</p>
+                <p>Welcome to Biomedical Science Laboratory!</p>
+                <p>Your account has been created.</p>
+                <p>
+                  <b>Username:</b> ${newUser.username}<br>
+                  <b>Password:</b> ${req.body.password}
+                </p>
+                <p>Please keep this information safe.</p>
+                <p>Best regards,<br>
+                Biomedical Science Laboratory Team</p>
+                <img src="https://aniportalimages.s3.amazonaws.com/media/details/ANI-20250218121007.jpg" alt="Navrachana University Logo" width="200"/>
+              `
+            },
+            toRecipients: [
+              {
+                emailAddress: {
+                  address: newUser.email
+                }
+              }
+            ]
+          }
+        };
 
-      let mailOptions = {
-        from: `biomedical science laboratory <${process.env.EMAIL_USER}>`,
-        to: newUser.email,
-        subject: 'Welcome to Biomedical Science Laboratory',
-        html: `
-          <p>Dear ${newUser.fullName || newUser.username},</p>
-          <p>Welcome to Biomedical Science Laboratory!</p>
-          <p>Your account has been created.</p>
-          <p>
-            <b>Username:</b> ${newUser.username}<br>
-            <b>Password:</b> ${req.body.password}
-          </p>
-          <p>Please keep this information safe.</p>
-          <p>Best regards,<br>
-          Biomedical Science Laboratory Team</p>
-          <img src="https://aniportalimages.s3.amazonaws.com/media/details/ANI-20250218121007.jpg" alt="Navrachana University Logo" width="200"/>
-        `
-      };
+        // Send email using Microsoft Graph API
+        const emailDataString = JSON.stringify(emailData);
+        
+        const options = {
+          hostname: 'graph.microsoft.com',
+          port: 443,
+          path: `/v1.0/users/${process.env.EMAIL_USER}/sendMail`,
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.EMAIL_ACCESS_TOKEN}`,
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(emailDataString)
+          }
+        };
 
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.error('Error sending welcome email:', error);
-        } else {
-          console.log('Welcome email sent:', info.response);
-        }
-      });
+        const emailPromise = new Promise((resolve, reject) => {
+          const req = https.request(options, (res) => {
+            let data = '';
+            
+            res.on('data', (chunk) => {
+              data += chunk;
+            });
+            
+            res.on('end', () => {
+              if (res.statusCode === 202) {
+                console.log('Welcome email sent successfully');
+                resolve();
+              } else {
+                console.error('Error sending welcome email:', res.statusCode, res.statusMessage, data);
+                resolve();
+              }
+            });
+          });
+
+          req.on('error', (error) => {
+            console.error('Error sending welcome email:', error);
+            resolve();
+          });
+
+          req.write(emailDataString);
+          req.end();
+        });
+
+        await emailPromise;
+      } catch (emailError) {
+        console.error('Error sending welcome email:', emailError);
+      }
+    } else if (newUser.email) {
+      console.log('Email credentials not configured. Skipping welcome email.');
+      console.log('To enable email sending, add EMAIL_ACCESS_TOKEN to your .env file');
     }
 
     // Send response without password
