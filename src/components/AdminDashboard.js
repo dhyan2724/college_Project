@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../App';
 import api from '../services/api';
-import AIFaqPage from './AIFaqPage';
 import InventorySection from "./InventorySection";
+import AIFaqPage from './AIFaqPage';
 
 const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
   const { chemicals, glasswares, instruments, users, setUsers, fetchData, API_URL, logout } = useContext(AuthContext);
@@ -56,6 +56,17 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
   const [loadingActivities, setLoadingActivities] = useState(true);
   const [activityError, setActivityError] = useState(null);
 
+  const [showCreateUserForm, setShowCreateUserForm] = useState(false);
+  const [newUserUsername, setNewUserUsername] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserFullName, setNewUserFullName] = useState('');
+  const [newUserRole, setNewUserRole] = useState('student');
+  const [newUserRollNo, setNewUserRollNo] = useState('');
+  const [newUserCategory, setNewUserCategory] = useState('UG/PG');
+
+  const [showFaqModal, setShowFaqModal] = useState(false);
+
   const navigate = useNavigate();
 
   const handleCreateTeacher = async (e) => {
@@ -84,7 +95,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
         setNewTeacherPassword('');
         setNewTeacherEmail('');
         setNewTeacherFullName('');
-        fetchData(); // Refresh user data after creating a new teacher
+        fetchData();
       } else {
         const errorData = await response.json();
         alert(`Failed to create teacher account: ${errorData.message}`);
@@ -124,7 +135,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
         setNewChemicalTotalWeight('');
         setNewChemicalCompany('');
         setNewChemicalCatalogNumber('');
-        fetchData(); // Refresh chemical data after adding a new chemical
+        fetchData();
       } else {
         const errorData = await response.json();
         console.error('Backend error response:', errorData);
@@ -165,7 +176,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
         setNewGlasswareTotalQuantity('');
         setNewGlasswareCompany('');
         setNewGlasswareCatalogNumber('');
-        fetchData(); // Refresh glassware data after adding new glassware
+        fetchData();
       } else {
         const errorData = await response.json();
         alert(`Failed to add glassware: ${errorData.message}`);
@@ -205,7 +216,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
         setNewInstrumentTotalQuantity('');
         setNewInstrumentCompany('');
         setNewInstrumentCatalogNumber('');
-        fetchData(); // Refresh instrument data after adding new instrument
+        fetchData();
       } else {
         const errorData = await response.json();
         console.error('Backend error response:', errorData);
@@ -314,41 +325,6 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
     fetchActivities();
   }, []);
 
-  const [showAddSpecimenForm, setShowAddSpecimenForm] = useState(false);
-  const [showAddSlideForm, setShowAddSlideForm] = useState(false);
-  const [showAddMinorInstrumentForm, setShowAddMinorInstrumentForm] = useState(false);
-
-  // Specimen form state
-  const [newSpecimenName, setNewSpecimenName] = useState('');
-  const [newSpecimenType, setNewSpecimenType] = useState('Plant');
-  const [newSpecimenTotalQuantity, setNewSpecimenTotalQuantity] = useState('');
-  const [newSpecimenCompany, setNewSpecimenCompany] = useState('');
-  const [newSpecimenCatalogNumber, setNewSpecimenCatalogNumber] = useState('');
-
-  // Slide form state
-  const [newSlideName, setNewSlideName] = useState('');
-  const [newSlideTotalQuantity, setNewSlideTotalQuantity] = useState('');
-  const [newSlideCompany, setNewSlideCompany] = useState('');
-  const [newSlideCatalogNumber, setNewSlideCatalogNumber] = useState('');
-
-  // Minor Instrument form state
-  const [newMinorInstrumentName, setNewMinorInstrumentName] = useState('');
-  const [newMinorInstrumentType, setNewMinorInstrumentType] = useState('Kit');
-  const [newMinorInstrumentTotalQuantity, setNewMinorInstrumentTotalQuantity] = useState('');
-  const [newMinorInstrumentCompany, setNewMinorInstrumentCompany] = useState('');
-  const [newMinorInstrumentCatalogNumber, setNewMinorInstrumentCatalogNumber] = useState('');
-
-  const [showCreateUserForm, setShowCreateUserForm] = useState(false);
-  const [newUserUsername, setNewUserUsername] = useState('');
-  const [newUserPassword, setNewUserPassword] = useState('');
-  const [newUserEmail, setNewUserEmail] = useState('');
-  const [newUserFullName, setNewUserFullName] = useState('');
-  const [newUserRole, setNewUserRole] = useState('student');
-  const [newUserRollNo, setNewUserRollNo] = useState('');
-  const [newUserCategory, setNewUserCategory] = useState('UG/PG');
-
-  const [showFaqModal, setShowFaqModal] = useState(false);
-
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
@@ -422,27 +398,6 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
               className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
             >
               Create Teacher Account
-            </button>
-            {/* New: Add Specimen */}
-            <button
-              onClick={() => setShowAddSpecimenForm(true)}
-              className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800"
-            >
-              Add Specimen
-            </button>
-            {/* New: Add Slide */}
-            <button
-              onClick={() => setShowAddSlideForm(true)}
-              className="bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800"
-            >
-              Add Slide
-            </button>
-            {/* New: Add Minor Instrument */}
-            <button
-              onClick={() => setShowAddMinorInstrumentForm(true)}
-              className="bg-fuchsia-700 text-white px-4 py-2 rounded hover:bg-fuchsia-800"
-            >
-              Add Minor Instrument
             </button>
           </div>
         </div>
@@ -703,105 +658,6 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
           </div>
         )}
 
-        {/* Add Specimen Form */}
-        {showAddSpecimenForm && (
-          <div className="bg-white rounded-lg shadow p-6 mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New Specimen</h2>
-            <form className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Specimen Name</label>
-                <input type="text" className="border p-2 rounded w-full" value={newSpecimenName} onChange={e => setNewSpecimenName(e.target.value)} required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Type</label>
-                <select className="border p-2 rounded w-full" value={newSpecimenType} onChange={e => setNewSpecimenType(e.target.value)}>
-                  <option value="Plant">Plant</option>
-                  <option value="Animal">Animal</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Total Quantity</label>
-                <input type="number" className="border p-2 rounded w-full" value={newSpecimenTotalQuantity} onChange={e => setNewSpecimenTotalQuantity(e.target.value)} required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Company</label>
-                <input type="text" className="border p-2 rounded w-full" value={newSpecimenCompany} onChange={e => setNewSpecimenCompany(e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Catalog Number</label>
-                <input type="text" className="border p-2 rounded w-full" value={newSpecimenCatalogNumber} onChange={e => setNewSpecimenCatalogNumber(e.target.value)} />
-              </div>
-              <div className="flex gap-2">
-                <button type="button" className="bg-gray-400 text-white px-4 py-2 rounded" onClick={() => setShowAddSpecimenForm(false)}>Cancel</button>
-                <button type="submit" className="bg-green-700 text-white px-4 py-2 rounded">Add Specimen</button>
-              </div>
-            </form>
-          </div>
-        )}
-        {/* Add Slide Form */}
-        {showAddSlideForm && (
-          <div className="bg-white rounded-lg shadow p-6 mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New Slide</h2>
-            <form className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Slide Name</label>
-                <input type="text" className="border p-2 rounded w-full" value={newSlideName} onChange={e => setNewSlideName(e.target.value)} required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Total Quantity</label>
-                <input type="number" className="border p-2 rounded w-full" value={newSlideTotalQuantity} onChange={e => setNewSlideTotalQuantity(e.target.value)} required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Company</label>
-                <input type="text" className="border p-2 rounded w-full" value={newSlideCompany} onChange={e => setNewSlideCompany(e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Catalog Number</label>
-                <input type="text" className="border p-2 rounded w-full" value={newSlideCatalogNumber} onChange={e => setNewSlideCatalogNumber(e.target.value)} />
-              </div>
-              <div className="flex gap-2">
-                <button type="button" className="bg-gray-400 text-white px-4 py-2 rounded" onClick={() => setShowAddSlideForm(false)}>Cancel</button>
-                <button type="submit" className="bg-cyan-700 text-white px-4 py-2 rounded">Add Slide</button>
-              </div>
-            </form>
-          </div>
-        )}
-        {/* Add Minor Instrument Form */}
-        {showAddMinorInstrumentForm && (
-          <div className="bg-white rounded-lg shadow p-6 mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New Minor Instrument</h2>
-            <form className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Instrument Name</label>
-                <input type="text" className="border p-2 rounded w-full" value={newMinorInstrumentName} onChange={e => setNewMinorInstrumentName(e.target.value)} required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Type</label>
-                <select className="border p-2 rounded w-full" value={newMinorInstrumentType} onChange={e => setNewMinorInstrumentType(e.target.value)}>
-                  <option value="Kit">Kit</option>
-                  <option value="Module">Module</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Total Quantity</label>
-                <input type="number" className="border p-2 rounded w-full" value={newMinorInstrumentTotalQuantity} onChange={e => setNewMinorInstrumentTotalQuantity(e.target.value)} required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Company</label>
-                <input type="text" className="border p-2 rounded w-full" value={newMinorInstrumentCompany} onChange={e => setNewMinorInstrumentCompany(e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Catalog Number</label>
-                <input type="text" className="border p-2 rounded w-full" value={newMinorInstrumentCatalogNumber} onChange={e => setNewMinorInstrumentCatalogNumber(e.target.value)} />
-              </div>
-              <div className="flex gap-2">
-                <button type="button" className="bg-gray-400 text-white px-4 py-2 rounded" onClick={() => setShowAddMinorInstrumentForm(false)}>Cancel</button>
-                <button type="submit" className="bg-fuchsia-700 text-white px-4 py-2 rounded">Add Minor Instrument</button>
-              </div>
-            </form>
-          </div>
-        )}
-
         {/* Create New User Form */}
         {showCreateUserForm && (
           <div className="bg-white rounded-lg shadow p-6 mb-8">
@@ -880,26 +736,6 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
             </form>
           </div>
         )}
-
-        {/* Manage Teacher Accounts */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Manage Teacher Accounts</h2>
-          {teachers.length > 0 ? (
-            <ul className="divide-y divide-gray-200">
-              {teachers.map(teacher => (
-                <li key={teacher._id} className="py-4 flex justify-between items-center">
-                  <div>
-                    <p className="text-lg font-semibold text-gray-900">{teacher.fullName} ({teacher.username})</p>
-                    <p className="text-sm text-gray-600">{teacher.email}</p>
-                  </div>
-                  {/* Add delete/edit buttons here later */}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-gray-600">No teacher accounts found.</p>
-          )}
-        </div>
 
         {/* Manage All Users */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
