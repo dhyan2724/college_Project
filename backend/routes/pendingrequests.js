@@ -3,6 +3,12 @@ const router = express.Router();
 const PendingRequest = require('../models/PendingRequest');
 const { authenticateToken } = require('../middleware/auth');
 const ActivityLog = require('../models/ActivityLog');
+const User = require('../models/User');
+const Chemical = require('../models/Chemical');
+const Glassware = require('../models/Glassware');
+const Plasticware = require('../models/Plasticware');
+const Instrument = require('../models/Instrument');
+const Miscellaneous = require('../models/Miscellaneous');
 
 // GET all pending requests
 router.get('/', authenticateToken, async (req, res) => {
@@ -53,6 +59,7 @@ router.post('/', authenticateToken, async (req, res) => {
 
   try {
     const newPendingRequest = await pendingRequest.save();
+    
     // Log activity for request
     await ActivityLog.create({
       action: 'request',
@@ -62,6 +69,77 @@ router.post('/', authenticateToken, async (req, res) => {
       user: req.user ? req.user.fullName || req.user.username : 'unknown',
       details: `Purpose: ${req.body.purpose}`
     });
+
+    // Send email notification to faculty
+    try {
+      const emailUtils = require('../utils/emailUtils');
+      
+      if (emailUtils.isEmailServiceConfigured()) {
+        // Get faculty information
+        const faculty = await User.findById(req.body.facultyInCharge);
+        
+        if (faculty && faculty.email) {
+          // Get detailed item information
+          const itemsWithDetails = await Promise.all(
+            req.body.items.map(async (item) => {
+              let itemDetails = null;
+              
+              switch (item.itemType) {
+                case 'Chemical':
+                  itemDetails = await Chemical.findById(item.itemId);
+                  break;
+                case 'Glassware':
+                  itemDetails = await Glassware.findById(item.itemId);
+                  break;
+                case 'Plasticware':
+                  itemDetails = await Plasticware.findById(item.itemId);
+                  break;
+                case 'Instrument':
+                  itemDetails = await Instrument.findById(item.itemId);
+                  break;
+                case 'Miscellaneous':
+                  itemDetails = await Miscellaneous.findById(item.itemId);
+                  break;
+              }
+              
+              return {
+                name: itemDetails ? itemDetails.name : 'Unknown Item',
+                itemType: item.itemType,
+                quantity: item.quantity,
+                totalWeightRequested: item.totalWeightRequested
+              };
+            })
+          );
+
+          // Create portal link (adjust the URL based on your frontend URL)
+          const portalLink = `http://localhost:3000/teacher?requestId=${newPendingRequest._id}`;
+          
+          // Send email notification
+          await emailUtils.sendFacultyRequestNotification(
+            faculty.email,
+            faculty.fullName,
+            req.user.fullName,
+            req.user.rollNo,
+            itemsWithDetails,
+            req.body.purpose,
+            req.body.desiredIssueTime,
+            req.body.desiredReturnTime,
+            req.body.notes,
+            portalLink
+          );
+          
+          console.log('Faculty notification email sent successfully');
+        } else {
+          console.log('Faculty not found or no email configured');
+        }
+      } else {
+        console.log('Email service not configured. Skipping faculty notification email.');
+      }
+    } catch (emailError) {
+      console.error('Error sending faculty notification email:', emailError);
+      // Don't fail the request if email fails
+    }
+
     res.status(201).json(newPendingRequest);
   } catch (err) {
     res.status(400).json({ message: err.message });

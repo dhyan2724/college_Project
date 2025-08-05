@@ -130,89 +130,31 @@ router.post('/', async (req, res) => {
       { expiresIn: '24h' }
     );
 
-        // Send welcome email using manual access token from Graph Explorer
-    if (newUser.email && process.env.EMAIL_USER && process.env.EMAIL_ACCESS_TOKEN) {
+        // Send welcome email with credentials using our email service
+    if (newUser.email) {
       try {
-        // Send email using Microsoft Graph API with manual token
-        const emailData = {
-          message: {
-            subject: 'Welcome to Biomedical Science Laboratory',
-            body: {
-              contentType: 'HTML',
-              content: `
-                <p>Dear ${newUser.fullName || newUser.username},</p>
-                <p>Welcome to Biomedical Science Laboratory!</p>
-                <p>Your account has been created.</p>
-                <p>
-                  <b>Username:</b> ${newUser.username}<br>
-                  <b>Password:</b> ${req.body.password}
-                </p>
-                <p>Please keep this information safe.</p>
-                <p>Best regards,<br>
-                Biomedical Science Laboratory Team</p>
-                <img src="https://aniportalimages.s3.amazonaws.com/media/details/ANI-20250218121007.jpg" alt="Navrachana University Logo" width="200"/>
-              `
-            },
-            toRecipients: [
-              {
-                emailAddress: {
-                  address: newUser.email
-                }
-              }
-            ]
-          }
-        };
-
-        // Send email using Microsoft Graph API
-        const emailDataString = JSON.stringify(emailData);
+        const emailUtils = require('../utils/emailUtils');
         
-        const options = {
-          hostname: 'graph.microsoft.com',
-          port: 443,
-          path: `/v1.0/users/${process.env.EMAIL_USER}/sendMail`,
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${process.env.EMAIL_ACCESS_TOKEN}`,
-            'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(emailDataString)
-          }
-        };
-
-        const emailPromise = new Promise((resolve, reject) => {
-          const req = https.request(options, (res) => {
-            let data = '';
-            
-            res.on('data', (chunk) => {
-              data += chunk;
-            });
-            
-            res.on('end', () => {
-              if (res.statusCode === 202) {
-                console.log('Welcome email sent successfully');
-                resolve();
-              } else {
-                console.error('Error sending welcome email:', res.statusCode, res.statusMessage, data);
-                resolve();
-              }
-            });
-          });
-
-          req.on('error', (error) => {
-            console.error('Error sending welcome email:', error);
-            resolve();
-          });
-
-          req.write(emailDataString);
-          req.end();
-        });
-
-        await emailPromise;
+        if (emailUtils.isEmailServiceConfigured()) {
+          // Determine user role based on the role field
+          const userRole = newUser.role || 'Student';
+          
+          await emailUtils.sendWelcomeEmailWithCredentials(
+            newUser.email, 
+            newUser.fullName || newUser.username,
+            newUser.username,
+            req.body.password, // The password from the request
+            newUser.rollNumber || null,
+            userRole
+          );
+          console.log('Welcome email with credentials sent successfully');
+        } else {
+          console.log('Email service not configured. Skipping welcome email.');
+          console.log('To enable email sending, configure the email service in config/email.js');
+        }
       } catch (emailError) {
         console.error('Error sending welcome email:', emailError);
       }
-    } else if (newUser.email) {
-      console.log('Email credentials not configured. Skipping welcome email.');
-      console.log('To enable email sending, add EMAIL_ACCESS_TOKEN to your .env file');
     }
 
     // Send response without password
