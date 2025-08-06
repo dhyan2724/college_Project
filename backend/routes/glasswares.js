@@ -7,7 +7,7 @@ const ActivityLog = require('../models/ActivityLog');
 // GET all glasswares
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const glasswares = await Glassware.find();
+    const glasswares = await Glassware.findAll();
     res.json(glasswares);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -27,23 +27,22 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
 // POST a new glassware
 router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) => {
-  const glassware = new Glassware({
-    name: req.body.name,
-    type: req.body.type,
-    storagePlace: req.body.storagePlace,
-    totalQuantity: req.body.totalQuantity,
-    company: req.body.company,
-    catalogNumber: req.body.catalogNumber, // <-- add this
-    // dateOfEntry and glasswareId are auto-generated
-  });
-
   try {
-    const newGlassware = await glassware.save();
+    const glasswareData = {
+      name: req.body.name,
+      type: req.body.type,
+      storagePlace: req.body.storagePlace,
+      totalQuantity: req.body.totalQuantity,
+      company: req.body.company,
+      catalogNumber: req.body.catalogNumber,
+    };
+
+    const newGlassware = await Glassware.create(glasswareData);
     // Log activity
     await ActivityLog.create({
       action: 'add',
       itemType: 'glassware',
-      itemId: newGlassware._id,
+      itemId: newGlassware.id,
       itemName: newGlassware.name,
       user: req.user ? req.user.username : 'unknown',
     });
@@ -62,23 +61,24 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin'), async (req, res
     }
 
     // Only allow updating certain fields
-    const updatableFields = ['name', 'type', 'storagePlace', 'totalQuantity', 'company', 'catalogNumber']; // <-- add catalogNumber
+    const updatableFields = ['name', 'type', 'storagePlace', 'totalQuantity', 'company', 'catalogNumber'];
+    const updateData = {};
     updatableFields.forEach(field => {
       if (req.body[field] !== undefined) {
-        glassware[field] = req.body[field];
+        updateData[field] = req.body[field];
       }
     });
 
-    const updatedGlassware = await glassware.save();
+    const updatedGlassware = await Glassware.updateById(req.params.id, updateData);
     // Log activity
     await ActivityLog.create({
       action: 'edit',
       itemType: 'glassware',
-      itemId: updatedGlassware._id,
-      itemName: updatedGlassware.name,
+      itemId: req.params.id,
+      itemName: glassware.name,
       user: req.user ? req.user.username : 'unknown',
     });
-    res.json(updatedGlassware);
+    res.json({ success: updatedGlassware });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -90,12 +90,12 @@ router.delete('/:id', authenticateToken, authorizeRoles('admin'), async (req, re
     const glassware = await Glassware.findById(req.params.id);
     if (!glassware) return res.status(404).json({ message: 'Glassware not found' });
     
-    await Glassware.deleteOne({ _id: req.params.id });
+    await Glassware.deleteById(req.params.id);
     // Log activity
     await ActivityLog.create({
       action: 'delete',
       itemType: 'glassware',
-      itemId: glassware._id,
+      itemId: req.params.id,
       itemName: glassware.name,
       user: req.user ? req.user.username : 'unknown',
     });

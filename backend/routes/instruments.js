@@ -7,7 +7,7 @@ const ActivityLog = require('../models/ActivityLog');
 // GET all instruments
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const instruments = await Instrument.find();
+    const instruments = await Instrument.findAll();
     res.json(instruments);
   } catch (err) {
     res.status(500).json({ message: err.message });

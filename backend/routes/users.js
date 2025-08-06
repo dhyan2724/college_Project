@@ -23,8 +23,8 @@ router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Find user by username
-    const user = await User.findOne({ username });
+    // Find user by username (using MySQL method)
+    const user = await User.findByUsername(username);
     if (!user) {
       return res.status(401).json({ message: 'Invalid username or password' });
     }
@@ -35,10 +35,13 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid username or password' });
     }
 
+    // Update last login
+    await User.updateLastLogin(user.id);
+
     // Create JWT token
     const token = jwt.sign(
       { 
-        id: user._id,
+        id: user.id,
         username: user.username,
         role: user.role,
         email: user.email,
@@ -50,7 +53,7 @@ router.post('/login', async (req, res) => {
     );
 
     // Send response without password
-    const userResponse = user.toObject();
+    const userResponse = { ...user };
     delete userResponse.password;
 
     res.json({
@@ -58,6 +61,7 @@ router.post('/login', async (req, res) => {
       user: userResponse
     });
   } catch (err) {
+    console.error('Login error:', err);
     res.status(500).json({ message: err.message });
   }
 });
@@ -65,8 +69,13 @@ router.post('/login', async (req, res) => {
 // GET all users (protected route)
 router.get('/', authenticateToken, authorizeRoles('admin', 'faculty'), async (req, res) => {
   try {
-    const users = await User.find().select('-password');
-    res.json(users);
+    const users = await User.findAll();
+    // Remove passwords from response
+    const usersWithoutPasswords = users.map(user => {
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    });
+    res.json(usersWithoutPasswords);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -75,9 +84,12 @@ router.get('/', authenticateToken, authorizeRoles('admin', 'faculty'), async (re
 // GET a single user by ID
 router.get('/:id', authenticateToken, async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select('-password');
+    const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
-    res.json(user);
+    
+    // Remove password from response
+    const { password, ...userWithoutPassword } = user;
+    res.json(userWithoutPassword);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -87,39 +99,30 @@ router.get('/:id', authenticateToken, async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     // Check if username or email already exists
-    const existingUser = await User.findOne({
-      $or: [
-        { username: req.body.username },
-        { email: req.body.email }
-      ]
-    });
+    const existingUsername = await User.findByUsername(req.body.username);
+    const existingEmail = await User.findByEmail(req.body.email);
 
-    if (existingUser) {
+    if (existingUsername || existingEmail) {
       return res.status(400).json({ 
         message: 'Username or email already exists' 
       });
     }
 
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(req.body.password, salt);
-
-    const user = new User({
+    // Create user using MySQL method
+    const newUser = await User.create({
       username: req.body.username,
-      password: hashedPassword,
+      password: req.body.password, // User.create handles password hashing
       role: req.body.role,
       email: req.body.email,
       fullName: req.body.fullName,
       rollNo: req.body.rollNo,
       category: req.body.category
     });
-
-    const newUser = await user.save();
     
     // Create JWT token
     const token = jwt.sign(
       { 
-        id: newUser._id,
+        id: newUser.id,
         username: newUser.username,
         role: newUser.role,
         email: newUser.email,
@@ -158,7 +161,7 @@ router.post('/', async (req, res) => {
     }
 
     // Send response without password
-    const userResponse = newUser.toObject();
+    const userResponse = { ...newUser };
     delete userResponse.password;
 
     res.status(201).json({
@@ -186,17 +189,17 @@ router.patch('/:id', authenticateToken, async (req, res) => {
       updates.password = await bcrypt.hash(req.body.password, salt);
     }
 
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { $set: updates },
-      { new: true }
-    ).select('-password');
-
-    if (!user) {
+    const success = await User.updateById(req.params.id, updates);
+    
+    if (!success) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.json(user);
+    // Fetch updated user
+    const user = await User.findById(req.params.id);
+    const { password, ...userWithoutPassword } = user;
+
+    res.json(userWithoutPassword);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -208,8 +211,12 @@ router.delete('/:id', authenticateToken, authorizeRoles('admin'), async (req, re
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
     
-    await User.deleteOne({ _id: req.params.id });
-    res.json({ message: 'User deleted' });
+    const success = await User.deleteById(req.params.id);
+    if (success) {
+      res.json({ message: 'User deleted' });
+    } else {
+      res.status(500).json({ message: 'Failed to delete user' });
+    }
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

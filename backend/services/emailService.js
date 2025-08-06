@@ -350,6 +350,51 @@ const emailTemplates = {
     `
   }),
 
+  passwordChangeNotification: (userName, newPassword) => ({
+    subject: 'Password Changed - Lab Management System',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background-color: #d4edda; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c3e6cb;">
+          <h1 style="color: #155724; margin: 0;">🔐 Password Updated</h1>
+        </div>
+        
+        <div style="background-color: white; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6;">
+          <h2 style="color: #333; margin-top: 0;">Dear ${userName},</h2>
+          
+          <p style="color: #666; line-height: 1.6;">
+            Your password for the Biomedical Science Laboratory Management System has been changed by the Master Administrator.
+          </p>
+          
+          <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #28a745;">
+            <h3 style="color: #333; margin: 0 0 10px 0;">Your New Login Credentials</h3>
+            <p style="color: #666; margin: 5px 0;">
+              <strong>New Password:</strong> ${newPassword}
+            </p>
+          </div>
+          
+          <p style="color: #666; line-height: 1.6;">
+            <strong>Please keep your new password safe and secure.</strong>
+          </p>
+          
+          <p style="color: #666; line-height: 1.6;">
+            For security reasons, we recommend changing this password to something personal after your next login.
+          </p>
+          
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+            <p style="color: #999; font-size: 12px; margin: 0;">
+              Best regards,<br>
+              Biomedical Science Laboratory Management System
+            </p>
+          </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+          <img src="https://aniportalimages.s3.amazonaws.com/media/details/ANI-20250218121007.jpg" alt="Navrachana University Logo" width="200" style="border-radius: 8px;"/>
+        </div>
+      </div>
+    `
+  }),
+
   // New template for faculty request notifications
   facultyRequestNotification: (facultyName, studentName, studentRollNo, items, purpose, desiredIssueTime, desiredReturnTime, notes, portalLink) => ({
     subject: `New Laboratory Request from ${studentName}`,
@@ -484,6 +529,12 @@ const emailTemplates = {
   sendFacultyRequestNotification: async (facultyEmail, facultyName, studentName, studentRollNo, items, purpose, desiredIssueTime, desiredReturnTime, notes, portalLink) => {
     const template = emailTemplates.facultyRequestNotification(facultyName, studentName, studentRollNo, items, purpose, desiredIssueTime, desiredReturnTime, notes, portalLink);
     return await sendEmail(facultyEmail, template.subject, template.html);
+  },
+
+  // Send password change notification email
+  sendPasswordChangeNotification: async (userEmail, userName, newPassword) => {
+    const template = emailTemplates.passwordChangeNotification(userName, newPassword);
+    return await sendEmail(userEmail, template.subject, template.html);
   },
   
   // Get rate limit status

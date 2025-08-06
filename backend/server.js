@@ -1,6 +1,9 @@
+// Load environment variables FIRST before any other imports
+require('dotenv').config();
+
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
+const { testConnection, initializeDatabase } = require('./config/database');
 const usersRouter = require('./routes/users');
 const chemicalsRouter = require('./routes/chemicals');
 const glasswaresRouter = require('./routes/glasswares');
@@ -12,12 +15,10 @@ const labRegistersRouter = require('./routes/labregisters');
 const activityLogsRouter = require('./routes/activitylogs');
 const miscellaneousRouter = require('./routes/miscellaneous');
 const faqRouter = require('./routes/faq');
-
-require('dotenv').config();
+const masterAdminRouter = require('./routes/masterAdmin');
 
 const app = express();
 const port = process.env.PORT || 5000;
-const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/lab_inventory';
 
 // Middleware
 app.use(cors({
@@ -26,10 +27,21 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Connect to MongoDB
-mongoose.connect(mongoUri)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('Could not connect to MongoDB:', err));
+// Initialize MySQL database
+const initializeApp = async () => {
+  try {
+    // Test database connection
+    await testConnection();
+    
+    // Initialize database schema
+    await initializeDatabase();
+    
+    console.log('Database initialized successfully');
+  } catch (error) {
+    console.error('Failed to initialize database:', error);
+    process.exit(1);
+  }
+};
 
 // Routes
 app.use('/api/users', usersRouter);
@@ -43,7 +55,11 @@ app.use('/api/labregisters', labRegistersRouter);
 app.use('/api/activitylogs', activityLogsRouter);
 app.use('/api/miscellaneous', miscellaneousRouter);
 app.use('/api/faq', faqRouter);
+app.use('/api/master-admin', masterAdminRouter);
 
-app.listen(port, () => {
-  console.log(`Server is running on port: ${port}`);
+// Start server after database initialization
+initializeApp().then(() => {
+  app.listen(port, () => {
+    console.log(`Server is running on port: ${port}`);
+  });
 }); 

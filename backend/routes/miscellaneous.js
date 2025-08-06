@@ -7,7 +7,7 @@ const ActivityLog = require('../models/ActivityLog');
 // GET all miscellaneous items
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const items = await Miscellaneous.find();
+    const items = await Miscellaneous.findAll();
     res.json(items);
   } catch (err) {
     res.status(500).json({ message: err.message });

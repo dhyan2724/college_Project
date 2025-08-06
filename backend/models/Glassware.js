@@ -1,26 +1,172 @@
-const mongoose = require('mongoose');
+const { pool } = require('../config/database');
 
-const GlasswareSchema = new mongoose.Schema({
-  name: { type: String, required: true, trim: true },
-  type: { type: String, required: true, trim: true },
-  storagePlace: { type: String, required: true, trim: true },
-  totalQuantity: { type: Number, required: true },
-  availableQuantity: { type: Number, required: true }, // what's actually available
-  company: { type: String, trim: true },
-  catalogNumber: { type: String, required: true, unique: true, trim: true }, // Catalog Number
-  dateOfEntry: { type: Date, default: Date.now },
-  glasswareId: { type: String, unique: true, required: true }, // Auto-generated
-});
-
-GlasswareSchema.pre('validate', function(next) {
-  if (!this.glasswareId) {
-    this.glasswareId = 'GLASS-' + Date.now();
+class Glassware {
+  // Create a new glassware
+  static async create(glasswareData) {
+    try {
+      const { name, type, storagePlace, totalQuantity, availableQuantity, company, catalogNumber } = glasswareData;
+      
+      // Generate glasswareId if not provided
+      const glasswareId = glasswareData.glasswareId || `GLASS-${Date.now()}`;
+      
+      // Set availableQuantity to totalQuantity if not specified
+      const finalAvailableQuantity = availableQuantity !== undefined ? availableQuantity : totalQuantity;
+      
+      const [result] = await pool.execute(
+        'INSERT INTO glasswares (name, type, storagePlace, totalQuantity, availableQuantity, company, catalogNumber, glasswareId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [name, type, storagePlace, totalQuantity, finalAvailableQuantity, company, catalogNumber, glasswareId]
+      );
+      
+      return { id: result.insertId, ...glasswareData, glasswareId, availableQuantity: finalAvailableQuantity };
+    } catch (error) {
+      throw error;
+    }
   }
-  // Set availableQuantity to totalQuantity if not specified
-  if (this.availableQuantity === undefined) {
-    this.availableQuantity = this.totalQuantity;
-  }
-  next();
-});
 
-module.exports = mongoose.model('Glassware', GlasswareSchema); 
+  // Find glassware by ID
+  static async findById(id) {
+    try {
+      const [rows] = await pool.execute(
+        'SELECT * FROM glasswares WHERE id = ?',
+        [id]
+      );
+      return rows[0] || null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Find glassware by catalog number
+  static async findByCatalogNumber(catalogNumber) {
+    try {
+      const [rows] = await pool.execute(
+        'SELECT * FROM glasswares WHERE catalogNumber = ?',
+        [catalogNumber]
+      );
+      return rows[0] || null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Find glassware by glasswareId
+  static async findByGlasswareId(glasswareId) {
+    try {
+      const [rows] = await pool.execute(
+        'SELECT * FROM glasswares WHERE glasswareId = ?',
+        [glasswareId]
+      );
+      return rows[0] || null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Get all glasswares
+  static async findAll() {
+    try {
+      const [rows] = await pool.execute('SELECT * FROM glasswares ORDER BY created_at DESC');
+      return rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Update glassware
+  static async updateById(id, updateData) {
+    try {
+      const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
+      const values = Object.values(updateData);
+      values.push(id);
+      
+      const [result] = await pool.execute(
+        `UPDATE glasswares SET ${fields} WHERE id = ?`,
+        values
+      );
+      
+      return result.affectedRows > 0;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Delete glassware
+  static async deleteById(id) {
+    try {
+      const [result] = await pool.execute(
+        'DELETE FROM glasswares WHERE id = ?',
+        [id]
+      );
+      return result.affectedRows > 0;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Search glasswares
+  static async search(query) {
+    try {
+      const searchTerm = `%${query}%`;
+      const [rows] = await pool.execute(
+        'SELECT * FROM glasswares WHERE name LIKE ? OR catalogNumber LIKE ? OR glasswareId LIKE ? OR company LIKE ? ORDER BY created_at DESC',
+        [searchTerm, searchTerm, searchTerm, searchTerm]
+      );
+      return rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Get glasswares by type
+  static async findByType(type) {
+    try {
+      const [rows] = await pool.execute(
+        'SELECT * FROM glasswares WHERE type = ? ORDER BY created_at DESC',
+        [type]
+      );
+      return rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Get glasswares by storage place
+  static async findByStoragePlace(storagePlace) {
+    try {
+      const [rows] = await pool.execute(
+        'SELECT * FROM glasswares WHERE storagePlace = ? ORDER BY created_at DESC',
+        [storagePlace]
+      );
+      return rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Update available quantity
+  static async updateAvailableQuantity(id, newAvailableQuantity) {
+    try {
+      const [result] = await pool.execute(
+        'UPDATE glasswares SET availableQuantity = ? WHERE id = ?',
+        [newAvailableQuantity, id]
+      );
+      return result.affectedRows > 0;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Get low stock glasswares (available quantity less than 10% of total quantity)
+  static async getLowStock() {
+    try {
+      const [rows] = await pool.execute(
+        'SELECT * FROM glasswares WHERE availableQuantity < (totalQuantity * 0.1) ORDER BY availableQuantity ASC'
+      );
+      return rows;
+    } catch (error) {
+      throw error;
+    }
+  }
+}
+
+module.exports = Glassware; 

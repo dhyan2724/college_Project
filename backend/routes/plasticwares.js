@@ -7,7 +7,7 @@ const ActivityLog = require('../models/ActivityLog');
 // GET all plasticwares
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const plasticwares = await Plasticware.find();
+    const plasticwares = await Plasticware.findAll();
     res.json(plasticwares);
   } catch (err) {
     res.status(500).json({ message: err.message });

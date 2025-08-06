@@ -5,6 +5,7 @@ import AIFaqPage from './components/AIFaqPage';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import LoginPage from './components/LoginPage';
+import MasterAdminDashboard from './components/MasterAdminDashboard';
 import RegisterBookForm from './components/RegisterBookForm';
 import StudentDashboard from './components/StudentDashboard';
 import StudentRegisterPage from './components/StudentRegisterPage';
@@ -33,7 +34,7 @@ function App() {
             try {
                 const parsedUser = JSON.parse(storedUser);
                 // Validate parsedUser to ensure it has a role and is one of the expected roles
-                if (parsedUser && (parsedUser.role === 'admin' || parsedUser.role === 'faculty' || parsedUser.role === 'student')) {
+                if (parsedUser && (parsedUser.role === 'master_admin' || parsedUser.role === 'admin' || parsedUser.role === 'faculty' || parsedUser.role === 'student')) {
                     setUser(parsedUser);
                 } else {
                     console.warn('Invalid user data in localStorage, clearing...');
@@ -69,7 +70,7 @@ function App() {
                 fetch(`${API_URL}/miscellaneous`, { headers }),
             ];
 
-            let isAdminOrFaculty = user && (user.role === 'admin' || user.role === 'faculty');
+            let isAdminOrFaculty = user && (user.role === 'master_admin' || user.role === 'admin' || user.role === 'faculty');
             if (isAdminOrFaculty) {
                 fetches.push(fetch(`${API_URL}/users`, { headers }));
             }
@@ -163,7 +164,9 @@ function App() {
                         path="/"
                         element={
                             user ? (
-                                user.role === 'admin' ? (
+                                user.role === 'master_admin' ? (
+                                    <Navigate to="/master-admin" replace />
+                                ) : user.role === 'admin' ? (
                                     <Navigate to="/admin" replace />
                                 ) : user.role === 'faculty' ? (
                                     <Navigate to="/teacher" replace />
@@ -177,6 +180,7 @@ function App() {
                             )
                         }
                     />
+                    <Route path="/master-admin" element={user && user.role === 'master_admin' ? <MasterAdminDashboard /> : <Navigate to="/login" replace />} />
                     <Route path="/admin" element={user && user.role === 'admin' ? <AdminDashboard miscellaneous={miscellaneous} setMiscellaneous={setMiscellaneous} /> : <Navigate to="/login" replace />} />
                     <Route path="/admin/ai-faq" element={user && user.role === 'admin' ? <AIFaqPage /> : <Navigate to="/login" replace />} />
                     <Route path="/teacher" element={user && user.role === 'faculty' ? <TeacherDashboard /> : <Navigate to="/login" replace />} />

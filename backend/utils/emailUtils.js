@@ -113,6 +113,22 @@ const sendFacultyRequestNotification = async (facultyEmail, facultyName, student
   }
 };
 
+// Utility function to send password change notification emails
+const sendPasswordChangeNotification = async (userEmail, userName, newPassword) => {
+  try {
+    const result = await emailService.sendPasswordChangeNotification(userEmail, userName, newPassword);
+    if (result.success) {
+      console.log(`Password change notification email sent to ${userEmail}`);
+    } else {
+      console.error(`Failed to send password change notification email to ${userEmail}:`, result.error);
+    }
+    return result;
+  } catch (error) {
+    console.error('Error sending password change notification email:', error);
+    return { success: false, error: error.message };
+  }
+};
+
 // Utility function to send bulk emails
 const sendBulkEmails = async (emailList, subject, message) => {
   const results = [];
@@ -142,6 +158,7 @@ module.exports = {
   sendPasswordResetEmail,
   sendCustomNotificationEmail,
   sendFacultyRequestNotification,
+  sendPasswordChangeNotification,
   sendBulkEmails,
   isEmailServiceConfigured
 }; 
