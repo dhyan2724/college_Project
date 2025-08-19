@@ -12,9 +12,17 @@ class Chemical {
       // Set availableWeight to totalWeight if not specified
       const finalAvailableWeight = availableWeight !== undefined ? availableWeight : totalWeight;
       
+      // Convert undefined values to null for MySQL
+      const safeName = name !== undefined ? name : null;
+      const safeType = type !== undefined ? type : null;
+      const safeStoragePlace = storagePlace !== undefined ? storagePlace : null;
+      const safeTotalWeight = totalWeight !== undefined ? totalWeight : null;
+      const safeCompany = company !== undefined ? company : null;
+      const safeCatalogNumber = catalogNumber !== undefined ? catalogNumber : null;
+      
       const [result] = await pool.execute(
         'INSERT INTO chemicals (name, type, storagePlace, totalWeight, availableWeight, company, catalogNumber, chemicalId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [name, type, storagePlace, totalWeight, finalAvailableWeight, company, catalogNumber, chemicalId]
+        [safeName, safeType, safeStoragePlace, safeTotalWeight, finalAvailableWeight, safeCompany, safeCatalogNumber, chemicalId]
       );
       
       return { id: result.insertId, ...chemicalData, chemicalId, availableWeight: finalAvailableWeight };

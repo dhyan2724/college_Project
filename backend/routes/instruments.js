@@ -27,23 +27,22 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
 // POST a new instrument
 router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) => {
-  const instrument = new Instrument({
-    name: req.body.name,
-    type: req.body.type,
-    storagePlace: req.body.storagePlace,
-    totalQuantity: req.body.totalQuantity,
-    company: req.body.company,
-    catalogNumber: req.body.catalogNumber, // <-- add this
-    // dateOfEntry and instrumentId are auto-generated
-  });
-
   try {
-    const newInstrument = await instrument.save();
+    const instrumentData = {
+      name: req.body.name,
+      type: req.body.type,
+      storagePlace: req.body.storagePlace,
+      totalQuantity: req.body.totalQuantity,
+      company: req.body.company,
+      catalogNumber: req.body.catalogNumber,
+    };
+
+    const newInstrument = await Instrument.create(instrumentData);
     // Log activity
     await ActivityLog.create({
       action: 'add',
       itemType: 'instrument',
-      itemId: newInstrument._id,
+      itemId: newInstrument.id,
       itemName: newInstrument.name,
       user: req.user ? req.user.username : 'unknown',
     });
@@ -62,23 +61,24 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin'), async (req, res
     }
 
     // Only allow updating certain fields
-    const updatableFields = ['name', 'type', 'storagePlace', 'totalQuantity', 'company', 'catalogNumber']; // <-- add catalogNumber
+    const updatableFields = ['name', 'type', 'storagePlace', 'totalQuantity', 'company', 'catalogNumber'];
+    const updateData = {};
     updatableFields.forEach(field => {
       if (req.body[field] !== undefined) {
-        instrument[field] = req.body[field];
+        updateData[field] = req.body[field];
       }
     });
 
-    const updatedInstrument = await instrument.save();
+    const updated = await Instrument.updateById(req.params.id, updateData);
     // Log activity
     await ActivityLog.create({
       action: 'edit',
       itemType: 'instrument',
-      itemId: updatedInstrument._id,
-      itemName: updatedInstrument.name,
+      itemId: req.params.id,
+      itemName: instrument.name,
       user: req.user ? req.user.username : 'unknown',
     });
-    res.json(updatedInstrument);
+    res.json({ success: updated });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -90,12 +90,12 @@ router.delete('/:id', authenticateToken, authorizeRoles('admin'), async (req, re
     const instrument = await Instrument.findById(req.params.id);
     if (!instrument) return res.status(404).json({ message: 'Instrument not found' });
     
-    await Instrument.deleteOne({ _id: req.params.id });
+    await Instrument.deleteById(req.params.id);
     // Log activity
     await ActivityLog.create({
       action: 'delete',
       itemType: 'instrument',
-      itemId: instrument._id,
+      itemId: req.params.id,
       itemName: instrument.name,
       user: req.user ? req.user.username : 'unknown',
     });

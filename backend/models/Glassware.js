@@ -12,9 +12,17 @@ class Glassware {
       // Set availableQuantity to totalQuantity if not specified
       const finalAvailableQuantity = availableQuantity !== undefined ? availableQuantity : totalQuantity;
       
+      // Convert undefined values to null for MySQL
+      const safeName = name !== undefined ? name : null;
+      const safeType = type !== undefined ? type : null;
+      const safeStoragePlace = storagePlace !== undefined ? storagePlace : null;
+      const safeTotalQuantity = totalQuantity !== undefined ? totalQuantity : null;
+      const safeCompany = company !== undefined ? company : null;
+      const safeCatalogNumber = catalogNumber !== undefined ? catalogNumber : null;
+      
       const [result] = await pool.execute(
         'INSERT INTO glasswares (name, type, storagePlace, totalQuantity, availableQuantity, company, catalogNumber, glasswareId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [name, type, storagePlace, totalQuantity, finalAvailableQuantity, company, catalogNumber, glasswareId]
+        [safeName, safeType, safeStoragePlace, safeTotalQuantity, finalAvailableQuantity, safeCompany, safeCatalogNumber, glasswareId]
       );
       
       return { id: result.insertId, ...glasswareData, glasswareId, availableQuantity: finalAvailableQuantity };

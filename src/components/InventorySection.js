@@ -10,7 +10,6 @@ const categories = [
   { key: "miscellaneous", label: "Miscellaneous" },
   { key: "specimens", label: "Specimens" },
   { key: "slides", label: "Slides" },
-  { key: "minorinstruments", label: "Minor Instruments" },
 ];
 
 const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, miscellaneous, specimens = [], slides = [], minorinstruments = [] }) => {
@@ -47,30 +46,31 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
   const getCurrentInventory = () => {
     if (selectedCategory === "all") return getAllInventory();
     let items = [];
-    if (selectedCategory === "chemicals") items = chemicals;
-    if (selectedCategory === "glasswares") items = glasswares;
-    if (selectedCategory === "plasticwares") items = plasticwares;
-    if (selectedCategory === "instruments") items = instruments;
-    if (selectedCategory === "miscellaneous") items = miscellaneous;
-    if (selectedCategory === "specimens") items = specimens;
-    if (selectedCategory === "slides") items = slides;
-    if (selectedCategory === "minorinstruments") items = minorinstruments;
-    return (items || []).map(item => ({
+    if (selectedCategory === "chemicals") items = chemicals || [];
+    if (selectedCategory === "glasswares") items = glasswares || [];
+    if (selectedCategory === "plasticwares") items = plasticwares || [];
+    if (selectedCategory === "instruments") items = instruments || [];
+    if (selectedCategory === "miscellaneous") items = miscellaneous || [];
+    if (selectedCategory === "specimens") items = specimens || [];
+    if (selectedCategory === "slides") items = slides || [];
+    if (selectedCategory === "minorinstruments") items = minorinstruments || [];
+    return items.map(item => ({
       ...item,
-      category: categories.find(c => c.key === selectedCategory).label,
+      category: categories.find(c => c.key === selectedCategory)?.label || 'Unknown',
     }));
   };
 
   // Filtered inventory based on search query
   const getFilteredInventory = () => {
     const inventory = getCurrentInventory();
+    if (!inventory || !Array.isArray(inventory)) return [];
     if (!searchQuery.trim()) return inventory;
     const query = searchQuery.toLowerCase();
     return inventory.filter(item =>
-      (item.name && item.name.toLowerCase().includes(query)) ||
-      (item.catalogNumber && item.catalogNumber.toLowerCase().includes(query)) ||
-      (item.type && item.type.toLowerCase().includes(query)) ||
-      (item.company && item.company.toLowerCase().includes(query))
+      (item && item.name && item.name.toLowerCase().includes(query)) ||
+      (item && item.catalogNumber && item.catalogNumber.toLowerCase().includes(query)) ||
+      (item && item.type && item.type.toLowerCase().includes(query)) ||
+      (item && item.company && item.company.toLowerCase().includes(query))
     );
   };
 
@@ -88,7 +88,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
       { key: 'name', label: 'Name' },
       { key: 'catalogNumber', label: 'Catalog Number' },
       { key: 'type', label: 'Type' },
-      { key: 'storagePlace', label: 'Storage Place' },
+      { key: 'storagePlace', label: 'Location' },
       { key: 'totalWeight', label: 'Total Weight (g)' },
       { key: 'availableWeight', label: 'Available Weight (g)' },
       { key: 'company', label: 'Company' },
@@ -97,7 +97,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
     glasswares: [
       { key: 'name', label: 'Name' },
       { key: 'catalogNumber', label: 'Catalog Number' },
-      { key: 'storagePlace', label: 'Storage Place' },
+      { key: 'storagePlace', label: 'Location' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'availableQuantity', label: 'Available Quantity' },
       { key: 'company', label: 'Company' },
@@ -106,7 +106,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
     plasticwares: [
       { key: 'name', label: 'Name' },
       { key: 'catalogNumber', label: 'Catalog Number' },
-      { key: 'storagePlace', label: 'Storage Place' },
+      { key: 'storagePlace', label: 'Location' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'availableQuantity', label: 'Available Quantity' },
       { key: 'company', label: 'Company' },
@@ -115,25 +115,18 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
     instruments: [
       { key: 'name', label: 'Name' },
       { key: 'catalogNumber', label: 'Catalog Number' },
-      { key: 'storagePlace', label: 'Storage Place' },
+      { key: 'storagePlace', label: 'Location' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'availableQuantity', label: 'Available Quantity' },
       { key: 'company', label: 'Company' },
-      { key: 'actions', label: 'Actions' },
+      { key: 'actions', label: 'Actions' }
     ],
+
     miscellaneous: [
       { key: 'name', label: 'Name' },
-      { key: 'description', label: 'Description' },
+      { key: 'type', label: 'Type' },
       { key: 'catalogNumber', label: 'Catalog Number' },
-      { key: 'totalQuantity', label: 'Total Quantity' },
-      { key: 'availableQuantity', label: 'Available Quantity' },
-      { key: 'company', label: 'Company' },
-      { key: 'actions', label: 'Actions' },
-    ],
-    specimens: [
-      { key: 'name', label: 'Name' },
-      { key: 'type', label: 'Type (Plant/Animal)' },
-      { key: 'catalogNumber', label: 'Catalog Number' },
+      { key: 'storagePlace', label: 'Location' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'availableQuantity', label: 'Available Quantity' },
       { key: 'company', label: 'Company' },
@@ -143,14 +136,15 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
       { key: 'name', label: 'Name' },
       { key: 'catalogNumber', label: 'Catalog Number' },
       { key: 'totalQuantity', label: 'Total Quantity' },
+      { key: 'storagePlace', label: 'Location' },
       { key: 'availableQuantity', label: 'Available Quantity' },
       { key: 'company', label: 'Company' },
       { key: 'actions', label: 'Actions' },
     ],
-    minorinstruments: [
+    specimens: [
       { key: 'name', label: 'Name' },
-      { key: 'type', label: 'Type (Kit/Module)' },
       { key: 'catalogNumber', label: 'Catalog Number' },
+      { key: 'storagePlace', label: 'Location' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'availableQuantity', label: 'Available Quantity' },
       { key: 'company', label: 'Company' },

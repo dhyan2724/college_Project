@@ -9,19 +9,20 @@ const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 const ActivityLog = require('../models/ActivityLog');
 const User = require('../models/User');
 
-// GET all issued items (admin/faculty see all, students see their own)
+// GET all issued items (admin/faculty/master_admin see all, students see their own)
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    let filter = {};
+    let issuedItems;
     if (req.user.role === 'student') {
-      filter.issuedTo = req.user.id;
-    } else if (req.user.role === 'faculty') {
-      filter.facultyInCharge = req.user.id;
+      issuedItems = await IssuedItem.findByIssuedTo(req.user.id);
+    } else if (req.user.role === 'faculty' || req.user.role === 'admin' || req.user.role === 'master_admin') {
+      issuedItems = await IssuedItem.findAll();
+    } else {
+      issuedItems = await IssuedItem.findAll();
     }
-    // Optionally, add similar logic for phd_scholar, dissertation_student
-    const issuedItems = await IssuedItem.find(filter).populate('issuedTo').populate('itemId');
     res.json(issuedItems);
   } catch (err) {
+    console.error('Error fetching issued items:', err);
     res.status(500).json({ message: err.message });
   }
 });
@@ -29,12 +30,13 @@ router.get('/', authenticateToken, async (req, res) => {
 // GET a single issued item by ID (admin/faculty or owner)
 router.get('/:id', authenticateToken, async (req, res) => {
   try {
-    const issuedItem = await IssuedItem.findById(req.params.id).populate('issuedTo').populate('itemId');
+    const issuedItem = await IssuedItem.findById(req.params.id);
     if (!issuedItem) return res.status(404).json({ message: 'Issued item not found' });
     if (
       req.user.role !== 'admin' &&
       req.user.role !== 'faculty' &&
-      (!issuedItem.issuedTo || issuedItem.issuedTo.toString() !== req.user.id)
+      req.user.role !== 'master_admin' &&
+      issuedItem.issuedToId !== req.user.id
     ) {
       return res.status(403).json({ message: 'Access denied' });
     }
@@ -46,28 +48,13 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
 // POST a new issued item (students, phd, dissertation, faculty)
 router.post('/', authenticateToken, authorizeRoles('student', 'phd_scholar', 'dissertation_student', 'faculty'), async (req, res) => {
-  // Prevent duplicate issuance for the same request
-  if (req.body.pendingRequestId) {
-    const PendingRequest = require('../models/PendingRequest');
-    const pendingRequest = await PendingRequest.findById(req.body.pendingRequestId);
-    if (!pendingRequest) {
-      return res.status(404).json({ message: 'Pending request not found' });
-    }
-    if (pendingRequest.status !== 'pending' && pendingRequest.status !== 'approved') {
-      return res.status(400).json({ message: 'This request has already been processed.' });
-    }
-    // Check if an issued item already exists for this request (optional, if you want to enforce 1:1)
-    const existingIssued = await IssuedItem.findOne({ pendingRequestId: req.body.pendingRequestId });
-    if (existingIssued) {
-      return res.status(400).json({ message: 'This request has already been issued.' });
-    }
-  }
-
-  const issuedItem = new IssuedItem({
+  try {
+    // NOTE: PendingRequest handling is omitted for MySQL model parity; add if/when PendingRequest is migrated
+    const issuedItemData = {
     itemType: req.body.itemType,
     itemId: req.body.itemId,
-    issuedTo: req.body.issuedTo,
-    issuedByUser: req.user.id,
+      issuedToId: req.body.issuedToId || req.body.issuedTo || req.body.issuedToId,
+      issuedByUserId: req.user.id,
     issuedByName: req.user.fullName,
     issuedByRole: req.user.role,
     issuedByRollNo: req.user.rollNo,
@@ -75,14 +62,10 @@ router.post('/', authenticateToken, authorizeRoles('student', 'phd_scholar', 'di
     quantity: req.body.quantity,
     totalWeightIssued: req.body.totalWeightIssued,
     purpose: req.body.purpose,
-    issueDate: new Date(),
-    returnDate: req.body.returnDate,
-    status: 'issued',
     notes: req.body.notes,
-    ...(req.body.pendingRequestId && { pendingRequestId: req.body.pendingRequestId })
-  });
+      pendingRequestId: req.body.pendingRequestId || null
+    };
 
-  try {
     // Update inventory based on item type
     let inventoryItem;
     const itemId = req.body.itemId;
@@ -93,18 +76,15 @@ router.post('/', authenticateToken, authorizeRoles('student', 'phd_scholar', 'di
     switch (itemType) {
       case 'Chemical':
         inventoryItem = await Chemical.findById(itemId);
-        console.log('🧪 Found chemical:', inventoryItem ? { name: inventoryItem.name, availableWeight: inventoryItem.availableWeight } : 'Not found');
         if (inventoryItem) {
           const weightToDeduct = req.body.totalWeightIssued || 0;
-          console.log('⚖️ Weight to deduct:', weightToDeduct, 'Available:', inventoryItem.availableWeight);
-          if (inventoryItem.availableWeight < weightToDeduct) {
+          if (Number(inventoryItem.availableWeight) < Number(weightToDeduct)) {
             return res.status(400).json({ 
               message: `Insufficient chemical available. Available: ${inventoryItem.availableWeight}g, Requested: ${weightToDeduct}g` 
             });
           }
-          inventoryItem.availableWeight -= weightToDeduct;
-          await inventoryItem.save();
-          console.log('✅ Chemical inventory updated. New available weight:', inventoryItem.availableWeight);
+          inventoryItem.availableWeight = Number(inventoryItem.availableWeight) - Number(weightToDeduct);
+          await Chemical.updateById(inventoryItem.id, { availableWeight: inventoryItem.availableWeight });
         }
         break;
         
@@ -119,8 +99,8 @@ router.post('/', authenticateToken, authorizeRoles('student', 'phd_scholar', 'di
               message: `Insufficient glassware available. Available: ${inventoryItem.availableQuantity}, Requested: ${quantityToDeduct}` 
             });
           }
-          inventoryItem.availableQuantity -= quantityToDeduct;
-          await inventoryItem.save();
+          inventoryItem.availableQuantity = Number(inventoryItem.availableQuantity) - Number(quantityToDeduct);
+          await Glassware.updateById(inventoryItem.id, { availableQuantity: inventoryItem.availableQuantity });
           console.log('✅ Glassware inventory updated. New available quantity:', inventoryItem.availableQuantity);
         }
         break;
@@ -136,8 +116,8 @@ router.post('/', authenticateToken, authorizeRoles('student', 'phd_scholar', 'di
               message: `Insufficient plasticware available. Available: ${inventoryItem.availableQuantity}, Requested: ${quantityToDeduct}` 
             });
           }
-          inventoryItem.availableQuantity -= quantityToDeduct;
-          await inventoryItem.save();
+          inventoryItem.availableQuantity = Number(inventoryItem.availableQuantity) - Number(quantityToDeduct);
+          await Plasticware.updateById(inventoryItem.id, { availableQuantity: inventoryItem.availableQuantity });
           console.log('✅ Plasticware inventory updated. New available quantity:', inventoryItem.availableQuantity);
         }
         break;
@@ -153,8 +133,8 @@ router.post('/', authenticateToken, authorizeRoles('student', 'phd_scholar', 'di
               message: `Instrument not available. Available: ${inventoryItem.availableQuantity}, Requested: ${quantityToDeduct}` 
             });
           }
-          inventoryItem.availableQuantity -= quantityToDeduct;
-          await inventoryItem.save();
+          inventoryItem.availableQuantity = Number(inventoryItem.availableQuantity) - 1;
+          await Instrument.updateById(inventoryItem.id, { availableQuantity: inventoryItem.availableQuantity });
           console.log('✅ Instrument inventory updated. New available quantity:', inventoryItem.availableQuantity);
         }
         break;
@@ -169,27 +149,12 @@ router.post('/', authenticateToken, authorizeRoles('student', 'phd_scholar', 'di
       return res.status(404).json({ message: 'Inventory item not found' });
     }
 
-    const newIssuedItem = await issuedItem.save();
+    const newIssuedItem = await IssuedItem.create(issuedItemData);
     // If linked to a pending request, mark it as approved
     if (req.body.pendingRequestId) {
       const PendingRequest = require('../models/PendingRequest');
       await PendingRequest.findByIdAndUpdate(req.body.pendingRequestId, { status: 'approved' });
     }
-    // Fetch student name
-    let studentName = '';
-    try {
-      const studentUser = await User.findById(req.body.issuedTo);
-      studentName = studentUser ? studentUser.fullName : req.body.issuedTo;
-    } catch (e) { studentName = req.body.issuedTo; }
-    // Log activity for approval/issue
-    await ActivityLog.create({
-      action: 'approve',
-      itemType: req.body.itemType,
-      itemId: newIssuedItem._id,
-      itemName: inventoryItem ? inventoryItem.name : '',
-      user: req.user ? req.user.fullName || req.user.username : 'unknown',
-      details: `Approved by: ${req.user ? req.user.fullName || req.user.username : 'unknown'}, Student: ${studentName}`
-    });
     res.status(201).json(newIssuedItem);
   } catch (err) {
     console.error('❌ Error issuing item:', err);
@@ -198,7 +163,7 @@ router.post('/', authenticateToken, authorizeRoles('student', 'phd_scholar', 'di
 });
 
 // PATCH (update) an issued item (admin/faculty only)
-router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty'), async (req, res) => {
+router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty', 'master_admin'), async (req, res) => {
   try {
     const issuedItem = await IssuedItem.findById(req.params.id);
     if (!issuedItem) return res.status(404).json({ message: 'Issued item not found' });
@@ -227,8 +192,8 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty'), asyn
           if (inventoryItem) {
             const weightToRestore = issuedItem.totalWeightIssued || 0;
             console.log('⚖️ Weight to restore:', weightToRestore);
-            inventoryItem.availableWeight += weightToRestore;
-            await inventoryItem.save();
+            inventoryItem.availableWeight = Number(inventoryItem.availableWeight) + Number(weightToRestore);
+            await Chemical.updateById(inventoryItem.id, { availableWeight: inventoryItem.availableWeight });
             console.log('✅ Chemical inventory restored. New available weight:', inventoryItem.availableWeight);
           }
           break;
@@ -239,8 +204,8 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty'), asyn
           if (inventoryItem) {
             const quantityToRestore = issuedItem.quantity || 1;
             console.log('📦 Quantity to restore:', quantityToRestore);
-            inventoryItem.availableQuantity += quantityToRestore;
-            await inventoryItem.save();
+            inventoryItem.availableQuantity = Number(inventoryItem.availableQuantity) + Number(quantityToRestore);
+            await Glassware.updateById(inventoryItem.id, { availableQuantity: inventoryItem.availableQuantity });
             console.log('✅ Glassware inventory restored. New available quantity:', inventoryItem.availableQuantity);
           }
           break;
@@ -251,8 +216,8 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty'), asyn
           if (inventoryItem) {
             const quantityToRestore = issuedItem.quantity || 1;
             console.log('📦 Quantity to restore:', quantityToRestore);
-            inventoryItem.availableQuantity += quantityToRestore;
-            await inventoryItem.save();
+            inventoryItem.availableQuantity = Number(inventoryItem.availableQuantity) + Number(quantityToRestore);
+            await Plasticware.updateById(inventoryItem.id, { availableQuantity: inventoryItem.availableQuantity });
             console.log('✅ Plasticware inventory restored. New available quantity:', inventoryItem.availableQuantity);
           }
           break;
@@ -263,8 +228,8 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty'), asyn
           if (inventoryItem) {
             const quantityToRestore = 1; // Instruments are typically returned one at a time
             console.log('📦 Quantity to restore:', quantityToRestore);
-            inventoryItem.availableQuantity += quantityToRestore;
-            await inventoryItem.save();
+            inventoryItem.availableQuantity = Number(inventoryItem.availableQuantity) + 1;
+            await Instrument.updateById(inventoryItem.id, { availableQuantity: inventoryItem.availableQuantity });
             console.log('✅ Instrument inventory restored. New available quantity:', inventoryItem.availableQuantity);
           }
           break;
@@ -286,20 +251,20 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty'), asyn
       });
     }
 
-    const updatedIssuedItem = await issuedItem.save();
-    res.json(updatedIssuedItem);
+    const updated = await IssuedItem.updateById(req.params.id, issuedItem);
+    const latest = await IssuedItem.findById(req.params.id);
+    res.json(latest);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
 // DELETE an issued item (admin only)
-router.delete('/:id', authenticateToken, authorizeRoles('admin'), async (req, res) => {
+router.delete('/:id', authenticateToken, authorizeRoles('admin', 'master_admin'), async (req, res) => {
   try {
     const issuedItem = await IssuedItem.findById(req.params.id);
     if (!issuedItem) return res.status(404).json({ message: 'Issued item not found' });
-
-    await IssuedItem.deleteOne({ _id: req.params.id });
+    await IssuedItem.deleteById(req.params.id);
     res.json({ message: 'Issued item deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });

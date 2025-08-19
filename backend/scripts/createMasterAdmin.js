@@ -29,11 +29,11 @@ async function createMasterAdmin() {
 
     // Create master admin user
     const adminData = {
-      username: 'dhyan',
-      password: 'Dhyan@2724',
+      username: 'master_admin',
+      password: 'MasterAdmin@2024',
       role: 'master_admin',
-      email: 'dhyan.k.patel@nuv.ac.in',
-      fullName: 'Dhyan Patel'
+      email: 'master.admin@nuv.ac.in',
+      fullName: 'Master Administrator'
     };
 
     // Hash password

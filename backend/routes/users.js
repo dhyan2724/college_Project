@@ -67,7 +67,7 @@ router.post('/login', async (req, res) => {
 });
 
 // GET all users (protected route)
-router.get('/', authenticateToken, authorizeRoles('admin', 'faculty'), async (req, res) => {
+router.get('/', authenticateToken, authorizeRoles('admin', 'faculty', 'master_admin'), async (req, res) => {
   try {
     const users = await User.findAll();
     // Remove passwords from response
@@ -205,11 +205,16 @@ router.patch('/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// DELETE a user
-router.delete('/:id', authenticateToken, authorizeRoles('admin'), async (req, res) => {
+// DELETE a user (restricted to master_admin)
+router.delete('/:id', authenticateToken, authorizeRoles('master_admin'), async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
+    
+    // Prevent deleting master admin accounts via this route
+    if (user.role === 'master_admin') {
+      return res.status(403).json({ message: 'Cannot delete master admin account' });
+    }
     
     const success = await User.deleteById(req.params.id);
     if (success) {

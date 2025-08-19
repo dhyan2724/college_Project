@@ -27,23 +27,22 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
 // POST a new plasticware
 router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) => {
-  const plasticware = new Plasticware({
-    name: req.body.name,
-    type: req.body.type,
-    storagePlace: req.body.storagePlace,
-    totalQuantity: req.body.totalQuantity,
-    company: req.body.company,
-    catalogNumber: req.body.catalogNumber, // <-- add this
-    // dateOfEntry and plasticwareId are auto-generated
-  });
-
   try {
-    const newPlasticware = await plasticware.save();
+    const plasticwareData = {
+      name: req.body.name,
+      type: req.body.type,
+      storagePlace: req.body.storagePlace,
+      totalQuantity: req.body.totalQuantity,
+      company: req.body.company,
+      catalogNumber: req.body.catalogNumber,
+    };
+
+    const newPlasticware = await Plasticware.create(plasticwareData);
     // Log activity
     await ActivityLog.create({
       action: 'add',
       itemType: 'plasticware',
-      itemId: newPlasticware._id,
+      itemId: newPlasticware.id,
       itemName: newPlasticware.name,
       user: req.user ? req.user.username : 'unknown',
     });
@@ -62,23 +61,24 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin'), async (req, res
     }
 
     // Only allow updating certain fields
-    const updatableFields = ['name', 'type', 'storagePlace', 'totalQuantity', 'company', 'catalogNumber']; // <-- add catalogNumber
+    const updatableFields = ['name', 'type', 'storagePlace', 'totalQuantity', 'company', 'catalogNumber'];
+    const updateData = {};
     updatableFields.forEach(field => {
       if (req.body[field] !== undefined) {
-        plasticware[field] = req.body[field];
+        updateData[field] = req.body[field];
       }
     });
 
-    const updatedPlasticware = await plasticware.save();
+    const updated = await Plasticware.updateById(req.params.id, updateData);
     // Log activity
     await ActivityLog.create({
       action: 'edit',
       itemType: 'plasticware',
-      itemId: updatedPlasticware._id,
-      itemName: updatedPlasticware.name,
+      itemId: req.params.id,
+      itemName: plasticware.name,
       user: req.user ? req.user.username : 'unknown',
     });
-    res.json(updatedPlasticware);
+    res.json({ success: updated });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -90,12 +90,12 @@ router.delete('/:id', authenticateToken, authorizeRoles('admin'), async (req, re
     const plasticware = await Plasticware.findById(req.params.id);
     if (!plasticware) return res.status(404).json({ message: 'Plasticware not found' });
     
-    await Plasticware.deleteOne({ _id: req.params.id });
+    await Plasticware.deleteById(req.params.id);
     // Log activity
     await ActivityLog.create({
       action: 'delete',
       itemType: 'plasticware',
-      itemId: plasticware._id,
+      itemId: req.params.id,
       itemName: plasticware.name,
       user: req.user ? req.user.username : 'unknown',
     });

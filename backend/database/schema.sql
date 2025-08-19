@@ -97,6 +97,7 @@ CREATE TABLE IF NOT EXISTS instruments (
 CREATE TABLE IF NOT EXISTS miscellaneous (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
+    type VARCHAR(255),
     description TEXT,
     storagePlace VARCHAR(255) NOT NULL,
     totalQuantity INT NOT NULL,
@@ -110,6 +111,7 @@ CREATE TABLE IF NOT EXISTS miscellaneous (
     INDEX idx_catalog (catalogNumber),
     INDEX idx_miscellaneousId (miscellaneousId)
 );
+
 
 -- Pending Requests table
 CREATE TABLE IF NOT EXISTS pending_requests (

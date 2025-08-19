@@ -4,7 +4,7 @@ class Miscellaneous {
   // Create a new miscellaneous item
   static async create(miscellaneousData) {
     try {
-      const { name, description, storagePlace, totalQuantity, availableQuantity, company, catalogNumber } = miscellaneousData;
+      const { name, type, description, storagePlace, totalQuantity, availableQuantity, company, catalogNumber } = miscellaneousData;
       
       // Generate miscellaneousId if not provided
       const miscellaneousId = miscellaneousData.miscellaneousId || `MISC-${Date.now()}`;
@@ -12,9 +12,18 @@ class Miscellaneous {
       // Set availableQuantity to totalQuantity if not specified
       const finalAvailableQuantity = availableQuantity !== undefined ? availableQuantity : totalQuantity;
       
+      // Convert undefined values to null for MySQL
+      const safeName = name !== undefined ? name : null;
+      const safeType = type !== undefined ? type : null;
+      const safeDescription = description !== undefined ? description : null;
+      const safeStoragePlace = storagePlace !== undefined ? storagePlace : null;
+      const safeTotalQuantity = totalQuantity !== undefined ? totalQuantity : null;
+      const safeCompany = company !== undefined ? company : null;
+      const safeCatalogNumber = catalogNumber !== undefined ? catalogNumber : null;
+      
       const [result] = await pool.execute(
-        'INSERT INTO miscellaneous (name, description, storagePlace, totalQuantity, availableQuantity, company, catalogNumber, miscellaneousId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [name, description, storagePlace, totalQuantity, finalAvailableQuantity, company, catalogNumber, miscellaneousId]
+        'INSERT INTO miscellaneous (name, type, description, storagePlace, totalQuantity, availableQuantity, company, catalogNumber, miscellaneousId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [safeName, safeType, safeDescription, safeStoragePlace, safeTotalQuantity, finalAvailableQuantity, safeCompany, safeCatalogNumber, miscellaneousId]
       );
       
       return { id: result.insertId, ...miscellaneousData, miscellaneousId, availableQuantity: finalAvailableQuantity };

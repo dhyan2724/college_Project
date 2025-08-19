@@ -64,6 +64,17 @@ const initializeDatabase = async () => {
       console.log('Database schema initialized successfully');
     }
     
+    // Post-initialization: ensure 'type' column exists on 'miscellaneous'
+    try {
+      const [columns] = await connection.query("SHOW COLUMNS FROM miscellaneous LIKE 'type'");
+      if (!columns || columns.length === 0) {
+        await connection.query('ALTER TABLE miscellaneous ADD COLUMN type VARCHAR(255)');
+        console.log("Added 'type' column to 'miscellaneous'");
+      }
+    } catch (colErr) {
+      console.warn("Could not verify/add 'type' column on 'miscellaneous':", colErr.message);
+    }
+    
     connection.release();
     tempPool.end(); // Close temporary pool
   } catch (error) {
