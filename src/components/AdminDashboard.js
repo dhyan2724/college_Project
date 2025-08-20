@@ -5,7 +5,7 @@ import api from '../services/api';
 import AIFaqPage from './AIFaqPage';
 import InventorySection from "./InventorySection";
 
-const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
+const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], slides = [] }) => {
   const { chemicals, glasswares, instruments, users, setUsers, fetchData, API_URL, logout } = useContext(AuthContext);
   const [showCreateTeacherForm, setShowCreateTeacherForm] = useState(false);
   const [newTeacherUsername, setNewTeacherUsername] = useState('');
@@ -357,75 +357,74 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
   const handleAddSpecimen = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/miscellaneous`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          name: newSpecimenName,
-          type: 'Specimen',
-          storagePlace: newSpecimenStoragePlace,
-          totalQuantity: parseFloat(newSpecimenTotalQuantity),
-          company: newSpecimenCompany,
-          catalogNumber: newSpecimenCatalogNumber,
-        }),
+      const response = await api.createSpecimen({
+        name: newSpecimenName,
+        type: newSpecimenType,
+        description: newSpecimenDescription,
+        storagePlace: newSpecimenStoragePlace,
+        totalQuantity: parseFloat(newSpecimenTotalQuantity),
+        company: newSpecimenCompany,
+        catalogNumber: newSpecimenCatalogNumber,
       });
-      if (response.ok) {
-        alert('Specimen added successfully!');
-        setShowAddSpecimenForm(false);
-        setNewSpecimenName('');
-        setNewSpecimenType('');
-        setNewSpecimenStoragePlace('');
-        setNewSpecimenTotalQuantity('');
-        setNewSpecimenCompany('');
-        setNewSpecimenCatalogNumber('');
-        fetchData();
-      } else {
-        const errorData = await response.json();
-        alert(`Failed to add specimen: ${errorData.message}`);
-      }
+      
+      setNotification({
+        type: 'success',
+        message: 'Specimen added successfully!',
+        title: 'Success'
+      });
+      setShowAddSpecimenForm(false);
+      setNewSpecimenName('');
+      setNewSpecimenType('');
+      setNewSpecimenDescription('');
+      setNewSpecimenStoragePlace('');
+      setNewSpecimenTotalQuantity('');
+      setNewSpecimenCompany('');
+      setNewSpecimenCatalogNumber('');
+      fetchData();
+      setTimeout(() => setNotification(null), 5000);
     } catch (error) {
-      alert('An error occurred while adding the specimen.');
+      setNotification({
+        type: 'error',
+        message: `Failed to add specimen: ${error.message}`,
+        title: 'Error'
+      });
+      setTimeout(() => setNotification(null), 5000);
     }
   };
 
   const handleAddSlide = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/miscellaneous`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          name: newSlideName,
-          type: 'Slide',
-          storagePlace: newSlideStoragePlace,
-          totalQuantity: parseFloat(newSlideTotalQuantity),
-          company: newSlideCompany,
-          catalogNumber: newSlideCatalogNumber,
-        }),
+      const response = await api.createSlide({
+        name: newSlideName,
+        description: newSlideDescription,
+        storagePlace: newSlideStoragePlace,
+        totalQuantity: parseFloat(newSlideTotalQuantity),
+        company: newSlideCompany,
+        catalogNumber: newSlideCatalogNumber,
       });
-      if (response.ok) {
-        alert('Slide added successfully!');
-        setShowAddSlideForm(false);
-        setNewSlideName('');
-        setNewSlideStoragePlace('');
-        setNewSlideTotalQuantity('');
-        setNewSlideCompany('');
-        setNewSlideCatalogNumber('');
-        fetchData();
-      } else {
-        const errorData = await response.json();
-        alert(`Failed to add slide: ${errorData.message}`);
-      }
+      
+      setNotification({
+        type: 'success',
+        message: 'Slide added successfully!',
+        title: 'Success'
+      });
+      setShowAddSlideForm(false);
+      setNewSlideName('');
+      setNewSlideDescription('');
+      setNewSlideStoragePlace('');
+      setNewSlideTotalQuantity('');
+      setNewSlideCompany('');
+      setNewSlideCatalogNumber('');
+      fetchData();
+      setTimeout(() => setNotification(null), 5000);
     } catch (error) {
-      alert('An error occurred while adding the slide.');
+      setNotification({
+        type: 'error',
+        message: `Failed to add slide: ${error.message}`,
+        title: 'Error'
+      });
+      setTimeout(() => setNotification(null), 5000);
     }
   };
 
@@ -618,8 +617,8 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
           instruments={instruments || []} 
           plasticwares={miscellaneous || []}
           miscellaneous={miscellaneous || []}
-          specimens={[]}
-          slides={[]}
+          specimens={specimens || []}
+          slides={slides || []}
         />
 
         {/* Add Chemical Form */}
@@ -832,16 +831,19 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
               </div>
               <div>
                 <label htmlFor="specimenType" className="block text-sm font-medium text-gray-700">Type</label>
-                <input type="text" id="specimenType" value={newSpecimenType} onChange={e => setNewSpecimenType(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                <input type="text" id="specimenType" value={newSpecimenType} onChange={e => setNewSpecimenType(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
-              
+              <div>
+                <label htmlFor="specimenDescription" className="block text-sm font-medium text-gray-700">Description</label>
+                <input type="text" id="specimenDescription" value={newSpecimenDescription} onChange={e => setNewSpecimenDescription(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+              </div>
               <div>
                 <label htmlFor="specimenStoragePlace" className="block text-sm font-medium text-gray-700">Location</label>
-                <input type="text" id="specimenStoragePlace" value={newSpecimenStoragePlace} onChange={e => setNewSpecimenStoragePlace(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                <input type="text" id="specimenStoragePlace" value={newSpecimenStoragePlace} onChange={e => setNewSpecimenStoragePlace(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
               <div>
                 <label htmlFor="specimenTotalQuantity" className="block text-sm font-medium text-gray-700">Total Quantity</label>
-                <input type="number" id="specimenTotalQuantity" value={newSpecimenTotalQuantity} onChange={e => setNewSpecimenTotalQuantity(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                <input type="number" id="specimenTotalQuantity" value={newSpecimenTotalQuantity} onChange={e => setNewSpecimenTotalQuantity(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
               <div>
                 <label htmlFor="specimenCompany" className="block text-sm font-medium text-gray-700">Company (optional)</label>
@@ -849,7 +851,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
               </div>
               <div>
                 <label htmlFor="specimenCatalogNumber" className="block text-sm font-medium text-gray-700">Catalog Number</label>
-                <input type="text" id="specimenCatalogNumber" value={newSpecimenCatalogNumber} onChange={e => setNewSpecimenCatalogNumber(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                <input type="text" id="specimenCatalogNumber" value={newSpecimenCatalogNumber} onChange={e => setNewSpecimenCatalogNumber(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
               <div className="flex space-x-4">
                 <button type="submit" className="bg-teal-500 text-white px-4 py-2 rounded hover:bg-teal-600">Add Specimen</button>
@@ -868,14 +870,17 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
                 <label htmlFor="slideName" className="block text-sm font-medium text-gray-700">Slide Name</label>
                 <input type="text" id="slideName" value={newSlideName} onChange={e => setNewSlideName(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
-              
+              <div>
+                <label htmlFor="slideDescription" className="block text-sm font-medium text-gray-700">Description</label>
+                <input type="text" id="slideDescription" value={newSlideDescription} onChange={e => setNewSlideDescription(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+              </div>
               <div>
                 <label htmlFor="slideStoragePlace" className="block text-sm font-medium text-gray-700">Location</label>
-                <input type="text" id="slideStoragePlace" value={newSlideStoragePlace} onChange={e => setNewSlideStoragePlace(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                <input type="text" id="slideStoragePlace" value={newSlideStoragePlace} onChange={e => setNewSlideStoragePlace(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
               <div>
                 <label htmlFor="slideTotalQuantity" className="block text-sm font-medium text-gray-700">Total Quantity</label>
-                <input type="number" id="slideTotalQuantity" value={newSlideTotalQuantity} onChange={e => setNewSlideTotalQuantity(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                <input type="number" id="slideTotalQuantity" value={newSlideTotalQuantity} onChange={e => setNewSlideTotalQuantity(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
               <div>
                 <label htmlFor="slideCompany" className="block text-sm font-medium text-gray-700">Company (optional)</label>
@@ -883,7 +888,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous }) => {
               </div>
               <div>
                 <label htmlFor="slideCatalogNumber" className="block text-sm font-medium text-gray-700">Catalog Number</label>
-                <input type="text" id="slideCatalogNumber" value={newSlideCatalogNumber} onChange={e => setNewSlideCatalogNumber(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+                <input type="text" id="slideCatalogNumber" value={newSlideCatalogNumber} onChange={e => setNewSlideCatalogNumber(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
               <div className="flex space-x-4">
                 <button type="submit" className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">Add Slide</button>

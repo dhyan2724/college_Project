@@ -16,6 +16,8 @@ const activityLogsRouter = require('./routes/activitylogs');
 const miscellaneousRouter = require('./routes/miscellaneous');
 const faqRouter = require('./routes/faq');
 const masterAdminRouter = require('./routes/masterAdmin');
+const specimensRouter = require('./routes/specimens');
+const slidesRouter = require('./routes/slides');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -56,10 +58,12 @@ app.use('/api/activitylogs', activityLogsRouter);
 app.use('/api/miscellaneous', miscellaneousRouter);
 app.use('/api/faq', faqRouter);
 app.use('/api/master-admin', masterAdminRouter);
+app.use('/api/specimens', specimensRouter);
+app.use('/api/slides', slidesRouter);
 
 // Start server after database initialization
 initializeApp().then(() => {
   app.listen(port, () => {
     console.log(`Server is running on port: ${port}`);
   });
-}); 
+});

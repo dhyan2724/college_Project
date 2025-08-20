@@ -10,6 +10,7 @@ const categories = [
   { key: "miscellaneous", label: "Miscellaneous" },
   { key: "specimens", label: "Specimens" },
   { key: "slides", label: "Slides" },
+  { key: "minorinstruments", label: "Minor Instruments" },
 ];
 
 const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, miscellaneous, specimens = [], slides = [], minorinstruments = [] }) => {
@@ -180,6 +181,12 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
           actualCategory = 'instruments';
         } else if (miscellaneous && miscellaneous.find(m => m._id === id)) {
           actualCategory = 'miscellaneous';
+        } else if (specimens && specimens.find(s => s._id === id)) {
+          actualCategory = 'specimens';
+        } else if (slides && slides.find(s => s._id === id)) {
+          actualCategory = 'slides';
+        } else if (minorinstruments && minorinstruments.find(m => m._id === id)) {
+          actualCategory = 'minorinstruments';
         }
       }
     }
@@ -192,6 +199,8 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
       if (actualCategory === 'plasticwares') await api.deletePlasticware(id);
       if (actualCategory === 'instruments') await api.deleteInstrument(id);
       if (actualCategory === 'miscellaneous') await api.deleteMiscellaneous(id);
+      if (actualCategory === 'specimens') await api.deleteSpecimen(id);
+      if (actualCategory === 'slides') await api.deleteSlide(id);
       console.log('Delete successful, reloading page...');
       window.location.reload();
     } catch (error) {
@@ -213,6 +222,8 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
       if (editCategory === 'plasticwares') await api.updatePlasticware(editItem._id, editItem);
       if (editCategory === 'instruments') await api.updateInstrument(editItem._id, editItem);
       if (editCategory === 'miscellaneous') await api.updateMiscellaneous(editItem._id, editItem);
+      if (editCategory === 'specimens') await api.updateSpecimen(editItem._id, editItem);
+      if (editCategory === 'slides') await api.updateSlide(editItem._id, editItem);
       setShowEditModal(false);
       window.location.reload();
     } catch (error) {
@@ -367,4 +378,4 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
   );
 };
 
-export default InventorySection; 
+export default InventorySection;

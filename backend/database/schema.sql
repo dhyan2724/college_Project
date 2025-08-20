@@ -232,4 +232,41 @@ CREATE TABLE IF NOT EXISTS faqs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_category (category)
-); 
+);
+
+
+-- Specimens table
+CREATE TABLE IF NOT EXISTS specimens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    storagePlace VARCHAR(255) NOT NULL,
+    totalQuantity INT NOT NULL,
+    availableQuantity INT NOT NULL,
+    company VARCHAR(255),
+    catalogNumber VARCHAR(255) NOT NULL UNIQUE,
+    specimenId VARCHAR(255) NOT NULL UNIQUE,
+    dateOfEntry TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_catalog (catalogNumber),
+    INDEX idx_specimenId (specimenId)
+);
+
+-- Slides table
+CREATE TABLE IF NOT EXISTS slides (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    storagePlace VARCHAR(255) NOT NULL,
+    totalQuantity INT NOT NULL,
+    availableQuantity INT NOT NULL,
+    company VARCHAR(255),
+    catalogNumber VARCHAR(255) NOT NULL UNIQUE,
+    slideId VARCHAR(255) NOT NULL UNIQUE,
+    dateOfEntry TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_catalog (catalogNumber),
+    INDEX idx_slideId (slideId)
+);

@@ -84,6 +84,18 @@ export const createMiscellaneous = (data) => fetch(`${API_URL}/miscellaneous`, {
 export const updateMiscellaneous = (id, data) => fetch(`${API_URL}/miscellaneous/${id}`, { method: 'PATCH', headers: headers(), body: JSON.stringify(data) }).then(handleResponse);
 export const deleteMiscellaneous = (id) => fetch(`${API_URL}/miscellaneous/${id}`, { method: 'DELETE', headers: headers() }).then(handleResponse);
 
+// Specimens
+export const fetchSpecimens = () => fetch(`${API_URL}/specimens`, { headers: headers() }).then(handleResponse);
+export const createSpecimen = (data) => fetch(`${API_URL}/specimens`, { method: 'POST', headers: headers(), body: JSON.stringify(data) }).then(handleResponse);
+export const updateSpecimen = (id, data) => fetch(`${API_URL}/specimens/${id}`, { method: 'PATCH', headers: headers(), body: JSON.stringify(data) }).then(handleResponse);
+export const deleteSpecimen = (id) => fetch(`${API_URL}/specimens/${id}`, { method: 'DELETE', headers: headers() }).then(handleResponse);
+
+// Slides
+export const fetchSlides = () => fetch(`${API_URL}/slides`, { headers: headers() }).then(handleResponse);
+export const createSlide = (data) => fetch(`${API_URL}/slides`, { method: 'POST', headers: headers(), body: JSON.stringify(data) }).then(handleResponse);
+export const updateSlide = (id, data) => fetch(`${API_URL}/slides/${id}`, { method: 'PATCH', headers: headers(), body: JSON.stringify(data) }).then(handleResponse);
+export const deleteSlide = (id) => fetch(`${API_URL}/slides/${id}`, { method: 'DELETE', headers: headers() }).then(handleResponse);
+
 export default {
   fetchChemicals,
   createChemical,
@@ -98,6 +110,14 @@ export default {
   updatePlasticware,
   deletePlasticware,
   fetchInstruments,
+  fetchSpecimens,
+  createSpecimen,
+  updateSpecimen,
+  deleteSpecimen,
+  fetchSlides,
+  createSlide,
+  updateSlide,
+  deleteSlide,
   createInstrument,
   updateInstrument,
   deleteInstrument,

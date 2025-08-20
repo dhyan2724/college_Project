@@ -25,6 +25,8 @@ function App() {
     const [issuedItems, setIssuedItems] = useState([]);
     const [pendingRequests, setPendingRequests] = useState([]);
     const [miscellaneous, setMiscellaneous] = useState([]);
+    const [specimens, setSpecimens] = useState([]);
+    const [slides, setSlides] = useState([]);
 
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
@@ -68,6 +70,8 @@ function App() {
                 fetch(`${API_URL}/pendingrequests`, { headers }),
                 fetch(`${API_URL}/issueditems`, { headers }),
                 fetch(`${API_URL}/miscellaneous`, { headers }),
+                fetch(`${API_URL}/specimens`, { headers }),
+                fetch(`${API_URL}/slides`, { headers }),
             ];
 
             let isAdminOrFaculty = user && (user.role === 'master_admin' || user.role === 'admin' || user.role === 'faculty');
@@ -82,7 +86,7 @@ function App() {
                 return;
             }
 
-            const [chemicalsData, glasswaresData, plasticwaresData, instrumentsData, pendingRequestsData, issuedItemsData, miscellaneousData, usersData] =
+            const [chemicalsData, glasswaresData, plasticwaresData, instrumentsData, pendingRequestsData, issuedItemsData, miscellaneousData, specimensData, slidesData, usersData] =
                 await Promise.all(responses.map(res => res.json()));
 
             setChemicals(chemicalsData);
@@ -92,6 +96,8 @@ function App() {
             setPendingRequests(pendingRequestsData);
             setIssuedItems(issuedItemsData);
             setMiscellaneous(miscellaneousData);
+            setSpecimens(specimensData);
+            setSlides(slidesData);
             if (isAdminOrFaculty) {
                 setUsers(usersData);
             }
@@ -151,10 +157,12 @@ function App() {
         setIssuedItems([]);
         setPendingRequests([]);
         setMiscellaneous([]);
+        setSpecimens([]);
+        setSlides([]);
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, chemicals, setChemicals, glasswares, setGlasswares, plasticwares, setPlasticwares, instruments, setInstruments, users, setUsers, issuedItems, setIssuedItems, pendingRequests, setPendingRequests, miscellaneous, setMiscellaneous, fetchData, API_URL }}>
+        <AuthContext.Provider value={{ user, login, logout, chemicals, setChemicals, glasswares, setGlasswares, plasticwares, setPlasticwares, instruments, setInstruments, users, setUsers, issuedItems, setIssuedItems, pendingRequests, setPendingRequests, miscellaneous, setMiscellaneous, specimens, setSpecimens, slides, setSlides, fetchData, API_URL }}>
             <Header />
             <Router>
                 <Routes>
@@ -181,7 +189,7 @@ function App() {
                         }
                     />
                     <Route path="/master-admin" element={user && user.role === 'master_admin' ? <MasterAdminDashboard /> : <Navigate to="/login" replace />} />
-                    <Route path="/admin" element={user && user.role === 'admin' ? <AdminDashboard miscellaneous={miscellaneous} setMiscellaneous={setMiscellaneous} /> : <Navigate to="/login" replace />} />
+                    <Route path="/admin" element={user && user.role === 'admin' ? <AdminDashboard miscellaneous={miscellaneous} setMiscellaneous={setMiscellaneous} specimens={specimens} setSpecimens={setSpecimens} slides={slides} setSlides={setSlides} /> : <Navigate to="/login" replace />} />
                     <Route path="/admin/ai-faq" element={user && user.role === 'admin' ? <AIFaqPage /> : <Navigate to="/login" replace />} />
                     <Route path="/teacher" element={user && user.role === 'faculty' ? <TeacherDashboard /> : <Navigate to="/login" replace />} />
                     <Route path="/student" element={user && user.role === 'student' ? <StudentDashboard /> : <Navigate to="/login" replace />} />
