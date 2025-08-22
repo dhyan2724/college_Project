@@ -171,21 +171,21 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
         actualCategory = 'chemicals';
       } else if (item.totalQuantity !== undefined) {
         // Check which collection this item belongs to by looking at the original arrays
-        if (chemicals && chemicals.find(c => c._id === id)) {
+        if (chemicals && chemicals.find(c => c.id === id)) {
           actualCategory = 'chemicals';
-        } else if (glasswares && glasswares.find(g => g._id === id)) {
+        } else if (glasswares && glasswares.find(g => g.id === id)) {
           actualCategory = 'glasswares';
-        } else if (plasticwares && plasticwares.find(p => p._id === id)) {
+        } else if (plasticwares && plasticwares.find(p => p.id === id)) {
           actualCategory = 'plasticwares';
-        } else if (instruments && instruments.find(i => i._id === id)) {
+        } else if (instruments && instruments.find(i => i.id === id)) {
           actualCategory = 'instruments';
-        } else if (miscellaneous && miscellaneous.find(m => m._id === id)) {
+        } else if (miscellaneous && miscellaneous.find(m => m.id === id)) {
           actualCategory = 'miscellaneous';
-        } else if (specimens && specimens.find(s => s._id === id)) {
+        } else if (specimens && specimens.find(s => s.id === id)) {
           actualCategory = 'specimens';
-        } else if (slides && slides.find(s => s._id === id)) {
+        } else if (slides && slides.find(s => s.id === id)) {
           actualCategory = 'slides';
-        } else if (minorinstruments && minorinstruments.find(m => m._id === id)) {
+        } else if (minorinstruments && minorinstruments.find(m => m.id === id)) {
           actualCategory = 'minorinstruments';
         }
       }
@@ -217,13 +217,13 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
 
   const handleEditSubmit = async () => {
     try {
-      if (editCategory === 'chemicals') await api.updateChemical(editItem._id, editItem);
-      if (editCategory === 'glasswares') await api.updateGlassware(editItem._id, editItem);
-      if (editCategory === 'plasticwares') await api.updatePlasticware(editItem._id, editItem);
-      if (editCategory === 'instruments') await api.updateInstrument(editItem._id, editItem);
-      if (editCategory === 'miscellaneous') await api.updateMiscellaneous(editItem._id, editItem);
-      if (editCategory === 'specimens') await api.updateSpecimen(editItem._id, editItem);
-      if (editCategory === 'slides') await api.updateSlide(editItem._id, editItem);
+      if (editCategory === 'chemicals') await api.updateChemical(editItem.id, editItem);
+      if (editCategory === 'glasswares') await api.updateGlassware(editItem.id, editItem);
+      if (editCategory === 'plasticwares') await api.updatePlasticware(editItem.id, editItem);
+      if (editCategory === 'instruments') await api.updateInstrument(editItem.id, editItem);
+      if (editCategory === 'miscellaneous') await api.updateMiscellaneous(editItem.id, editItem);
+      if (editCategory === 'specimens') await api.updateSpecimen(editItem.id, editItem);
+      if (editCategory === 'slides') await api.updateSlide(editItem.id, editItem);
       setShowEditModal(false);
       window.location.reload();
     } catch (error) {
@@ -290,11 +290,11 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
           </thead>
           <tbody>
             {getFilteredInventory().map((item, idx) => (
-              <tr key={item._id || idx}>
+              <tr key={item.id || idx}>
                 {columnsByCategory[selectedCategory].map(col => (
                   col.key === 'actions' ? (
                     <td key={col.key} className="border px-2 py-1">
-                      <button className="text-red-600 mr-2" onClick={() => handleDelete(selectedCategory, item._id, item)}>Delete</button>
+                      <button className="text-red-600 mr-2" onClick={() => handleDelete(selectedCategory, item.id, item)}>Delete</button>
                       <button className="text-blue-600" onClick={() => handleEdit(item, selectedCategory)}>Edit</button>
                     </td>
                   ) : (

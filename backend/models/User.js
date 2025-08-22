@@ -5,14 +5,14 @@ class User {
   // Create a new user
   static async create(userData) {
     try {
-      const { username, password, role, email, fullName, rollNo, category } = userData;
+      const { username, password, role, email, fullName, rollNo, category, year, department, } = userData;
       
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
       
       const [result] = await pool.execute(
-        'INSERT INTO users (username, password, role, email, fullName, rollNo, category) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [username, hashedPassword, role.toLowerCase(), email.toLowerCase(), fullName, rollNo, category]
+        'INSERT INTO users (username, password, role, email, fullName, rollNo, category, year, department) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [username, hashedPassword, role.toLowerCase(), email.toLowerCase(), fullName, rollNo, category, year, department]
       );
       
       return { id: result.insertId, ...userData };

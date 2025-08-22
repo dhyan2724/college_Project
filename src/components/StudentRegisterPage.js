@@ -10,6 +10,8 @@ const StudentRegisterPage = () => {
   const [fullName, setFullName] = useState('');
   const [rollNo, setRollNo] = useState('');
   const [category, setCategory] = useState('');
+  const [year, setYear] = useState('');
+  const [department, setDepartment] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -28,6 +30,8 @@ const StudentRegisterPage = () => {
           rollNo,
           role: 'student',
           category, // Add category to request
+          year,        // Add year to request
+          department,
         }),
       });
       if (response.ok) {
@@ -103,6 +107,25 @@ const StudentRegisterPage = () => {
           <option value="PhD">PhD</option>
           <option value="Project Student">Project Student</option>
         </select>
+        <select
+            className="w-full mb-4 p-2 border rounded"
+            value={year}
+            onChange={e => setYear(e.target.value)}
+            required>
+            <option value="">Select Year</option>
+            <option value="1st">1st Year</option>
+            <option value="2nd">2nd Year</option>
+            <option value="3rd">3rd Year</option>
+            <option value="4th">4th Year</option>
+          </select>
+          <input
+            type="text"
+            placeholder="Department"
+            className="w-full mb-4 p-2 border rounded"
+            value={department}
+            onChange={e => setDepartment(e.target.value)}
+            required
+          />
         <button type="submit" className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600" disabled={loading}>
           {loading ? 'Registering...' : 'Register'}
         </button>

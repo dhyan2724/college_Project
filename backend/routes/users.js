@@ -9,27 +9,15 @@ const https = require('https');
 require('dotenv').config();
 
 // GET all teachers (public)
-// router.get('/teachers', async (req, res) => {
-//   try {
-//     const teachers = await User.find({ role: 'faculty' }).select('-password');
-//     res.json(teachers);
-//   } catch (err) {
-//     res.status(500).json({ message: 'Server error' });
-//   }
-// });
 router.get('/teachers', async (req, res) => {
   try {
-    const teachers = await User.findByRole('faculty');
-    // Remove passwords from response
-    const teachersWithoutPasswords = teachers.map(user => {
-      const { password, ...userWithoutPassword } = user;
-      return userWithoutPassword;
-    });
-    res.json(teachersWithoutPasswords);
+    const teachers = await User.find({ role: 'faculty' }).select('-password');
+    res.json(teachers);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 // Login route
 router.post('/login', async (req, res) => {
   try {
@@ -128,7 +116,9 @@ router.post('/', async (req, res) => {
       email: req.body.email,
       fullName: req.body.fullName,
       rollNo: req.body.rollNo,
-      category: req.body.category
+      category: req.body.category,
+      year: req.body.year,
+      department: req.body.department
     });
     
     // Create JWT token
@@ -139,7 +129,9 @@ router.post('/', async (req, res) => {
         role: newUser.role,
         email: newUser.email,
         fullName: newUser.fullName,
-        rollNo: newUser.rollNo
+        rollNo: newUser.rollNo,
+        year: newUser.year,
+        department: newUser.department
       },
       JWT_SECRET,
       { expiresIn: '24h' }

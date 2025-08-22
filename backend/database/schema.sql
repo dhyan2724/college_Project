@@ -19,7 +19,9 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_rollno (rollNo),
     INDEX idx_role (role)
-);
+    year VARCHAR(20),
+    department VARCHAR(100)
+    );
 
 -- Chemicals table
 CREATE TABLE IF NOT EXISTS chemicals (
