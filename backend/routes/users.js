@@ -9,15 +9,27 @@ const https = require('https');
 require('dotenv').config();
 
 // GET all teachers (public)
+// router.get('/teachers', async (req, res) => {
+//   try {
+//     const teachers = await User.find({ role: 'faculty' }).select('-password');
+//     res.json(teachers);
+//   } catch (err) {
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// });
 router.get('/teachers', async (req, res) => {
   try {
-    const teachers = await User.find({ role: 'faculty' }).select('-password');
-    res.json(teachers);
+    const teachers = await User.findByRole('faculty');
+    // Remove passwords from response
+    const teachersWithoutPasswords = teachers.map(user => {
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    });
+    res.json(teachersWithoutPasswords);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
 // Login route
 router.post('/login', async (req, res) => {
   try {
