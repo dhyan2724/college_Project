@@ -1,7 +1,7 @@
 require('dotenv').config();
 const http = require('http');
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'http://172.168.2.130:5000/api';
 
 function makeRequest(method, path, data = null, token = null) {
   return new Promise((resolve, reject) => {

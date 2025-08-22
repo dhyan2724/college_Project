@@ -11,7 +11,7 @@ import StudentDashboard from './components/StudentDashboard';
 import StudentRegisterPage from './components/StudentRegisterPage';
 import TeacherDashboard from './components/TeacherDashboard';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'http://172.168.2.130:5000/api';
 
 export const AuthContext = createContext(null);
 
