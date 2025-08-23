@@ -5,14 +5,27 @@ class User {
   // Create a new user
   static async create(userData) {
     try {
-      const { username, password, role, email, fullName, rollNo, category, year, department, } = userData;
+      const { username, password, role, email, fullName, rollNo, category, year, department } = userData;
       
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
       
+      // Ensure all parameters are either a value or null, never undefined
+      const params = [
+        username || null,
+        hashedPassword,
+        role ? role.toLowerCase() : null,
+        email ? email.toLowerCase() : null,
+        fullName || null,
+        rollNo || null,
+        typeof category !== 'undefined' ? category : null,
+        typeof year !== 'undefined' ? year : null,
+        typeof department !== 'undefined' ? department : null
+      ];
+
       const [result] = await pool.execute(
-        'INSERT INTO users (username, password, role, email, fullName, rollNo, category, year, department) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [username, hashedPassword, role.toLowerCase(), email.toLowerCase(), fullName, rollNo, category, year, department]
+        'INSERT INTO users (username, password, role, email, fullName, rollNo, category, year, department) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        params
       );
       
       return { id: result.insertId, ...userData };
@@ -86,16 +99,15 @@ class User {
   // Update user
   static async updateById(id, updateData) {
     try {
-      const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
-      const values = Object.values(updateData);
-      values.push(id);
-      
-      const [result] = await pool.execute(
-        `UPDATE users SET ${fields} WHERE id = ?`,
-        values
-      );
-      
-      return result.affectedRows > 0;
+        const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
+        // Replace undefined with null in values
+        const values = Object.values(updateData).map(v => v === undefined ? null : v);
+        values.push(id);
+        const [result] = await pool.execute(
+          `UPDATE users SET ${fields} WHERE id = ?`,
+          values
+        );
+        return result.affectedRows > 0;
     } catch (error) {
       throw error;
     }

@@ -55,15 +55,16 @@ const TeacherDashboard = () => {
       for (const item of request.items) {
         await api.createIssuedItem({
           itemType: item.itemType,
-          itemId: item.itemId,
-          issuedTo: request.requestedByUser,
+          itemId: item.itemId || item._id,
+          issuedToId: request.requestedByUser?._id || request.requestedByUser?.id || request.requestedByUser,
           facultyInCharge: request.facultyInCharge,
           quantity: item.quantity,
           totalWeightIssued: item.totalWeightRequested,
           purpose: request.purpose,
           returnDate: request.desiredReturnTime,
           notes: request.notes,
-          pendingRequestId: request._id, // <-- add this line
+          pendingRequestId: request._id || request.id,
+          issuedByRole: user?.role || 'faculty', // Ensure teacher role is sent
         });
       }
       alert('Item(s) issued!');
@@ -98,8 +99,8 @@ const TeacherDashboard = () => {
 
   // Helper: Check if a request has already been issued
   const isRequestIssued = (request) => {
-    // If any issuedItem has pendingRequestId matching this request's _id, consider it issued
-    return issuedItems.some(item => item.pendingRequestId === request._id);
+    // If any issuedItem has pendingRequestId matching this request's _id or id, consider it issued
+    return issuedItems.some(item => String(item.pendingRequestId) === String(request._id || request.id));
   };
 
   return (
@@ -135,7 +136,7 @@ const TeacherDashboard = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {issuedItems.map(item => (
-                  <tr key={item._id}>
+                  <tr key={item._id || item.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.itemType}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.itemId?.name || 'Unknown'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.issuedTo?.fullName || 'Unknown'}</td>
@@ -146,7 +147,7 @@ const TeacherDashboard = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {item.status === 'issued' && (
                         <button
-                          onClick={() => handleReturnItem(item._id)}
+                          onClick={() => handleReturnItem(item._id || item.id)}
                           className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 text-xs"
                         >
                           Return
@@ -181,7 +182,7 @@ const TeacherDashboard = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {pendingRequests.map(request => (
-                  <tr key={request._id}>
+                  <tr key={request._id || request.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{request.requestedByName} ({request.requestedByRollNo})</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       <div className="space-y-1">
@@ -201,11 +202,11 @@ const TeacherDashboard = () => {
                       {request.status === 'pending' && (
                         <div className="flex gap-2 mt-2">
                           <button
-                            onClick={() => handleRequestAction(request._id, 'approved')}
+                            onClick={() => handleRequestAction(request.id, 'approved')}
                             className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 text-xs"
                           >Approve</button>
                           <button
-                            onClick={() => handleRequestAction(request._id, 'rejected')}
+                            onClick={() => handleRequestAction(request.id, 'rejected')}
                             className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 text-xs"
                           >Reject</button>
                         </div>

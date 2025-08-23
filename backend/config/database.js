@@ -83,8 +83,26 @@ const initializeDatabase = async () => {
   }
 };
 
+const createUsersTable = `
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('master_admin', 'admin', 'faculty', 'student', 'phd_scholar', 'dissertation_student') NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    fullName VARCHAR(255) NOT NULL,
+    rollNo VARCHAR(255) UNIQUE,
+    year VARCHAR(20),
+    department VARCHAR(100),
+    category ENUM('UG/PG', 'PhD', 'Project Student'),
+    lastLogin TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX role_index (role)
+)`;
+
 module.exports = {
   pool,
   testConnection,
   initializeDatabase
-}; 
+};

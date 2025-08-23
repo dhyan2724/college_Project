@@ -73,47 +73,45 @@ router.post('/', authenticateToken, async (req, res) => {
     // Send email notification to faculty
     try {
       const emailUtils = require('../utils/emailUtils');
-      
       if (emailUtils.isEmailServiceConfigured()) {
         // Get faculty information
         const faculty = await User.findById(req.body.facultyInCharge);
-        
         if (faculty && faculty.email) {
-          // Get detailed item information
-          const itemsWithDetails = await Promise.all(
-            req.body.items.map(async (item) => {
-              let itemDetails = null;
-              
-              switch (item.itemType) {
-                case 'Chemical':
-                  itemDetails = await Chemical.findById(item.itemId);
-                  break;
-                case 'Glassware':
-                  itemDetails = await Glassware.findById(item.itemId);
-                  break;
-                case 'Plasticware':
-                  itemDetails = await Plasticware.findById(item.itemId);
-                  break;
-                case 'Instrument':
-                  itemDetails = await Instrument.findById(item.itemId);
-                  break;
-                case 'Miscellaneous':
-                  itemDetails = await Miscellaneous.findById(item.itemId);
-                  break;
-              }
-              
-              return {
-                name: itemDetails ? itemDetails.name : 'Unknown Item',
-                itemType: item.itemType,
-                quantity: item.quantity,
-                totalWeightRequested: item.totalWeightRequested
-              };
-            })
-          );
-
+          let itemsWithDetails = [];
+          if (Array.isArray(req.body.items) && req.body.items.length > 0) {
+            itemsWithDetails = await Promise.all(
+              req.body.items.map(async (item) => {
+                let itemDetails = null;
+                switch (item.itemType) {
+                  case 'Chemical':
+                    itemDetails = await Chemical.findById(item.itemId);
+                    break;
+                  case 'Glassware':
+                    itemDetails = await Glassware.findById(item.itemId);
+                    break;
+                  case 'Plasticware':
+                    itemDetails = await Plasticware.findById(item.itemId);
+                    break;
+                  case 'Instrument':
+                    itemDetails = await Instrument.findById(item.itemId);
+                    break;
+                  case 'Miscellaneous':
+                    itemDetails = await Miscellaneous.findById(item.itemId);
+                    break;
+                }
+                return {
+                  name: itemDetails ? itemDetails.name : 'Unknown Item',
+                  itemType: item.itemType,
+                  quantity: item.quantity,
+                  totalWeightRequested: item.totalWeightRequested
+                };
+              })
+            );
+          } else {
+            console.warn('No items array found in pending request, sending notification without item details.');
+          }
           // Create portal link (adjust the URL based on your frontend URL)
-          const portalLink = `http://localhost:3000/teacher?requestId=${newPendingRequest._id}`;
-          
+          const portalLink = `http://localhost:3000/teacher?requestId=${newPendingRequest.id}`;
           // Send email notification
           await emailUtils.sendFacultyRequestNotification(
             faculty.email,
@@ -127,7 +125,6 @@ router.post('/', authenticateToken, async (req, res) => {
             req.body.notes,
             portalLink
           );
-          
           console.log('Faculty notification email sent successfully');
         } else {
           console.log('Faculty not found or no email configured');

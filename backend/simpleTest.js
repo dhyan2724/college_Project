@@ -15,7 +15,7 @@ async function simpleTest() {
     console.log('✅ Connected to database successfully!');
     
     // Test if we can query the plasticwares table
-    const [rows] = await connection.execute('SELECT COUNT(*) as count FROM plasticwares');
+    const [rows] = await connection.execute('SELECT COUNT(*) as count FROM chemicals');
     console.log('✅ Plasticwares table accessible. Count:', rows[0].count);
     
     // Test if we can insert data

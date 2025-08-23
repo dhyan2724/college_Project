@@ -11,10 +11,20 @@ require('dotenv').config();
 // GET all teachers (public)
 router.get('/teachers', async (req, res) => {
   try {
-    const teachers = await User.find({ role: 'faculty' }).select('-password');
-    res.json(teachers);
+    const teachers = await User.findByRole('faculty');
+    // Remove password field from each teacher
+    const teachersWithoutPassword = teachers.map(t => {
+      const { password, ...rest } = t;
+      return rest;
+    });
+    res.json(teachersWithoutPassword);
   } catch (err) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error fetching teachers:', err);
+    if (err instanceof Error) {
+      res.status(500).json({ message: 'Server error', error: err.message, stack: err.stack });
+    } else {
+      res.status(500).json({ message: 'Server error', error: err });
+    }
   }
 });
 
@@ -98,6 +108,19 @@ router.get('/:id', authenticateToken, async (req, res) => {
 // POST a new user (registration)
 router.post('/', async (req, res) => {
   try {
+    // Validate required fields
+    const requiredFields = ['username', 'password', 'role', 'email', 'fullName'];
+    const missingFields = requiredFields.filter(field => !req.body[field]);
+    if (missingFields.length > 0) {
+      return res.status(400).json({ message: `Missing required fields: ${missingFields.join(', ')}` });
+    }
+
+    // Validate role value
+    const allowedRoles = ['master_admin', 'admin', 'faculty', 'student', 'phd_scholar', 'dissertation_student'];
+    if (!allowedRoles.includes(req.body.role)) {
+      return res.status(400).json({ message: `Invalid role. Must be one of: ${allowedRoles.join(', ')}` });
+    }
+
     // Check if username or email already exists
     const existingUsername = await User.findByUsername(req.body.username);
     const existingEmail = await User.findByEmail(req.body.email);
@@ -120,7 +143,7 @@ router.post('/', async (req, res) => {
       year: req.body.year,
       department: req.body.department
     });
-    
+
     // Create JWT token
     const token = jwt.sign(
       { 
@@ -137,15 +160,13 @@ router.post('/', async (req, res) => {
       { expiresIn: '24h' }
     );
 
-        // Send welcome email with credentials using our email service
+    // Send welcome email with credentials using our email service
     if (newUser.email) {
       try {
         const emailUtils = require('../utils/emailUtils');
-        
         if (emailUtils.isEmailServiceConfigured()) {
           // Determine user role based on the role field
           const userRole = newUser.role || 'Student';
-          
           await emailUtils.sendWelcomeEmailWithCredentials(
             newUser.email, 
             newUser.fullName || newUser.username,
@@ -167,43 +188,10 @@ router.post('/', async (req, res) => {
     // Send response without password
     const userResponse = { ...newUser };
     delete userResponse.password;
-
     res.status(201).json({
       token,
       user: userResponse
     });
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// PATCH (update) an existing user
-router.patch('/:id', authenticateToken, async (req, res) => {
-  try {
-    const updates = {};
-    
-    // Only allow updating specific fields
-    if (req.body.rollNo) updates.rollNo = req.body.rollNo;
-    if (req.body.email) updates.email = req.body.email;
-    if (req.body.fullName) updates.fullName = req.body.fullName;
-    
-    // If password is being updated, hash it
-    if (req.body.password) {
-      const salt = await bcrypt.genSalt(10);
-      updates.password = await bcrypt.hash(req.body.password, salt);
-    }
-
-    const success = await User.updateById(req.params.id, updates);
-    
-    if (!success) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    // Fetch updated user
-    const user = await User.findById(req.params.id);
-    const { password, ...userWithoutPassword } = user;
-
-    res.json(userWithoutPassword);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

@@ -44,7 +44,7 @@ router.get('/users/role/:role', authenticateToken, authorizeMasterAdmin, async (
 // POST create any type of user account (master admin can create admin, faculty, student, etc.)
 router.post('/create-user', authenticateToken, authorizeMasterAdmin, async (req, res) => {
   try {
-    const { username, password, role, email, fullName, rollNo, category } = req.body;
+    const { username, password, role, email, fullName, rollNo, category, year, department } = req.body;
 
     // Validate required fields
     if (!username || !password || !role || !email || !fullName) {
@@ -79,7 +79,9 @@ router.post('/create-user', authenticateToken, authorizeMasterAdmin, async (req,
       email,
       fullName,
       rollNo,
-      category
+      category,
+      year: typeof year !== 'undefined' ? year : null,
+      department: typeof department !== 'undefined' ? department : null
     });
 
     // Send welcome email with credentials

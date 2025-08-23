@@ -1051,7 +1051,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
           {users.length > 0 ? (
             <ul className="divide-y divide-gray-200">
               {users.map(user => (
-                <li key={user._id} className="py-4 flex justify-between items-center">
+                <li key={user.id} className="py-4 flex justify-between items-center">
                   <div>
                     <p className="text-lg font-semibold text-gray-900">{user.fullName} ({user.username})</p>
                     <p className="text-sm text-gray-600">{user.email} | Role: {user.role}</p>
@@ -1079,7 +1079,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
             ) : (
               <ul className="divide-y divide-gray-200">
                 {recentActivities.map((log) => (
-                  <li key={log._id} className="py-2">
+                  <li key={log.id} className="py-2">
                     <span className="font-semibold capitalize">{log.action}</span> {log.itemType} <span className="font-semibold">{log.itemName}</span>
                     <span className="text-gray-500 ml-2">by {log.user || 'unknown'}</span>
                     <span className="text-gray-400 ml-2 text-xs">{new Date(log.timestamp).toLocaleString()}</span>

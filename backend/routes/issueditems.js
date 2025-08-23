@@ -51,19 +51,24 @@ router.post('/', authenticateToken, authorizeRoles('student', 'phd_scholar', 'di
   try {
     // NOTE: PendingRequest handling is omitted for MySQL model parity; add if/when PendingRequest is migrated
     const issuedItemData = {
-    itemType: req.body.itemType,
-    itemId: req.body.itemId,
+      itemType: req.body.itemType,
+      itemId: req.body.itemId,
       issuedToId: req.body.issuedToId || req.body.issuedTo || req.body.issuedToId,
       issuedByUserId: req.user.id,
-    issuedByName: req.user.fullName,
-    issuedByRole: req.user.role,
-    issuedByRollNo: req.user.rollNo,
-    facultyInCharge: req.body.facultyInCharge,
-    quantity: req.body.quantity,
-    totalWeightIssued: req.body.totalWeightIssued,
-    purpose: req.body.purpose,
-    notes: req.body.notes,
+      issuedByName: req.user.fullName,
+      issuedByRole: req.user.role,
+      issuedByRollNo: req.user.rollNo,
+      facultyInCharge: req.body.facultyInCharge,
+      quantity: req.body.quantity,
+      totalWeightIssued: req.body.totalWeightIssued,
+      purpose: req.body.purpose,
+      notes: req.body.notes,
       pendingRequestId: req.body.pendingRequestId || null
+    };
+
+    // Validate issuedToId
+    if (!issuedItemData.issuedToId) {
+      return res.status(400).json({ message: "issuedToId is required and cannot be null" });
     };
 
     // Update inventory based on item type
@@ -244,7 +249,7 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty', 'mast
       await ActivityLog.create({
         action: 'return',
         itemType: issuedItem.itemType,
-        itemId: issuedItem._id,
+        itemId: issuedItem.id,
         itemName: inventoryItem ? inventoryItem.name : '',
         user: req.user ? req.user.fullName || req.user.username : 'unknown',
         details: `Returned by: ${studentName}, Processed by: ${req.user ? req.user.fullName || req.user.username : 'unknown'}`

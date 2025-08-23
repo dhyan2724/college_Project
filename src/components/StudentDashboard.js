@@ -10,6 +10,7 @@ const StudentDashboard = () => {
   const [cart, setCart] = useState([]);
   const [facultyInCharge, setFacultyInCharge] = useState('');
   const [teachers, setTeachers] = useState([]);
+  const [teacherError, setTeacherError] = useState('');
   const [purpose, setPurpose] = useState('');
   const [desiredIssueTime, setDesiredIssueTime] = useState('');
   const [desiredReturnTime, setDesiredReturnTime] = useState('');
@@ -30,11 +31,11 @@ const StudentDashboard = () => {
   };
 
   // Helper to get filtered items by category and search
-  const getFilteredItems = (items, category) => {
-    return items.filter(item =>
-      (!searchTerm || item.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-  };
+    const getFilteredItems = (items, category) => {
+      return items && items.length > 0
+        ? items.filter(item => (!searchTerm || item.name.toLowerCase().includes(searchTerm.toLowerCase())))
+        : [];
+    };
 
   useEffect(() => {
     if (user) {
@@ -42,41 +43,88 @@ const StudentDashboard = () => {
     }
   }, [fetchData, user]);
 
+  // Debug: log inventory data
+  useEffect(() => {
+    console.log('Chemicals:', chemicals);
+    console.log('Glasswares:', glasswares);
+    console.log('Plasticwares:', plasticwares);
+    console.log('Instruments:', instruments);
+    console.log('Miscellaneous:', miscellaneous);
+    console.log('Specimens:', specimens);
+    console.log('Slides:', slides);
+  }, [chemicals, glasswares, plasticwares, instruments, miscellaneous, specimens, slides]);
+
+  // Error message state
+  const [fetchError, setFetchError] = useState('');
+
+  // Example: wrap fetchData to catch errors
+  const safeFetchData = async () => {
+    try {
+      await fetchData();
+      setFetchError('');
+    } catch (err) {
+      setFetchError('Failed to fetch inventory: ' + (err.message || err));
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      safeFetchData();
+    }
+  }, [user]);
+
   useEffect(() => {
     if (user && user.role === 'student') {
-      api.fetchTeachers().then(setTeachers);
+      api.fetchTeachers()
+        .then(data => {
+          if (Array.isArray(data)) {
+            setTeachers(data.filter(t => t && (t.id || t.id) && t.fullName));
+            setTeacherError('');
+          } else {
+            setTeachers([]);
+            setTeacherError('No teachers found or invalid response.');
+          }
+        })
+        .catch(() => {
+          setTeachers([]);
+          setTeacherError('Failed to fetch teachers.');
+        });
     }
   }, [user]);
 
   const userRequests = Array.isArray(pendingRequests)
     ? pendingRequests.filter(request => {
-        const requestUserId = request.requestedByUser?._id || request.requestedByUser;
-        return requestUserId?.toString() === user?._id?.toString();
+        const requestUserId = request.requestedByUser?._id || request.requestedByUser?.id || request.requestedByUser;
+        const userId = user?._id || user?.id;
+        // Accept both string and number types
+        return String(requestUserId) === String(userId);
       })
     : [];
   const userIssuedItems = Array.isArray(issuedItems)
     ? issuedItems.filter(item => {
-        const issuedToUserId = item.issuedTo?._id || item.issuedTo;
-        return issuedToUserId?.toString() === user?._id?.toString();
+        const issuedToUserId = item.issuedTo?._id || item.issuedTo?.id || item.issuedTo;
+        const userId = user?._id || user?.id;
+        return String(issuedToUserId) === String(userId);
       })
     : [];
 
   const addToCart = (item, type) => {
     const capType = ITEM_TYPE_MAP[type] || type;
-    const existingItem = cart.find(cartItem => cartItem.id === item._id && cartItem.type === capType);
+    const itemId = item._id || item.id;
+    const existingItem = cart.find(cartItem => cartItem.id === itemId && cartItem.type === capType);
     if (existingItem) {
       setCart(prev => prev.map(cartItem =>
-        cartItem.id === item._id && cartItem.type === capType
+        cartItem.id === itemId && cartItem.type === capType
           ? { ...cartItem, quantity: cartItem.quantity + 1 }
           : cartItem
       ));
     } else {
       setCart(prev => [...prev, {
-        id: item._id,
+        id: itemId,
         name: item.name,
         type: capType,
         quantity: 1,
-        totalWeightRequested: capType === 'Chemical' ? 0 : undefined
+        totalWeightRequested: capType === 'Chemical' ? 0 : null
       }]);
     }
   };
@@ -99,20 +147,38 @@ const StudentDashboard = () => {
 
   const handleSubmitRequest = async (e) => {
     e.preventDefault();
+    // Validate request data
+    if (!facultyInCharge) {
+      alert('Please select a faculty member.');
+      return;
+    }
+    if (!purpose.trim()) {
+      alert('Please enter a purpose.');
+      return;
+    }
+    if (!desiredIssueTime || !desiredReturnTime) {
+      alert('Please select both issue and return times.');
+      return;
+    }
+    if (!cart.length) {
+      alert('Your cart is empty.');
+      return;
+    }
+    const requestData = {
+      items: cart.map(item => ({
+        itemType: item.type,
+        itemId: item.id,
+        quantity: item.type !== 'Instrument' ? parseFloat(item.quantity) : null,
+        totalWeightRequested: item.type === 'Chemical' ? parseFloat(item.totalWeightRequested) : null,
+      })),
+      facultyInCharge,
+      purpose,
+      desiredIssueTime,
+      desiredReturnTime,
+      notes
+    };
+    console.log('Submitting request:', requestData);
     try {
-      const requestData = {
-        items: cart.map(item => ({
-          itemType: item.type,
-          itemId: item.id,
-          quantity: item.type !== 'Instrument' ? parseFloat(item.quantity) : undefined,
-          totalWeightRequested: item.type === 'Chemical' ? parseFloat(item.totalWeightRequested) : undefined,
-        })),
-        facultyInCharge,
-        purpose,
-        desiredIssueTime,
-        desiredReturnTime,
-        notes
-      };
       await api.createPendingRequest(requestData);
       alert('Request submitted successfully!');
       setShowRequestForm(false);
@@ -165,6 +231,11 @@ const StudentDashboard = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {fetchError && (
+        <div className="bg-red-100 text-red-700 p-2 mb-4 rounded">
+          {fetchError}
+        </div>
+      )}
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">Student Portal</h1>
@@ -224,7 +295,7 @@ const StudentDashboard = () => {
         </nav>
       </div>
 
-      {activeTab === 'inventory' && (
+  {activeTab === 'inventory' && (
         <div className="space-y-6">
           {/* Search and Category Filter */}
           <div className="flex flex-col md:flex-row md:items-center md:space-x-4 mb-4">
@@ -257,8 +328,10 @@ const StudentDashboard = () => {
             <div>
               <h3 className="text-xl font-semibold mb-4 text-blue-800">Available Chemicals</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {getFilteredItems(chemicals, 'Chemicals').map(chemical => (
-                  <div key={chemical._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                  {getFilteredItems(chemicals, 'Chemicals')
+                    .filter(chemical => chemical._id !== undefined && chemical._id !== null)
+                    .map(chemical => (
+                      <div key={`chemical-${chemical._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                     <h4 className="font-semibold text-gray-800">{chemical.name}</h4>
                     <p className="text-sm text-gray-600 mb-2">Available: {chemical.availableWeight}gm</p>
                     <p className="text-sm text-gray-600 mb-3">Weight: {chemical.weightPerUnit}gm</p>
@@ -278,8 +351,10 @@ const StudentDashboard = () => {
             <div>
               <h3 className="text-xl font-semibold mb-4 text-green-800">Available Glassware</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {getFilteredItems(glasswares, 'Glassware').map(glassware => (
-                  <div key={glassware._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                {getFilteredItems(glasswares, 'Glassware')
+                  .filter(glassware => glassware._id !== undefined && glassware._id !== null)
+                  .map(glassware => (
+                    <div key={`glassware-${glassware._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                     <h4 className="font-semibold text-gray-800">{glassware.name}</h4>
                     <p className="text-sm text-gray-600 mb-2">Available: {glassware.availableQuantity} units</p>
                     <button
@@ -298,8 +373,10 @@ const StudentDashboard = () => {
             <div>
               <h3 className="text-xl font-semibold mb-4 text-purple-800">Available Plasticware</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {getFilteredItems(plasticwares, 'Plasticware').map(plasticware => (
-                  <div key={plasticware._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                {getFilteredItems(plasticwares, 'Plasticware')
+                  .filter(plasticware => plasticware._id !== undefined && plasticware._id !== null)
+                  .map(plasticware => (
+                    <div key={`plasticware-${plasticware._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                     <h4 className="font-semibold text-gray-800">{plasticware.name}</h4>
                     <p className="text-sm text-gray-600 mb-2">Available: {plasticware.availableQuantity} units</p>
                     <button
@@ -318,8 +395,10 @@ const StudentDashboard = () => {
             <div>
               <h3 className="text-xl font-semibold mb-4 text-orange-800">Available Instruments</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {getFilteredItems(instruments, 'Instruments').map(instrument => (
-                  <div key={instrument._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                {getFilteredItems(instruments, 'Instruments')
+                  .filter(instrument => instrument._id !== undefined && instrument._id !== null)
+                  .map(instrument => (
+                    <div key={`instrument-${instrument._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                     <h4 className="font-semibold text-gray-800">{instrument.name}</h4>
                     <p className="text-sm text-gray-600 mb-2">Available: {instrument.availableQuantity} units</p>
                     <button
@@ -339,8 +418,10 @@ const StudentDashboard = () => {
             <div>
               <h3 className="text-xl font-semibold mb-4 text-gray-800">Available Miscellaneous</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {getFilteredItems(miscellaneous, 'Miscellaneous').map(item => (
-                  <div key={item._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                {getFilteredItems(miscellaneous, 'Miscellaneous')
+                  .filter(item => item._id !== undefined && item._id !== null)
+                  .map(item => (
+                    <div key={`miscellaneous-${item._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                     <h4 className="font-semibold text-gray-800">{item.name}</h4>
                     <p className="text-sm text-gray-600 mb-2">Available: {item.availableQuantity} units</p>
                     <p className="text-sm text-gray-600 mb-3">Description: {item.description}</p>
@@ -359,8 +440,10 @@ const StudentDashboard = () => {
             <div>
               <h3 className="text-xl font-semibold mb-4 text-green-900">Available Specimens</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {getFilteredItems(specimens, 'Specimens').map(specimen => (
-                  <div key={specimen._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                {getFilteredItems(specimens, 'Specimens')
+                  .filter(specimen => specimen._id !== undefined && specimen._id !== null)
+                  .map(specimen => (
+                    <div key={`specimen-${specimen._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                     <h4 className="font-semibold text-gray-800">{specimen.name}</h4>
                     <p className="text-sm text-gray-600 mb-2">Type: {specimen.type}</p>
                     <p className="text-sm text-gray-600 mb-2">Available: {specimen.availableQuantity} units</p>
@@ -379,8 +462,10 @@ const StudentDashboard = () => {
             <div>
               <h3 className="text-xl font-semibold mb-4 text-cyan-900">Available Slides</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {getFilteredItems(slides, 'Slides').map(slide => (
-                  <div key={slide._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                {getFilteredItems(slides, 'Slides')
+                  .filter(slide => slide._id !== undefined && slide._id !== null)
+                  .map(slide => (
+                    <div key={`slide-${slide._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                     <h4 className="font-semibold text-gray-800">{slide.name}</h4>
                     <p className="text-sm text-gray-600 mb-2">Available: {slide.availableQuantity} units</p>
                     <button
@@ -398,8 +483,10 @@ const StudentDashboard = () => {
             <div>
               <h3 className="text-xl font-semibold mb-4 text-fuchsia-900">Available Minor Instruments</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {getFilteredItems(minorinstruments, 'Minor Instruments').map(minor => (
-                  <div key={minor._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                {getFilteredItems(minorinstruments, 'Minor Instruments')
+                  .filter(minor => minor._id !== undefined && minor._id !== null)
+                  .map(minor => (
+                    <div key={`minorinstrument-${minor._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                     <h4 className="font-semibold text-gray-800">{minor.name}</h4>
                     <p className="text-sm text-gray-600 mb-2">Type: {minor.type}</p>
                     <p className="text-sm text-gray-600 mb-2">Available: {minor.availableQuantity} units</p>
@@ -455,7 +542,7 @@ const StudentDashboard = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {cart.map((item, index) => (
-                    <tr key={`${item.id}-${item.type}`}>
+                    <tr key={`cart-${item.id}-${item.type}`}> 
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {item.name}
                       </td>
@@ -528,13 +615,14 @@ const StudentDashboard = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {userRequests.map(request => (
-                    <tr key={request._id}>
+                    <tr key={`request-${request.id}`}>
                       <td className="px-6 py-4 text-sm text-gray-900">
                         <div className="space-y-1">
                           {request.items.map((item, idx) => {
-                            const itemData = getItemOptions(item.itemType.toLowerCase()).find(i => i._id === item.itemId);
+                            const itemData = getItemOptions(item.itemType.toLowerCase()).find(i => i.id === item.itemId);
+                            // Use a composite key for uniqueness
                             return (
-                              <div key={idx} className="text-xs">
+                              <div key={`requestitem-${item.itemId}-${idx}`} className="text-xs">
                                 {itemData?.name || 'Unknown'} 
                                 {item.quantity && ` (${item.quantity})`}
                                 {item.totalWeightRequested && ` - ${item.totalWeightRequested}g`}
@@ -544,7 +632,7 @@ const StudentDashboard = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {teachers.find(t => t._id === request.facultyInCharge)?.fullName || 'Unknown'}
+                        {teachers.find(t => t.id === request.facultyInCharge)?.fullName || 'Unknown'}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
                         {request.purpose}
@@ -592,9 +680,9 @@ const StudentDashboard = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {userIssuedItems.map(item => (
-                    <tr key={item._id}>
+                    <tr key={`issued-${item._id || item.id}`}> 
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {getItemOptions(item.itemType.toLowerCase()).find(i => i._id === item.itemId)?.name || 'Unknown'}
+                        {getItemOptions(item.itemType.toLowerCase()).find(i => (i._id || i.id) === (item.itemId || item._id || item.id))?.name || 'Unknown'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
                         {item.itemType}
@@ -662,12 +750,16 @@ const StudentDashboard = () => {
                     required
                   >
                     <option value="">Select a faculty member</option>
+                    {teachers.length === 0 && (
+                      <option value="" disabled>No faculty available</option>
+                    )}
                     {teachers.map(t => (
-                      <option key={t._id} value={t._id}>
+                      <option key={`teacher-${t.id || t.id || t.username}`} value={t.id || t.id}>
                         {t.fullName} ({t.username})
                       </option>
                     ))}
                   </select>
+                  {teacherError && <p className="text-red-500 text-xs mt-1">{teacherError}</p>}
                 </div>
 
                 <div>

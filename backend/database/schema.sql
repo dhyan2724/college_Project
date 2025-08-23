@@ -1,10 +1,9 @@
 -- MySQL Database Schema for Lab Inventory Management System
 
--- Create database
+-- Create database--
 CREATE DATABASE IF NOT EXISTS lab_inventory;
 USE lab_inventory;
 
--- Users table
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
@@ -17,11 +16,11 @@ CREATE TABLE IF NOT EXISTS users (
     lastLogin TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    year VARCHAR(20),
+    department VARCHAR(100),
     INDEX idx_rollno (rollNo),
     INDEX idx_role (role)
-    year VARCHAR(20),
-    department VARCHAR(100)
-    );
+);
 
 -- Chemicals table
 CREATE TABLE IF NOT EXISTS chemicals (

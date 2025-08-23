@@ -73,7 +73,7 @@ http://localhost:3000/teacher?requestId={requestId}
 
 **For production, update the URL in `backend/routes/pendingrequests.js` line 108:**
 ```javascript
-const portalLink = `https://your-domain.com/teacher?requestId=${newPendingRequest._id}`;
+const portalLink = `https://your-domain.com/teacher?requestId=${newPendingRequest.id}`;
 ```
 
 ## Testing

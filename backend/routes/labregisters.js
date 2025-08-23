@@ -32,7 +32,7 @@ router.post('/', authenticateToken, async (req, res) => {
     publisher: req.body.publisher,
     year: req.body.year,
     isbn: req.body.isbn,
-    registeredByUser: req.user._id,
+    registeredByUser: req.user.id,
     registeredByName: req.user.fullName,
     registeredByRollNo: req.user.rollNo,
     registeredByCollegeEmail: req.user.email,
@@ -73,7 +73,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
     const labRegister = await LabRegister.findById(req.params.id);
     if (!labRegister) return res.status(404).json({ message: 'Lab register not found' });
 
-    await LabRegister.deleteOne({ _id: req.params.id });
+    await LabRegister.deleteOne({ id: req.params.id });
     res.json({ message: 'Lab register deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });

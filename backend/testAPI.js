@@ -29,7 +29,7 @@ const initializeTestApp = async () => {
     app.listen(port, () => {
       console.log(`✅ Test server running on port ${port}`);
       console.log(`✅ Test endpoint: http://localhost:${port}/test`);
-      console.log(`✅ Plasticwares endpoint: http://localhost:${port}/api/plasticwares`);
+      console.log(`✅ Plasticwares endpoint: http://localhost:${port}/api/Chemical`);
       console.log('\nNow test these URLs in your browser:');
       console.log(`1. http://localhost:${port}/test`);
       console.log(`2. http://localhost:${port}/api/plasticwares`);

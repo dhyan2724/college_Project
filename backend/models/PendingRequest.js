@@ -40,8 +40,10 @@ class PendingRequest {
   static async addItems(requestId, items) {
     try {
       for (const item of items) {
-        const { itemType, itemId, quantity, totalWeightRequested } = item;
-        
+        const { itemType, itemId } = item;
+        // Convert undefined to null for SQL
+        const quantity = item.quantity === undefined ? null : item.quantity;
+        const totalWeightRequested = item.totalWeightRequested === undefined ? null : item.totalWeightRequested;
         await pool.execute(
           'INSERT INTO pending_request_items (pendingRequestId, itemType, itemId, quantity, totalWeightRequested) VALUES (?, ?, ?, ?, ?)',
           [requestId, itemType, itemId, quantity, totalWeightRequested]
@@ -171,14 +173,13 @@ class PendingRequest {
   static async updateById(id, updateData) {
     try {
       const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
-      const values = Object.values(updateData);
+      // Replace undefined with null in values
+      const values = Object.values(updateData).map(v => v === undefined ? null : v);
       values.push(id);
-
       const [result] = await pool.execute(
         `UPDATE pending_requests SET ${fields} WHERE id = ?`,
         values
       );
-
       return result.affectedRows > 0;
     } catch (error) {
       throw error;

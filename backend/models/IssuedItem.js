@@ -4,6 +4,8 @@ class IssuedItem {
   // Create a new issued item
   static async create(issuedItemData) {
     try {
+      // Sanitize all fields: if undefined, set to null
+      const sanitize = v => v === undefined ? null : v;
       const {
         itemType,
         itemId,
@@ -27,9 +29,9 @@ class IssuedItem {
           totalWeightIssued, purpose, notes, pendingRequestId
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          itemType, itemId, issuedToId, issuedByUserId, issuedByName,
-          issuedByRole, issuedByRollNo, facultyInCharge, quantity,
-          totalWeightIssued, purpose, notes, pendingRequestId
+          sanitize(itemType), sanitize(itemId), sanitize(issuedToId), sanitize(issuedByUserId), sanitize(issuedByName),
+          sanitize(issuedByRole), sanitize(issuedByRollNo), sanitize(facultyInCharge), sanitize(quantity),
+          sanitize(totalWeightIssued), sanitize(purpose), sanitize(notes), sanitize(pendingRequestId)
         ]
       );
 

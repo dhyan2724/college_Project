@@ -15,7 +15,7 @@ async function fixAvailableWeight() {
       chem.storagePlace === undefined ||
       chem.type === undefined
     ) {
-      console.log(`Skipped: ${chem.name || chem._id} - missing required fields`);
+      console.log(`Skipped: ${chem.name || chem.id} - missing required fields`);
       continue;
     }
     if (chem.availableWeight === undefined) {
