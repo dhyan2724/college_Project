@@ -758,7 +758,11 @@ const StudentDashboard = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {teachers.find(t => t.id === request.facultyInCharge)?.fullName || 'Unknown'}
+                        {(() => {
+                          const facultyId = request.facultyInChargeId || request.facultyInCharge;
+                          const faculty = teachers.find(t => (t.id || t._id) === facultyId);
+                          return faculty?.fullName || 'Unknown';
+                        })()}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
                         {request.purpose}

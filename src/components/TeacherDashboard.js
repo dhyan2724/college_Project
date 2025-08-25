@@ -5,7 +5,7 @@ import api from '../services/api';
 import InventorySection from './InventorySection';
 
 const TeacherDashboard = () => {
-  const { chemicals, glasswares, plasticwares, instruments, logout, user, fetchData } = useContext(AuthContext);
+  const { chemicals, glasswares, plasticwares, instruments, users, logout, user, fetchData } = useContext(AuthContext);
   const [issuedItems, setIssuedItems] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
   const navigate = useNavigate();
@@ -134,6 +134,22 @@ const TeacherDashboard = () => {
     });
   };
 
+  // Helper: get item list by type (for resolving names from IDs)
+  const getItemOptions = (type) => {
+    switch ((type || '').toLowerCase()) {
+      case 'chemical':
+        return chemicals;
+      case 'glassware':
+        return glasswares;
+      case 'plasticware':
+        return plasticwares;
+      case 'instrument':
+        return instruments;
+      default:
+        return [];
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
@@ -217,13 +233,17 @@ const TeacherDashboard = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{request.requestedByName} ({request.requestedByRollNo})</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       <div className="space-y-1">
-                        {request.items.map((item, idx) => (
-                          <div key={idx} className="text-xs">
-                            {item.itemType}: {item.itemId?.name || 'Unknown'}
-                            {item.quantity && ` (${item.quantity})`}
-                            {item.totalWeightRequested && ` - ${item.totalWeightRequested}g`}
-                          </div>
-                        ))}
+                        {request.items.map((item, idx) => {
+                          const list = getItemOptions(item.itemType);
+                          const itemData = list.find(i => (i._id || i.id) === item.itemId);
+                          return (
+                            <div key={idx} className="text-xs">
+                              {item.itemType}: {itemData?.name || 'Unknown'}
+                              {item.quantity && ` (${item.quantity})`}
+                              {item.totalWeightRequested && ` - ${item.totalWeightRequested}g`}
+                            </div>
+                          );
+                        })}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">{request.purpose}</td>
