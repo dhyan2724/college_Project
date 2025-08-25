@@ -4,7 +4,7 @@ class Instrument {
   // Create a new instrument
   static async create(instrumentData) {
     try {
-      const { name, type, storagePlace, totalQuantity, availableQuantity, company, catalogNumber } = instrumentData;
+      const { name, type, storagePlace, totalQuantity, availableQuantity, company } = instrumentData;
       
       // Generate instrumentId if not provided
       const instrumentId = instrumentData.instrumentId || `INST-${Date.now()}`;
@@ -18,11 +18,10 @@ class Instrument {
       const safeStoragePlace = storagePlace !== undefined ? storagePlace : null;
       const safeTotalQuantity = totalQuantity !== undefined ? totalQuantity : null;
       const safeCompany = company !== undefined ? company : null;
-      const safeCatalogNumber = catalogNumber !== undefined ? catalogNumber : null;
       
       const [result] = await pool.execute(
-        'INSERT INTO instruments (name, type, storagePlace, totalQuantity, availableQuantity, company, catalogNumber, instrumentId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [safeName, safeType, safeStoragePlace, safeTotalQuantity, finalAvailableQuantity, safeCompany, safeCatalogNumber, instrumentId]
+        'INSERT INTO instruments (name, type, storagePlace, totalQuantity, availableQuantity, company, instrumentId) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [safeName, safeType, safeStoragePlace, safeTotalQuantity, finalAvailableQuantity, safeCompany, instrumentId]
       );
       
       return { id: result.insertId, ...instrumentData, instrumentId, availableQuantity: finalAvailableQuantity };
@@ -44,18 +43,7 @@ class Instrument {
     }
   }
 
-  // Find instrument by catalog number
-  static async findByCatalogNumber(catalogNumber) {
-    try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM instruments WHERE catalogNumber = ?',
-        [catalogNumber]
-      );
-      return rows[0] || null;
-    } catch (error) {
-      throw error;
-    }
-  }
+  // removed catalog number lookups
 
   // Find instrument by instrumentId
   static async findByInstrumentId(instrumentId) {
@@ -116,8 +104,8 @@ class Instrument {
     try {
       const searchTerm = `%${query}%`;
       const [rows] = await pool.execute(
-        'SELECT * FROM instruments WHERE name LIKE ? OR catalogNumber LIKE ? OR instrumentId LIKE ? OR company LIKE ? ORDER BY created_at DESC',
-        [searchTerm, searchTerm, searchTerm, searchTerm]
+        'SELECT * FROM instruments WHERE name LIKE ? OR instrumentId LIKE ? OR company LIKE ? ORDER BY created_at DESC',
+        [searchTerm, searchTerm, searchTerm]
       );
       return rows;
     } catch (error) {

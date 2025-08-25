@@ -213,7 +213,6 @@ async function migrateGlasswares() {
         totalQuantity: glassware.totalQuantity,
         availableQuantity: glassware.availableQuantity,
         company: glassware.company,
-        catalogNumber: glassware.catalogNumber,
         glasswareId: glassware.glasswareId,
         dateOfEntry: glassware.dateOfEntry
       });
@@ -237,7 +236,6 @@ async function migratePlasticwares() {
         totalQuantity: plasticware.totalQuantity,
         availableQuantity: plasticware.availableQuantity,
         company: plasticware.company,
-        catalogNumber: plasticware.catalogNumber,
         plasticwareId: plasticware.plasticwareId,
         dateOfEntry: plasticware.dateOfEntry
       });
@@ -261,7 +259,6 @@ async function migrateInstruments() {
         totalQuantity: instrument.totalQuantity,
         availableQuantity: instrument.availableQuantity,
         company: instrument.company,
-        catalogNumber: instrument.catalogNumber,
         instrumentId: instrument.instrumentId,
         dateOfEntry: instrument.dateOfEntry
       });
@@ -285,7 +282,6 @@ async function migrateMiscellaneous() {
         totalQuantity: item.totalQuantity,
         availableQuantity: item.availableQuantity,
         company: item.company,
-        catalogNumber: item.catalogNumber,
         miscellaneousId: item.miscellaneousId,
         dateOfEntry: item.dateOfEntry
       });

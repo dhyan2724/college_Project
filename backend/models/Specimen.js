@@ -4,7 +4,7 @@ class Specimen {
   // Create a new specimen
   static async create(specimenData) {
     try {
-      const { name, description, storagePlace, totalQuantity, availableQuantity, company, catalogNumber } = specimenData;
+      const { name, description, storagePlace, totalQuantity, availableQuantity, company } = specimenData;
       
       // Generate specimenId if not provided
       const specimenId = specimenData.specimenId || `SPEC-${Date.now()}`;
@@ -18,11 +18,10 @@ class Specimen {
       const safeStoragePlace = storagePlace !== undefined ? storagePlace : null;
       const safeTotalQuantity = totalQuantity !== undefined ? totalQuantity : null;
       const safeCompany = company !== undefined ? company : null;
-      const safeCatalogNumber = catalogNumber !== undefined ? catalogNumber : null;
       
       const [result] = await pool.execute(
-        'INSERT INTO specimens (name, description, storagePlace, totalQuantity, availableQuantity, company, catalogNumber, specimenId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [safeName, safeDescription, safeStoragePlace, safeTotalQuantity, finalAvailableQuantity, safeCompany, safeCatalogNumber, specimenId]
+        'INSERT INTO specimens (name, description, storagePlace, totalQuantity, availableQuantity, company, specimenId) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [safeName, safeDescription, safeStoragePlace, safeTotalQuantity, finalAvailableQuantity, safeCompany, specimenId]
       );
       
       return { id: result.insertId, ...specimenData, specimenId, availableQuantity: finalAvailableQuantity };
@@ -44,18 +43,7 @@ class Specimen {
     }
   }
 
-  // Find specimen by catalog number
-  static async findByCatalogNumber(catalogNumber) {
-    try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM specimens WHERE catalogNumber = ?',
-        [catalogNumber]
-      );
-      return rows[0] || null;
-    } catch (error) {
-      throw error;
-    }
-  }
+  // removed catalog number lookups
 
   // Find specimen by specimenId
   static async findBySpecimenId(specimenId) {
@@ -116,8 +104,8 @@ class Specimen {
     try {
       const searchTerm = `%${query}%`;
       const [rows] = await pool.execute(
-        'SELECT * FROM specimens WHERE name LIKE ? OR description LIKE ? OR catalogNumber LIKE ? OR specimenId LIKE ? OR company LIKE ? ORDER BY created_at DESC',
-        [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm]
+        'SELECT * FROM specimens WHERE name LIKE ? OR description LIKE ? OR specimenId LIKE ? OR company LIKE ? ORDER BY created_at DESC',
+        [searchTerm, searchTerm, searchTerm, searchTerm]
       );
       return rows;
     } catch (error) {

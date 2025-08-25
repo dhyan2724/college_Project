@@ -49,12 +49,10 @@ CREATE TABLE IF NOT EXISTS glasswares (
     totalQuantity INT NOT NULL,
     availableQuantity INT NOT NULL,
     company VARCHAR(255),
-    catalogNumber VARCHAR(255) NOT NULL UNIQUE,
     glasswareId VARCHAR(255) NOT NULL UNIQUE,
     dateOfEntry TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_catalog (catalogNumber),
     INDEX idx_glasswareId (glasswareId)
 );
 
@@ -67,12 +65,10 @@ CREATE TABLE IF NOT EXISTS plasticwares (
     totalQuantity INT NOT NULL,
     availableQuantity INT NOT NULL,
     company VARCHAR(255),
-    catalogNumber VARCHAR(255) NOT NULL UNIQUE,
     plasticwareId VARCHAR(255) NOT NULL UNIQUE,
     dateOfEntry TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_catalog (catalogNumber),
     INDEX idx_plasticwareId (plasticwareId)
 );
 
@@ -85,12 +81,10 @@ CREATE TABLE IF NOT EXISTS instruments (
     totalQuantity INT NOT NULL,
     availableQuantity INT NOT NULL,
     company VARCHAR(255),
-    catalogNumber VARCHAR(255) NOT NULL UNIQUE,
     instrumentId VARCHAR(255) NOT NULL UNIQUE,
     dateOfEntry TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_catalog (catalogNumber),
     INDEX idx_instrumentId (instrumentId)
 );
 
@@ -104,12 +98,10 @@ CREATE TABLE IF NOT EXISTS miscellaneous (
     totalQuantity INT NOT NULL,
     availableQuantity INT NOT NULL,
     company VARCHAR(255),
-    catalogNumber VARCHAR(255) NOT NULL UNIQUE,
     miscellaneousId VARCHAR(255) NOT NULL UNIQUE,
     dateOfEntry TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_catalog (catalogNumber),
     INDEX idx_miscellaneousId (miscellaneousId)
 );
 
@@ -245,12 +237,10 @@ CREATE TABLE IF NOT EXISTS specimens (
     totalQuantity INT NOT NULL,
     availableQuantity INT NOT NULL,
     company VARCHAR(255),
-    catalogNumber VARCHAR(255) NOT NULL UNIQUE,
     specimenId VARCHAR(255) NOT NULL UNIQUE,
     dateOfEntry TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_catalog (catalogNumber),
     INDEX idx_specimenId (specimenId)
 );
 
@@ -263,11 +253,9 @@ CREATE TABLE IF NOT EXISTS slides (
     totalQuantity INT NOT NULL,
     availableQuantity INT NOT NULL,
     company VARCHAR(255),
-    catalogNumber VARCHAR(255) NOT NULL UNIQUE,
     slideId VARCHAR(255) NOT NULL UNIQUE,
     dateOfEntry TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_catalog (catalogNumber),
     INDEX idx_slideId (slideId)
 );

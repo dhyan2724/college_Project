@@ -4,7 +4,7 @@ class Slide {
   // Create a new slide
   static async create(slideData) {
     try {
-      const { name, description, storagePlace, totalQuantity, availableQuantity, company, catalogNumber } = slideData;
+      const { name, description, storagePlace, totalQuantity, availableQuantity, company } = slideData;
       
       // Generate slideId if not provided
       const slideId = slideData.slideId || `SLIDE-${Date.now()}`;
@@ -18,11 +18,10 @@ class Slide {
       const safeStoragePlace = storagePlace !== undefined ? storagePlace : null;
       const safeTotalQuantity = totalQuantity !== undefined ? totalQuantity : null;
       const safeCompany = company !== undefined ? company : null;
-      const safeCatalogNumber = catalogNumber !== undefined ? catalogNumber : null;
       
       const [result] = await pool.execute(
-        'INSERT INTO slides (name, description, storagePlace, totalQuantity, availableQuantity, company, catalogNumber, slideId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [safeName, safeDescription, safeStoragePlace, safeTotalQuantity, finalAvailableQuantity, safeCompany, safeCatalogNumber, slideId]
+        'INSERT INTO slides (name, description, storagePlace, totalQuantity, availableQuantity, company, slideId) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [safeName, safeDescription, safeStoragePlace, safeTotalQuantity, finalAvailableQuantity, safeCompany, slideId]
       );
       
       return { id: result.insertId, ...slideData, slideId, availableQuantity: finalAvailableQuantity };
@@ -44,18 +43,7 @@ class Slide {
     }
   }
 
-  // Find slide by catalog number
-  static async findByCatalogNumber(catalogNumber) {
-    try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM slides WHERE catalogNumber = ?',
-        [catalogNumber]
-      );
-      return rows[0] || null;
-    } catch (error) {
-      throw error;
-    }
-  }
+  // removed catalog number lookups
 
   // Find slide by slideId
   static async findBySlideId(slideId) {
@@ -116,8 +104,8 @@ class Slide {
     try {
       const searchTerm = `%${query}%`;
       const [rows] = await pool.execute(
-        'SELECT * FROM slides WHERE name LIKE ? OR description LIKE ? OR catalogNumber LIKE ? OR slideId LIKE ? OR company LIKE ? ORDER BY created_at DESC',
-        [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm]
+        'SELECT * FROM slides WHERE name LIKE ? OR description LIKE ? OR slideId LIKE ? OR company LIKE ? ORDER BY created_at DESC',
+        [searchTerm, searchTerm, searchTerm, searchTerm]
       );
       return rows;
     } catch (error) {

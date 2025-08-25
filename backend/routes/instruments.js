@@ -34,7 +34,6 @@ router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) =>
       storagePlace: req.body.storagePlace,
       totalQuantity: req.body.totalQuantity,
       company: req.body.company,
-      catalogNumber: req.body.catalogNumber,
     };
 
     const newInstrument = await Instrument.create(instrumentData);
@@ -61,7 +60,7 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty', 'mast
     }
 
     // Only allow updating certain fields
-    const updatableFields = ['name', 'type', 'storagePlace', 'totalQuantity', 'company', 'catalogNumber'];
+    const updatableFields = ['name', 'type', 'storagePlace', 'totalQuantity', 'company'];
     const updateData = {};
     updatableFields.forEach(field => {
       if (req.body[field] !== undefined) {

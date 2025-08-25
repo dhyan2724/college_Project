@@ -25,12 +25,12 @@ async function simpleTest() {
       storagePlace: 'Test Location',
       totalQuantity: 5,
       company: 'Test Company',
-      catalogNumber: 'TEST-' + Date.now()
+      
     };
     
     const [result] = await connection.execute(
-      'INSERT INTO plasticwares (name, type, storagePlace, totalQuantity, availableQuantity, company, catalogNumber, plasticwareId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [testData.name, testData.type, testData.storagePlace, testData.totalQuantity, testData.totalQuantity, testData.company, testData.catalogNumber, 'TEST-ID-' + Date.now()]
+      'INSERT INTO plasticwares (name, type, storagePlace, totalQuantity, availableQuantity, company, plasticwareId) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [testData.name, testData.type, testData.storagePlace, testData.totalQuantity, testData.totalQuantity, testData.company, 'TEST-ID-' + Date.now()]
     );
     
     console.log('✅ Insert test successful. ID:', result.insertId);

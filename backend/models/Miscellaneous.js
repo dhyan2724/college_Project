@@ -4,7 +4,7 @@ class Miscellaneous {
   // Create a new miscellaneous item
   static async create(miscellaneousData) {
     try {
-      const { name, type, description, storagePlace, totalQuantity, availableQuantity, company, catalogNumber } = miscellaneousData;
+      const { name, type, description, storagePlace, totalQuantity, availableQuantity, company } = miscellaneousData;
       
       // Generate miscellaneousId if not provided
       const miscellaneousId = miscellaneousData.miscellaneousId || `MISC-${Date.now()}`;
@@ -19,11 +19,10 @@ class Miscellaneous {
       const safeStoragePlace = storagePlace !== undefined ? storagePlace : null;
       const safeTotalQuantity = totalQuantity !== undefined ? totalQuantity : null;
       const safeCompany = company !== undefined ? company : null;
-      const safeCatalogNumber = catalogNumber !== undefined ? catalogNumber : null;
       
       const [result] = await pool.execute(
-        'INSERT INTO miscellaneous (name, type, description, storagePlace, totalQuantity, availableQuantity, company, catalogNumber, miscellaneousId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [safeName, safeType, safeDescription, safeStoragePlace, safeTotalQuantity, finalAvailableQuantity, safeCompany, safeCatalogNumber, miscellaneousId]
+        'INSERT INTO miscellaneous (name, type, description, storagePlace, totalQuantity, availableQuantity, company, miscellaneousId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [safeName, safeType, safeDescription, safeStoragePlace, safeTotalQuantity, finalAvailableQuantity, safeCompany, miscellaneousId]
       );
       
       return { id: result.insertId, ...miscellaneousData, miscellaneousId, availableQuantity: finalAvailableQuantity };
@@ -45,18 +44,7 @@ class Miscellaneous {
     }
   }
 
-  // Find miscellaneous item by catalog number
-  static async findByCatalogNumber(catalogNumber) {
-    try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM miscellaneous WHERE catalogNumber = ?',
-        [catalogNumber]
-      );
-      return rows[0] || null;
-    } catch (error) {
-      throw error;
-    }
-  }
+  // removed catalog number lookups
 
   // Find miscellaneous item by miscellaneousId
   static async findByMiscellaneousId(miscellaneousId) {
@@ -117,8 +105,8 @@ class Miscellaneous {
     try {
       const searchTerm = `%${query}%`;
       const [rows] = await pool.execute(
-        'SELECT * FROM miscellaneous WHERE name LIKE ? OR description LIKE ? OR catalogNumber LIKE ? OR miscellaneousId LIKE ? OR company LIKE ? ORDER BY created_at DESC',
-        [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm]
+        'SELECT * FROM miscellaneous WHERE name LIKE ? OR description LIKE ? OR miscellaneousId LIKE ? OR company LIKE ? ORDER BY created_at DESC',
+        [searchTerm, searchTerm, searchTerm, searchTerm]
       );
       return rows;
     } catch (error) {

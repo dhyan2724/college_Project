@@ -35,7 +35,6 @@ router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) =>
       storagePlace: req.body.storagePlace,
       totalQuantity: req.body.totalQuantity,
       company: req.body.company,
-      catalogNumber: req.body.catalogNumber,
     };
 
     const newItem = await Miscellaneous.create(miscData);
@@ -60,7 +59,7 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty', 'mast
       return res.status(404).json({ message: 'Miscellaneous item not found' });
     }
 
-    const updatableFields = ['name', 'type', 'description', 'storagePlace', 'totalQuantity', 'company', 'catalogNumber'];
+    const updatableFields = ['name', 'type', 'description', 'storagePlace', 'totalQuantity', 'company'];
     const updateData = {};
     updatableFields.forEach(field => {
       if (req.body[field] !== undefined) {

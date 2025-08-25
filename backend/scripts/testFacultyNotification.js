@@ -35,7 +35,7 @@ async function testFacultyNotification() {
     const desiredIssueTime = new Date(Date.now() + 24 * 60 * 60 * 1000); // Tomorrow
     const desiredReturnTime = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // 3 days from now
     const notes = 'Need for practical examination. Will handle with care.';
-    const portalLink = 'http://localhost:3000/teacher?requestId=test123';
+    const portalLink = 'http://172.168.2.130:3000/teacher?requestId=test123';
     
     console.log('\nSending test faculty notification email...');
     const result = await emailUtils.sendFacultyRequestNotification(

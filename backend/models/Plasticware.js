@@ -4,7 +4,7 @@ class Plasticware {
   // Create a new plasticware
   static async create(plasticwareData) {
     try {
-      const { name, type, storagePlace, totalQuantity, availableQuantity, company, catalogNumber } = plasticwareData;
+      const { name, type, storagePlace, totalQuantity, availableQuantity, company } = plasticwareData;
       
       // Generate plasticwareId if not provided
       const plasticwareId = plasticwareData.plasticwareId || `PLASTIC-${Date.now()}`;
@@ -18,11 +18,10 @@ class Plasticware {
       const safeStoragePlace = storagePlace !== undefined ? storagePlace : null;
       const safeTotalQuantity = totalQuantity !== undefined ? totalQuantity : null;
       const safeCompany = company !== undefined ? company : null;
-      const safeCatalogNumber = catalogNumber !== undefined ? catalogNumber : null;
       
       const [result] = await pool.execute(
-        'INSERT INTO plasticwares (name, type, storagePlace, totalQuantity, availableQuantity, company, catalogNumber, plasticwareId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [safeName, safeType, safeStoragePlace, safeTotalQuantity, finalAvailableQuantity, safeCompany, safeCatalogNumber, plasticwareId]
+        'INSERT INTO plasticwares (name, type, storagePlace, totalQuantity, availableQuantity, company, plasticwareId) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [safeName, safeType, safeStoragePlace, safeTotalQuantity, finalAvailableQuantity, safeCompany, plasticwareId]
       );
       
       return { id: result.insertId, ...plasticwareData, plasticwareId, availableQuantity: finalAvailableQuantity };
@@ -44,18 +43,7 @@ class Plasticware {
     }
   }
 
-  // Find plasticware by catalog number
-  static async findByCatalogNumber(catalogNumber) {
-    try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM plasticwares WHERE catalogNumber = ?',
-        [catalogNumber]
-      );
-      return rows[0] || null;
-    } catch (error) {
-      throw error;
-    }
-  }
+  // removed catalog number lookups
 
   // Find plasticware by plasticwareId
   static async findByPlasticwareId(plasticwareId) {
@@ -116,8 +104,8 @@ class Plasticware {
     try {
       const searchTerm = `%${query}%`;
       const [rows] = await pool.execute(
-        'SELECT * FROM plasticwares WHERE name LIKE ? OR catalogNumber LIKE ? OR plasticwareId LIKE ? OR company LIKE ? ORDER BY created_at DESC',
-        [searchTerm, searchTerm, searchTerm, searchTerm]
+        'SELECT * FROM plasticwares WHERE name LIKE ? OR plasticwareId LIKE ? OR company LIKE ? ORDER BY created_at DESC',
+        [searchTerm, searchTerm, searchTerm]
       );
       return rows;
     } catch (error) {

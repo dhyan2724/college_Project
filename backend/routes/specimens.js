@@ -34,7 +34,6 @@ router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) =>
       storagePlace: req.body.storagePlace,
       totalQuantity: req.body.totalQuantity,
       company: req.body.company,
-      catalogNumber: req.body.catalogNumber,
     };
 
     const newItem = await Specimen.create(specimenData);
@@ -59,7 +58,7 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty', 'mast
       return res.status(404).json({ message: 'Specimen not found' });
     }
 
-    const updatableFields = ['name', 'description', 'storagePlace', 'totalQuantity', 'company', 'catalogNumber'];
+    const updatableFields = ['name', 'description', 'storagePlace', 'totalQuantity', 'company'];
     const updateData = {};
     updatableFields.forEach(field => {
       if (req.body[field] !== undefined) {

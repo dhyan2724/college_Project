@@ -33,7 +33,7 @@ async function testPlasticware() {
       storagePlace: 'Test Location',
       totalQuantity: 10,
       company: 'Test Company',
-      catalogNumber: 'TEST-' + Date.now()
+      
     };
     
     const newPlasticware = await Plasticware.create(testData);

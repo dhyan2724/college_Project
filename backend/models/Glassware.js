@@ -4,7 +4,7 @@ class Glassware {
   // Create a new glassware
   static async create(glasswareData) {
     try {
-      const { name, type, storagePlace, totalQuantity, availableQuantity, company, catalogNumber } = glasswareData;
+      const { name, type, storagePlace, totalQuantity, availableQuantity, company } = glasswareData;
       
       // Generate glasswareId if not provided
       const glasswareId = glasswareData.glasswareId || `GLASS-${Date.now()}`;
@@ -18,11 +18,10 @@ class Glassware {
       const safeStoragePlace = storagePlace !== undefined ? storagePlace : null;
       const safeTotalQuantity = totalQuantity !== undefined ? totalQuantity : null;
       const safeCompany = company !== undefined ? company : null;
-      const safeCatalogNumber = catalogNumber !== undefined ? catalogNumber : null;
       
       const [result] = await pool.execute(
-        'INSERT INTO glasswares (name, type, storagePlace, totalQuantity, availableQuantity, company, catalogNumber, glasswareId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [safeName, safeType, safeStoragePlace, safeTotalQuantity, finalAvailableQuantity, safeCompany, safeCatalogNumber, glasswareId]
+        'INSERT INTO glasswares (name, type, storagePlace, totalQuantity, availableQuantity, company, glasswareId) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [safeName, safeType, safeStoragePlace, safeTotalQuantity, finalAvailableQuantity, safeCompany, glasswareId]
       );
       
       return { id: result.insertId, ...glasswareData, glasswareId, availableQuantity: finalAvailableQuantity };
@@ -44,18 +43,7 @@ class Glassware {
     }
   }
 
-  // Find glassware by catalog number
-  static async findByCatalogNumber(catalogNumber) {
-    try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM glasswares WHERE catalogNumber = ?',
-        [catalogNumber]
-      );
-      return rows[0] || null;
-    } catch (error) {
-      throw error;
-    }
-  }
+  // removed catalog number lookups
 
   // Find glassware by glasswareId
   static async findByGlasswareId(glasswareId) {
@@ -116,8 +104,8 @@ class Glassware {
     try {
       const searchTerm = `%${query}%`;
       const [rows] = await pool.execute(
-        'SELECT * FROM glasswares WHERE name LIKE ? OR catalogNumber LIKE ? OR glasswareId LIKE ? OR company LIKE ? ORDER BY created_at DESC',
-        [searchTerm, searchTerm, searchTerm, searchTerm]
+        'SELECT * FROM glasswares WHERE name LIKE ? OR glasswareId LIKE ? OR company LIKE ? ORDER BY created_at DESC',
+        [searchTerm, searchTerm, searchTerm]
       );
       return rows;
     } catch (error) {

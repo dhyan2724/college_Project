@@ -68,7 +68,6 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
     const query = searchQuery.toLowerCase();
     return inventory.filter(item =>
       (item && item.name && item.name.toLowerCase().includes(query)) ||
-      (item && item.catalogNumber && item.catalogNumber.toLowerCase().includes(query)) ||
       (item && item.type && item.type.toLowerCase().includes(query)) ||
       (item && item.company && item.company.toLowerCase().includes(query))
     );
@@ -96,7 +95,6 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
     ],
     glasswares: [
       { key: 'name', label: 'Name' },
-      { key: 'catalogNumber', label: 'Catalog Number' },
       { key: 'storagePlace', label: 'Location' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'availableQuantity', label: 'Available Quantity' },
@@ -105,7 +103,6 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
     ],
     plasticwares: [
       { key: 'name', label: 'Name' },
-      { key: 'catalogNumber', label: 'Catalog Number' },
       { key: 'storagePlace', label: 'Location' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'availableQuantity', label: 'Available Quantity' },
@@ -114,7 +111,6 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
     ],
     instruments: [
       { key: 'name', label: 'Name' },
-      { key: 'catalogNumber', label: 'Catalog Number' },
       { key: 'storagePlace', label: 'Location' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'availableQuantity', label: 'Available Quantity' },
@@ -125,7 +121,6 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
     miscellaneous: [
       { key: 'name', label: 'Name' },
       { key: 'type', label: 'Type' },
-      { key: 'catalogNumber', label: 'Catalog Number' },
       { key: 'storagePlace', label: 'Location' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'availableQuantity', label: 'Available Quantity' },
@@ -134,7 +129,6 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
     ],
     slides: [
       { key: 'name', label: 'Name' },
-      { key: 'catalogNumber', label: 'Catalog Number' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'storagePlace', label: 'Location' },
       { key: 'availableQuantity', label: 'Available Quantity' },
@@ -143,7 +137,6 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
     ],
     specimens: [
       { key: 'name', label: 'Name' },
-      { key: 'catalogNumber', label: 'Catalog Number' },
       { key: 'storagePlace', label: 'Location' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'availableQuantity', label: 'Available Quantity' },
@@ -153,7 +146,6 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
     all: [
       { key: 'category', label: 'Category' },
       { key: 'name', label: 'Name' },
-      { key: 'catalogNumber', label: 'Catalog Number' },
       { key: 'actions', label: 'Actions' },
     ],
   };

@@ -116,7 +116,7 @@ router.post('/', authenticateToken, async (req, res) => {
             console.warn('No items array found in pending request, sending notification without item details.');
           }
           // Create portal link (adjust the URL based on your frontend URL)
-          const portalLink = `http://localhost:3000/teacher?requestId=${newPendingRequest.id}`;
+          const portalLink = `http://172.168.2.130:3000/teacher?requestId=${newPendingRequest.id}`;
           // Send email notification
           await emailUtils.sendFacultyRequestNotification(
             faculty.email,
