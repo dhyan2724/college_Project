@@ -27,7 +27,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
   const [newGlasswareStoragePlace, setNewGlasswareStoragePlace] = useState('');
   const [newGlasswareTotalQuantity, setNewGlasswareTotalQuantity] = useState('');
   const [newGlasswareCompany, setNewGlasswareCompany] = useState('');
-  const [newGlasswareCatalogNumber, setNewGlasswareCatalogNumber] = useState("");
+  // removed catalog number for glassware
 
   const [showAddInstrumentForm, setShowAddInstrumentForm] = useState(false);
   const [newInstrumentName, setNewInstrumentName] = useState('');
@@ -35,7 +35,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
   const [newInstrumentStoragePlace, setNewInstrumentStoragePlace] = useState('');
   const [newInstrumentTotalQuantity, setNewInstrumentTotalQuantity] = useState('');
   const [newInstrumentCompany, setNewInstrumentCompany] = useState('');
-  const [newInstrumentCatalogNumber, setNewInstrumentCatalogNumber] = useState("");
+  // removed catalog number for instruments
 
   const [showAddPlasticwareForm, setShowAddPlasticwareForm] = useState(false);
   const [newPlasticwareName, setNewPlasticwareName] = useState('');
@@ -43,7 +43,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
   const [newPlasticwareStoragePlace, setNewPlasticwareStoragePlace] = useState('');
   const [newPlasticwareTotalQuantity, setNewPlasticwareTotalQuantity] = useState('');
   const [newPlasticwareCompany, setNewPlasticwareCompany] = useState('');
-  const [newPlasticwareCatalogNumber, setNewPlasticwareCatalogNumber] = useState("");
+  // removed catalog number for plasticware
 
   const [showAddMiscForm, setShowAddMiscForm] = useState(false);
   const [newMiscName, setNewMiscName] = useState('');
@@ -52,7 +52,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
   const [newMiscStoragePlace, setNewMiscStoragePlace] = useState('');
   const [newMiscTotalQuantity, setNewMiscTotalQuantity] = useState('');
   const [newMiscCompany, setNewMiscCompany] = useState('');
-  const [newMiscCatalogNumber, setNewMiscCatalogNumber] = useState('');
+  // removed catalog number for miscellaneous
 
   // New: toggles for Specimens and Slides (UI buttons and placeholders)
   const [showAddSpecimenForm, setShowAddSpecimenForm] = useState(false);
@@ -65,7 +65,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
   const [newSpecimenStoragePlace, setNewSpecimenStoragePlace] = useState('');
   const [newSpecimenTotalQuantity, setNewSpecimenTotalQuantity] = useState('');
   const [newSpecimenCompany, setNewSpecimenCompany] = useState('');
-  const [newSpecimenCatalogNumber, setNewSpecimenCatalogNumber] = useState('');
+  // removed catalog number for specimens
 
   // New: state for Slides form
   const [newSlideName, setNewSlideName] = useState('');
@@ -73,7 +73,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
   const [newSlideStoragePlace, setNewSlideStoragePlace] = useState('');
   const [newSlideTotalQuantity, setNewSlideTotalQuantity] = useState('');
   const [newSlideCompany, setNewSlideCompany] = useState('');
-  const [newSlideCatalogNumber, setNewSlideCatalogNumber] = useState('');
+  // removed catalog number for slides
 
   const [recentActivities, setRecentActivities] = useState([]);
   const [loadingActivities, setLoadingActivities] = useState(true);
@@ -192,7 +192,6 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
           storagePlace: newGlasswareStoragePlace,
           totalQuantity: parseFloat(newGlasswareTotalQuantity),
           company: newGlasswareCompany,
-          catalogNumber: newGlasswareCatalogNumber,
         }),
       });
 
@@ -204,7 +203,6 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
         setNewGlasswareStoragePlace('');
         setNewGlasswareTotalQuantity('');
         setNewGlasswareCompany('');
-        setNewGlasswareCatalogNumber('');
         fetchData();
       } else {
         const errorData = await response.json();
@@ -232,7 +230,6 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
           storagePlace: newInstrumentStoragePlace,
           totalQuantity: parseFloat(newInstrumentTotalQuantity),
           company: newInstrumentCompany,
-          catalogNumber: newInstrumentCatalogNumber,
         }),
       });
 
@@ -244,7 +241,6 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
         setNewInstrumentStoragePlace('');
         setNewInstrumentTotalQuantity('');
         setNewInstrumentCompany('');
-        setNewInstrumentCatalogNumber('');
         fetchData();
       } else {
         const errorData = await response.json();
@@ -273,7 +269,6 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
           storagePlace: newPlasticwareStoragePlace,
           totalQuantity: parseFloat(newPlasticwareTotalQuantity),
           company: newPlasticwareCompany,
-          catalogNumber: newPlasticwareCatalogNumber,
         }),
       });
       if (response.ok) {
@@ -290,9 +285,6 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
         setNewPlasticwareStoragePlace('');
         setNewPlasticwareTotalQuantity('');
         setNewPlasticwareCompany('');
-        setNewPlasticwareCatalogNumber('');
-        
-        // Auto-refresh data
         fetchData();
         
         // Clear notification after 3 seconds
@@ -333,7 +325,6 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
           storagePlace: newMiscStoragePlace,
           totalQuantity: parseFloat(newMiscTotalQuantity),
           company: newMiscCompany,
-          catalogNumber: newMiscCatalogNumber,
         }),
       });
       if (response.ok) {
@@ -345,7 +336,6 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
         setNewMiscStoragePlace('');
         setNewMiscTotalQuantity('');
         setNewMiscCompany('');
-        setNewMiscCatalogNumber('');
         fetchData();
       } else {
         const errorData = await response.json();
@@ -366,7 +356,6 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
         storagePlace: newSpecimenStoragePlace,
         totalQuantity: parseFloat(newSpecimenTotalQuantity),
         company: newSpecimenCompany,
-        catalogNumber: newSpecimenCatalogNumber,
       });
       
       setNotification({
@@ -381,7 +370,6 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
       setNewSpecimenStoragePlace('');
       setNewSpecimenTotalQuantity('');
       setNewSpecimenCompany('');
-      setNewSpecimenCatalogNumber('');
       fetchData();
       setTimeout(() => setNotification(null), 5000);
     } catch (error) {
@@ -403,7 +391,6 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
         storagePlace: newSlideStoragePlace,
         totalQuantity: parseFloat(newSlideTotalQuantity),
         company: newSlideCompany,
-        catalogNumber: newSlideCatalogNumber,
       });
       
       setNotification({
@@ -417,7 +404,6 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
       setNewSlideStoragePlace('');
       setNewSlideTotalQuantity('');
       setNewSlideCompany('');
-      setNewSlideCatalogNumber('');
       fetchData();
       setTimeout(() => setNotification(null), 5000);
     } catch (error) {
@@ -681,10 +667,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
                 <label htmlFor="glasswareType" className="block text-sm font-medium text-gray-700">Type</label>
                 <input type="text" id="glasswareType" placeholder="e.g., Beaker, Flask, Test Tube" value={newGlasswareType} onChange={e => setNewGlasswareType(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
-              <div>
-                <label htmlFor="glasswareCatalogNumber" className="block text-sm font-medium text-gray-700">Catalog Number</label>
-                <input type="text" id="glasswareCatalogNumber" value={newGlasswareCatalogNumber} onChange={e => setNewGlasswareCatalogNumber(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
-              </div>
+              {/* catalog number removed for glassware */}
               
               <div>
                 <label htmlFor="glasswareStoragePlace" className="block text-sm font-medium text-gray-700">Location</label>
@@ -719,10 +702,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
                 <label htmlFor="instrumentType" className="block text-sm font-medium text-gray-700">Type</label>
                 <input type="text" id="instrumentType" placeholder="e.g., Microscope, Centrifuge, Spectrophotometer" value={newInstrumentType} onChange={e => setNewInstrumentType(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
-              <div>
-                <label htmlFor="instrumentCatalogNumber" className="block text-sm font-medium text-gray-700">Catalog Number</label>
-                <input type="text" id="instrumentCatalogNumber" value={newInstrumentCatalogNumber} onChange={e => setNewInstrumentCatalogNumber(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
-              </div>
+              {/* catalog number removed for instruments */}
               
               <div>
                 <label htmlFor="instrumentStoragePlace" className="block text-sm font-medium text-gray-700">Location</label>
@@ -757,10 +737,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
                 <label htmlFor="plasticwareType" className="block text-sm font-medium text-gray-700">Type</label>
                 <input type="text" id="plasticwareType" placeholder="e.g., Pipette, Petri Dish, Centrifuge Tube" value={newPlasticwareType} onChange={e => setNewPlasticwareType(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
-              <div>
-                <label htmlFor="plasticwareCatalogNumber" className="block text-sm font-medium text-gray-700">Catalog Number</label>
-                <input type="text" id="plasticwareCatalogNumber" value={newPlasticwareCatalogNumber} onChange={e => setNewPlasticwareCatalogNumber(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
-              </div>
+              {/* catalog number removed for plasticware */}
               <div>
                 <label htmlFor="plasticwareStoragePlace" className="block text-sm font-medium text-gray-700">Location</label>
                 <input type="text" id="plasticwareStoragePlace" value={newPlasticwareStoragePlace} onChange={e => setNewPlasticwareStoragePlace(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
@@ -801,10 +778,6 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
               <div>
                 <label htmlFor="miscStoragePlace" className="block text-sm font-medium text-gray-700">Location</label>
                 <input type="text" id="miscStoragePlace" value={newMiscStoragePlace} onChange={e => setNewMiscStoragePlace(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
-              </div>
-              <div>
-                <label htmlFor="miscCatalogNumber" className="block text-sm font-medium text-gray-700">Catalog Number</label>
-                <input type="text" id="miscCatalogNumber" value={newMiscCatalogNumber} onChange={e => setNewMiscCatalogNumber(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
               <div>
                 <label htmlFor="miscTotalQuantity" className="block text-sm font-medium text-gray-700">Total Quantity</label>
@@ -851,10 +824,6 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
                 <label htmlFor="specimenCompany" className="block text-sm font-medium text-gray-700">Company (optional)</label>
                 <input type="text" id="specimenCompany" value={newSpecimenCompany} onChange={e => setNewSpecimenCompany(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
               </div>
-              <div>
-                <label htmlFor="specimenCatalogNumber" className="block text-sm font-medium text-gray-700">Catalog Number</label>
-                <input type="text" id="specimenCatalogNumber" value={newSpecimenCatalogNumber} onChange={e => setNewSpecimenCatalogNumber(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
-              </div>
               <div className="flex space-x-4">
                 <button type="submit" className="bg-teal-500 text-white px-4 py-2 rounded hover:bg-teal-600">Add Specimen</button>
                 <button type="button" onClick={() => setShowAddSpecimenForm(false)} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancel</button>
@@ -887,10 +856,6 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
               <div>
                 <label htmlFor="slideCompany" className="block text-sm font-medium text-gray-700">Company (optional)</label>
                 <input type="text" id="slideCompany" value={newSlideCompany} onChange={e => setNewSlideCompany(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
-              </div>
-              <div>
-                <label htmlFor="slideCatalogNumber" className="block text-sm font-medium text-gray-700">Catalog Number</label>
-                <input type="text" id="slideCatalogNumber" value={newSlideCatalogNumber} onChange={e => setNewSlideCatalogNumber(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
               <div className="flex space-x-4">
                 <button type="submit" className="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">Add Slide</button>
