@@ -10,7 +10,6 @@ const categories = [
   { key: "miscellaneous", label: "Miscellaneous" },
   { key: "specimens", label: "Specimens" },
   { key: "slides", label: "Slides" },
-  { key: "minorinstruments", label: "Minor Instruments" },
 ];
 
 const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, miscellaneous, specimens = [], slides = [], minorinstruments = [] }) => {
