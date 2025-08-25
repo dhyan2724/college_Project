@@ -185,9 +185,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
           actualCategory = 'specimens';
         } else if (slides && slides.find(s => s.id === id)) {
           actualCategory = 'slides';
-        } else if (minorinstruments && minorinstruments.find(m => m.id === id)) {
-          actualCategory = 'minorinstruments';
-        }
+        } 
       }
     }
     

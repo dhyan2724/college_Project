@@ -117,17 +117,22 @@ const StudentDashboard = () => {
 
   const userRequests = Array.isArray(pendingRequests)
     ? pendingRequests.filter(request => {
-        const requestUserId = request.requestedByUser?._id || request.requestedByUser?.id || request.requestedByUser;
+        // Support both legacy (Mongo-like) and MySQL field shapes
+        const requestUserId =
+          request.requestedByUserId ||
+          request.requestedByUser?._id ||
+          request.requestedByUser?.id ||
+          request.requestedByUser;
         const userId = user?._id || user?.id;
-        // Accept both string and number types
-        return String(requestUserId) === String(userId);
+        return requestUserId != null && userId != null && String(requestUserId) === String(userId);
       })
     : [];
   const userIssuedItems = Array.isArray(issuedItems)
     ? issuedItems.filter(item => {
-        const issuedToUserId = item.issuedTo?._id || item.issuedTo?.id || item.issuedTo;
+        // Support both legacy (Mongo-like) and MySQL field shapes
+        const issuedToUserId = item.issuedToId || item.issuedTo?._id || item.issuedTo?.id || item.issuedTo;
         const userId = user?._id || user?.id;
-        return String(issuedToUserId) === String(userId);
+        return issuedToUserId != null && userId != null && String(issuedToUserId) === String(userId);
       })
     : [];
 
@@ -407,9 +412,9 @@ const StudentDashboard = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {getFilteredItems(chemicals, 'Chemicals')
-                    .filter(chemical => chemical._id !== undefined && chemical._id !== null)
+                    .filter(chemical => (chemical._id !== undefined && chemical._id !== null) || (chemical.id !== undefined && chemical.id !== null))
                     .map(chemical => (
-                      <div key={`chemical-${chemical._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div key={`chemical-${chemical._id || chemical.id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                         <h4 className="font-semibold text-gray-800">{chemical.name}</h4>
                         <p className="text-sm text-gray-600 mb-2">Available: {chemical.availableWeight}gm</p>
                         <p className="text-sm text-gray-600 mb-3">Weight: {chemical.weightPerUnit}gm</p>
@@ -436,9 +441,9 @@ const StudentDashboard = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {getFilteredItems(glasswares, 'Glassware')
-                    .filter(glassware => glassware._id !== undefined && glassware._id !== null)
+                    .filter(glassware => (glassware._id !== undefined && glassware._id !== null) || (glassware.id !== undefined && glassware.id !== null))
                     .map(glassware => (
-                      <div key={`glassware-${glassware._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div key={`glassware-${glassware._id || glassware.id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                         <h4 className="font-semibold text-gray-800">{glassware.name}</h4>
                         <p className="text-sm text-gray-600 mb-2">Available: {glassware.availableQuantity} units</p>
                         <button
@@ -464,9 +469,9 @@ const StudentDashboard = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {getFilteredItems(plasticwares, 'Plasticware')
-                    .filter(plasticware => plasticware._id !== undefined && plasticware._id !== null)
+                    .filter(plasticware => (plasticware._id !== undefined && plasticware._id !== null) || (plasticware.id !== undefined && plasticware.id !== null))
                     .map(plasticware => (
-                      <div key={`plasticware-${plasticware._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div key={`plasticware-${plasticware._id || plasticware.id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                         <h4 className="font-semibold text-gray-800">{plasticware.name}</h4>
                         <p className="text-sm text-gray-600 mb-2">Available: {plasticware.availableQuantity} units</p>
                         <button
@@ -492,9 +497,9 @@ const StudentDashboard = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {getFilteredItems(instruments, 'Instruments')
-                    .filter(instrument => instrument._id !== undefined && instrument._id !== null)
+                    .filter(instrument => (instrument._id !== undefined && instrument._id !== null) || (instrument.id !== undefined && instrument.id !== null))
                     .map(instrument => (
-                      <div key={`instrument-${instrument._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div key={`instrument-${instrument._id || instrument.id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                         <h4 className="font-semibold text-gray-800">{instrument.name}</h4>
                         <p className="text-sm text-gray-600 mb-2">Available: {instrument.availableQuantity} units</p>
                         <button
@@ -521,9 +526,9 @@ const StudentDashboard = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {getFilteredItems(miscellaneous, 'Miscellaneous')
-                    .filter(item => item._id !== undefined && item._id !== null)
+                    .filter(item => (item._id !== undefined && item._id !== null) || (item.id !== undefined && item.id !== null))
                     .map(item => (
-                      <div key={`miscellaneous-${item._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div key={`miscellaneous-${item._id || item.id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                         <h4 className="font-semibold text-gray-800">{item.name}</h4>
                         <p className="text-sm text-gray-600 mb-2">Available: {item.availableQuantity} units</p>
                         <p className="text-sm text-gray-600 mb-3">Description: {item.description}</p>
@@ -549,9 +554,9 @@ const StudentDashboard = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {getFilteredItems(specimens, 'Specimens')
-                    .filter(specimen => specimen._id !== undefined && specimen._id !== null)
+                    .filter(specimen => (specimen._id !== undefined && specimen._id !== null) || (specimen.id !== undefined && specimen.id !== null))
                     .map(specimen => (
-                      <div key={`specimen-${specimen._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div key={`specimen-${specimen._id || specimen.id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                         <h4 className="font-semibold text-gray-800">{specimen.name}</h4>
                         <p className="text-sm text-gray-600 mb-2">Type: {specimen.type}</p>
                         <p className="text-sm text-gray-600 mb-2">Available: {specimen.availableQuantity} units</p>
@@ -577,9 +582,9 @@ const StudentDashboard = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {getFilteredItems(slides, 'Slides')
-                    .filter(slide => slide._id !== undefined && slide._id !== null)
+                    .filter(slide => (slide._id !== undefined && slide._id !== null) || (slide.id !== undefined && slide.id !== null))
                     .map(slide => (
-                      <div key={`slide-${slide._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div key={`slide-${slide._id || slide.id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                         <h4 className="font-semibold text-gray-800">{slide.name}</h4>
                         <p className="text-sm text-gray-600 mb-2">Available: {slide.availableQuantity} units</p>
                         <button
@@ -604,9 +609,9 @@ const StudentDashboard = () => {
                 ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {getFilteredItems(minorinstruments, 'Minor Instruments')
-                    .filter(minor => minor._id !== undefined && minor._id !== null)
+                    .filter(minor => (minor._id !== undefined && minor._id !== null) || (minor.id !== undefined && minor.id !== null))
                     .map(minor => (
-                      <div key={`minorinstrument-${minor._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div key={`minorinstrument-${minor._id || minor.id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                         <h4 className="font-semibold text-gray-800">{minor.name}</h4>
                         <p className="text-sm text-gray-600 mb-2">Type: {minor.type}</p>
                         <p className="text-sm text-gray-600 mb-2">Available: {minor.availableQuantity} units</p>
