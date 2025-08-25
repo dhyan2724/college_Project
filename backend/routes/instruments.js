@@ -53,7 +53,7 @@ router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) =>
 });
 
 // PATCH (update) an instrument
-router.patch('/:id', authenticateToken, authorizeRoles('admin'), async (req, res) => {
+router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty', 'master_admin'), async (req, res) => {
   try {
     const instrument = await Instrument.findById(req.params.id);
     if (!instrument) {
@@ -85,7 +85,7 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin'), async (req, res
 });
 
 // DELETE an instrument
-router.delete('/:id', authenticateToken, authorizeRoles('admin'), async (req, res) => {
+router.delete('/:id', authenticateToken, authorizeRoles('admin', 'faculty', 'master_admin'), async (req, res) => {
   try {
     const instrument = await Instrument.findById(req.params.id);
     if (!instrument) return res.status(404).json({ message: 'Instrument not found' });

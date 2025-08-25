@@ -58,10 +58,19 @@ class PendingRequest {
   // Find pending request by ID
   static async findById(id) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM pending_requests WHERE id = ?',
-        [id]
-      );
+      const [rows] = await pool.execute(`
+        SELECT 
+          pr.*,
+          u1.fullName as facultyInChargeName,
+          u1.role as facultyInChargeRole,
+          u2.fullName as requestedByName,
+          u2.role as requestedByRole,
+          u2.rollNo as requestedByRollNo
+        FROM pending_requests pr
+        LEFT JOIN users u1 ON pr.facultyInChargeId = u1.id
+        LEFT JOIN users u2 ON pr.requestedByUserId = u2.id
+        WHERE pr.id = ?
+      `, [id]);
       
       if (rows[0]) {
         // Get items for this request
@@ -81,9 +90,19 @@ class PendingRequest {
   // Get all pending requests
   static async findAll() {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM pending_requests ORDER BY requestDate DESC'
-      );
+      const [rows] = await pool.execute(`
+        SELECT 
+          pr.*,
+          u1.fullName as facultyInChargeName,
+          u1.role as facultyInChargeRole,
+          u2.fullName as requestedByName,
+          u2.role as requestedByRole,
+          u2.rollNo as requestedByRollNo
+        FROM pending_requests pr
+        LEFT JOIN users u1 ON pr.facultyInChargeId = u1.id
+        LEFT JOIN users u2 ON pr.requestedByUserId = u2.id
+        ORDER BY pr.requestDate DESC
+      `);
       
       // Get items for each request
       for (let request of rows) {
@@ -103,10 +122,20 @@ class PendingRequest {
   // Get pending requests by status
   static async findByStatus(status) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM pending_requests WHERE status = ? ORDER BY requestDate DESC',
-        [status]
-      );
+      const [rows] = await pool.execute(`
+        SELECT 
+          pr.*,
+          u1.fullName as facultyInChargeName,
+          u1.role as facultyInChargeRole,
+          u2.fullName as requestedByName,
+          u2.role as requestedByRole,
+          u2.rollNo as requestedByRollNo
+        FROM pending_requests pr
+        LEFT JOIN users u1 ON pr.facultyInChargeId = u1.id
+        LEFT JOIN users u2 ON pr.requestedByUserId = u2.id
+        WHERE pr.status = ? 
+        ORDER BY pr.requestDate DESC
+      `, [status]);
       
       // Get items for each request
       for (let request of rows) {
@@ -126,10 +155,20 @@ class PendingRequest {
   // Get pending requests by faculty in charge
   static async findByFacultyInCharge(facultyInChargeId) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM pending_requests WHERE facultyInChargeId = ? ORDER BY requestDate DESC',
-        [facultyInChargeId]
-      );
+      const [rows] = await pool.execute(`
+        SELECT 
+          pr.*,
+          u1.fullName as facultyInChargeName,
+          u1.role as facultyInChargeRole,
+          u2.fullName as requestedByName,
+          u2.role as requestedByRole,
+          u2.rollNo as requestedByRollNo
+        FROM pending_requests pr
+        LEFT JOIN users u1 ON pr.facultyInChargeId = u1.id
+        LEFT JOIN users u2 ON pr.requestedByUserId = u2.id
+        WHERE pr.facultyInChargeId = ? 
+        ORDER BY pr.requestDate DESC
+      `, [facultyInChargeId]);
       
       // Get items for each request
       for (let request of rows) {
@@ -149,10 +188,20 @@ class PendingRequest {
   // Get pending requests by requested by user
   static async findByRequestedByUser(requestedByUserId) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM pending_requests WHERE requestedByUserId = ? ORDER BY requestDate DESC',
-        [requestedByUserId]
-      );
+      const [rows] = await pool.execute(`
+        SELECT 
+          pr.*,
+          u1.fullName as facultyInChargeName,
+          u1.role as facultyInChargeRole,
+          u2.fullName as requestedByName,
+          u2.role as requestedByRole,
+          u2.rollNo as requestedByRollNo
+        FROM pending_requests pr
+        LEFT JOIN users u1 ON pr.facultyInChargeId = u1.id
+        LEFT JOIN users u2 ON pr.requestedByUserId = u2.id
+        WHERE pr.requestedByUserId = ? 
+        ORDER BY pr.requestDate DESC
+      `, [requestedByUserId]);
       
       // Get items for each request
       for (let request of rows) {

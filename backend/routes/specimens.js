@@ -52,7 +52,7 @@ router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) =>
 });
 
 // PATCH (update) a specimen
-router.patch('/:id', authenticateToken, authorizeRoles('admin'), async (req, res) => {
+router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty', 'master_admin'), async (req, res) => {
   try {
     const item = await Specimen.findById(req.params.id);
     if (!item) {
@@ -82,7 +82,7 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin'), async (req, res
 });
 
 // DELETE a specimen
-router.delete('/:id', authenticateToken, authorizeRoles('admin'), async (req, res) => {
+router.delete('/:id', authenticateToken, authorizeRoles('admin', 'faculty', 'master_admin'), async (req, res) => {
   try {
     const item = await Specimen.findById(req.params.id);
     if (!item) return res.status(404).json({ message: 'Specimen not found' });

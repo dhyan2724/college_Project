@@ -1,43 +1,79 @@
-const express = require('express');
-const cors = require('cors');
-const { testConnection, initializeDatabase } = require('./config/database');
-const plasticwaresRouter = require('./routes/plasticwares');
+const fetch = require('node-fetch');
 
-// Create a minimal test server
-const app = express();
-app.use(cors());
-app.use(express.json());
+const API_BASE = 'http://172.168.2.130:5000/api';
 
-// Test the plasticwares route
-app.use('/api/plasticwares', plasticwaresRouter);
+async function testAPI() {
+  console.log('Testing API endpoints...\n');
 
-// Test endpoint
-app.get('/test', (req, res) => {
-  res.json({ message: 'Test server is running' });
-});
-
-const port = 5001; // Use different port to avoid conflict
-
-const initializeTestApp = async () => {
   try {
-    console.log('Testing database connection...');
-    await testConnection();
-    await initializeDatabase();
-    console.log('✅ Database initialized successfully');
-    
-    // Start test server
-    app.listen(port, () => {
-      console.log(`✅ Test server running on port ${port}`);
-      console.log(`✅ Test endpoint: http://localhost:${port}/test`);
-      console.log(`✅ Plasticwares endpoint: http://localhost:${port}/api/Chemical`);
-      console.log('\nNow test these URLs in your browser:');
-      console.log(`1. http://localhost:${port}/test`);
-      console.log(`2. http://localhost:${port}/api/plasticwares`);
-    });
-    
-  } catch (error) {
-    console.error('❌ Failed to initialize test app:', error);
-  }
-};
+    // Test chemicals endpoint
+    console.log('Testing /chemicals endpoint...');
+    const chemicalsResponse = await fetch(`${API_BASE}/chemicals`);
+    console.log('Status:', chemicalsResponse.status);
+    if (chemicalsResponse.ok) {
+      const chemicals = await chemicalsResponse.json();
+      console.log('Chemicals count:', chemicals.length);
+      if (chemicals.length > 0) {
+        console.log('Sample chemical:', chemicals[0]);
+      }
+    }
+    console.log('');
 
-initializeTestApp();
+    // Test glasswares endpoint
+    console.log('Testing /glasswares endpoint...');
+    const glasswaresResponse = await fetch(`${API_BASE}/glasswares`);
+    console.log('Status:', glasswaresResponse.status);
+    if (glasswaresResponse.ok) {
+      const glasswares = await glasswaresResponse.json();
+      console.log('Glasswares count:', glasswares.length);
+      if (glasswares.length > 0) {
+        console.log('Sample glassware:', glasswares[0]);
+      }
+    }
+    console.log('');
+
+    // Test specimens endpoint
+    console.log('Testing /specimens endpoint...');
+    const specimensResponse = await fetch(`${API_BASE}/specimens`);
+    console.log('Status:', specimensResponse.status);
+    if (specimensResponse.ok) {
+      const specimens = await specimensResponse.json();
+      console.log('Specimens count:', specimens.length);
+      if (specimens.length > 0) {
+        console.log('Sample specimen:', specimens[0]);
+      }
+    }
+    console.log('');
+
+    // Test slides endpoint
+    console.log('Testing /slides endpoint...');
+    const slidesResponse = await fetch(`${API_BASE}/slides`);
+    console.log('Status:', slidesResponse.status);
+    if (slidesResponse.ok) {
+      const slides = await slidesResponse.json();
+      console.log('Slides count:', slides.length);
+      if (slides.length > 0) {
+        console.log('Sample slide:', slides[0]);
+      }
+    }
+    console.log('');
+
+    // Test miscellaneous endpoint
+    console.log('Testing /miscellaneous endpoint...');
+    const miscellaneousResponse = await fetch(`${API_BASE}/miscellaneous`);
+    console.log('Status:', miscellaneousResponse.status);
+    if (miscellaneousResponse.ok) {
+      const miscellaneous = await miscellaneousResponse.json();
+      console.log('Miscellaneous count:', miscellaneous.length);
+      if (miscellaneous.length > 0) {
+        console.log('Sample miscellaneous:', miscellaneous[0]);
+      }
+    }
+    console.log('');
+
+  } catch (error) {
+    console.error('Error testing API:', error.message);
+  }
+}
+
+testAPI();

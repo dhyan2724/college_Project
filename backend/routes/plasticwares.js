@@ -53,7 +53,7 @@ router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) =>
 });
 
 // PATCH (update) a plasticware
-router.patch('/:id', authenticateToken, authorizeRoles('admin'), async (req, res) => {
+router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty', 'master_admin'), async (req, res) => {
   try {
     const plasticware = await Plasticware.findById(req.params.id);
     if (!plasticware) {
@@ -85,7 +85,7 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin'), async (req, res
 });
 
 // DELETE a plasticware
-router.delete('/:id', authenticateToken, authorizeRoles('admin'), async (req, res) => {
+router.delete('/:id', authenticateToken, authorizeRoles('admin', 'faculty', 'master_admin'), async (req, res) => {
   try {
     const plasticware = await Plasticware.findById(req.params.id);
     if (!plasticware) return res.status(404).json({ message: 'Plasticware not found' });

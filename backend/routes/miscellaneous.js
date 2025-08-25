@@ -53,7 +53,7 @@ router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) =>
 });
 
 // PATCH (update) a miscellaneous item
-router.patch('/:id', authenticateToken, authorizeRoles('admin'), async (req, res) => {
+router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty', 'master_admin'), async (req, res) => {
   try {
     const item = await Miscellaneous.findById(req.params.id);
     if (!item) {
@@ -83,7 +83,7 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin'), async (req, res
 });
 
 // DELETE a miscellaneous item
-router.delete('/:id', authenticateToken, authorizeRoles('admin'), async (req, res) => {
+router.delete('/:id', authenticateToken, authorizeRoles('admin', 'faculty', 'master_admin'), async (req, res) => {
   try {
     const item = await Miscellaneous.findById(req.params.id);
     if (!item) return res.status(404).json({ message: 'Miscellaneous item not found' });

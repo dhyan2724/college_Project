@@ -4,7 +4,7 @@ import { AuthContext } from '../App';
 import api from '../services/api';
 
 const StudentDashboard = () => {
-  const { user, chemicals, glasswares, plasticwares, instruments, miscellaneous, specimens = [], slides = [], minorinstruments = [], pendingRequests, issuedItems, fetchData, logout } = useContext(AuthContext);
+  const { user, chemicals, glasswares, plasticwares, instruments, miscellaneous, specimens = [], slides = [], pendingRequests, issuedItems, fetchData, logout } = useContext(AuthContext);
   const [showRequestForm, setShowRequestForm] = useState(false);
   const [activeTab, setActiveTab] = useState('inventory');
   const [cart, setCart] = useState([]);
@@ -19,6 +19,11 @@ const StudentDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
 
+  // Filter minor instruments from the instruments array
+  const minorinstruments = instruments.filter(instrument => 
+    instrument.type && instrument.type.toLowerCase().includes('minor')
+  );
+
   const ITEM_TYPE_MAP = {
     chemical: 'Chemical',
     glassware: 'Glassware',
@@ -31,11 +36,29 @@ const StudentDashboard = () => {
   };
 
   // Helper to get filtered items by category and search
-    const getFilteredItems = (items, category) => {
-      return items && items.length > 0
-        ? items.filter(item => (!searchTerm || item.name.toLowerCase().includes(searchTerm.toLowerCase())))
-        : [];
-    };
+  const getFilteredItems = (items, category) => {
+    // If items is undefined/null, return empty array but don't hide the section
+    if (!items) return [];
+    
+    // Filter by search term if provided
+    const filtered = searchTerm 
+      ? items.filter(item => item.name && item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      : items;
+    
+    return filtered || [];
+  };
+
+  // Check if data is still loading
+  const isDataLoading = !chemicals && !glasswares && !plasticwares && !instruments && !miscellaneous && !specimens && !slides;
+
+  // Check if there are any items in any category
+  const hasAnyItems = (chemicals && chemicals.length > 0) || 
+                     (glasswares && glasswares.length > 0) || 
+                     (plasticwares && plasticwares.length > 0) || 
+                     (instruments && instruments.length > 0) || 
+                     (miscellaneous && miscellaneous.length > 0) || 
+                     (specimens && specimens.length > 0) || 
+                     (slides && slides.length > 0);
 
   useEffect(() => {
     if (user) {
@@ -297,6 +320,50 @@ const StudentDashboard = () => {
 
   {activeTab === 'inventory' && (
         <div className="space-y-6">
+          {/* Debug Information */}
+          <div className="bg-gray-100 p-4 rounded-lg mb-4">
+            <h4 className="font-semibold text-gray-800 mb-2">Debug Information</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div>Chemicals: {chemicals ? chemicals.length : 'Loading...'}</div>
+              <div>Glasswares: {glasswares ? glasswares.length : 'Loading...'}</div>
+              <div>Plasticwares: {plasticwares ? plasticwares.length : 'Loading...'}</div>
+              <div>Instruments: {instruments ? instruments.length : 'Loading...'}</div>
+              <div>Miscellaneous: {miscellaneous ? miscellaneous.length : 'Loading...'}</div>
+              <div>Specimens: {specimens ? specimens.length : 'Loading...'}</div>
+              <div>Slides: {slides ? slides.length : 'Loading...'}</div>
+              <div>Minor Instruments: {minorinstruments ? minorinstruments.length : 'Loading...'}</div>
+            </div>
+          </div>
+
+          {/* Error Message */}
+          {fetchError && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              <strong>Error:</strong> {fetchError}
+              <button 
+                onClick={safeFetchData}
+                className="ml-4 bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {/* Loading State */}
+          {isDataLoading && (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading inventory data...</p>
+            </div>
+          )}
+
+          {/* No Items Message */}
+          {!isDataLoading && !hasAnyItems && !fetchError && (
+            <div className="text-center py-8">
+              <p className="text-gray-600 text-lg">No inventory items found.</p>
+              <p className="text-gray-500">Please check back later or contact an administrator.</p>
+            </div>
+          )}
+
           {/* Search and Category Filter */}
           <div className="flex flex-col md:flex-row md:items-center md:space-x-4 mb-4">
             <input
@@ -321,95 +388,125 @@ const StudentDashboard = () => {
               <option value="Slides">Slides</option>
               <option value="Minor Instruments">Minor Instruments</option>
             </select>
+            <button
+              onClick={safeFetchData}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+            >
+              Refresh Inventory
+            </button>
           </div>
 
           {/* Inventory Grids with Filters */}
           {(categoryFilter === 'All' || categoryFilter === 'Chemicals') && (
             <div>
               <h3 className="text-xl font-semibold mb-4 text-blue-800">Available Chemicals</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {!isDataLoading && getFilteredItems(chemicals, 'Chemicals').length === 0 ? (
+                <div className="text-center py-6 text-gray-500">
+                  <p>No chemicals available at the moment.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {getFilteredItems(chemicals, 'Chemicals')
                     .filter(chemical => chemical._id !== undefined && chemical._id !== null)
                     .map(chemical => (
                       <div key={`chemical-${chemical._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                    <h4 className="font-semibold text-gray-800">{chemical.name}</h4>
-                    <p className="text-sm text-gray-600 mb-2">Available: {chemical.availableWeight}gm</p>
-                    <p className="text-sm text-gray-600 mb-3">Weight: {chemical.weightPerUnit}gm</p>
-                    <button
-                      onClick={() => addToCart(chemical, 'chemical')}
-                      className="w-full bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition-colors"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                ))}
-              </div>
+                        <h4 className="font-semibold text-gray-800">{chemical.name}</h4>
+                        <p className="text-sm text-gray-600 mb-2">Available: {chemical.availableWeight}gm</p>
+                        <p className="text-sm text-gray-600 mb-3">Weight: {chemical.weightPerUnit}gm</p>
+                        <button
+                          onClick={() => addToCart(chemical, 'chemical')}
+                          className="w-full bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition-colors"
+                        >
+                          Add to Cart
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
           )}
 
           {(categoryFilter === 'All' || categoryFilter === 'Glassware') && (
             <div>
               <h3 className="text-xl font-semibold mb-4 text-green-800">Available Glassware</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {getFilteredItems(glasswares, 'Glassware')
-                  .filter(glassware => glassware._id !== undefined && glassware._id !== null)
-                  .map(glassware => (
-                    <div key={`glassware-${glassware._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                    <h4 className="font-semibold text-gray-800">{glassware.name}</h4>
-                    <p className="text-sm text-gray-600 mb-2">Available: {glassware.availableQuantity} units</p>
-                    <button
-                      onClick={() => addToCart(glassware, 'glassware')}
-                      className="w-full bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition-colors"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                ))}
-              </div>
+              {!isDataLoading && getFilteredItems(glasswares, 'Glassware').length === 0 ? (
+                <div className="text-center py-6 text-gray-500">
+                  <p>No glassware available at the moment.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {getFilteredItems(glasswares, 'Glassware')
+                    .filter(glassware => glassware._id !== undefined && glassware._id !== null)
+                    .map(glassware => (
+                      <div key={`glassware-${glassware._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <h4 className="font-semibold text-gray-800">{glassware.name}</h4>
+                        <p className="text-sm text-gray-600 mb-2">Available: {glassware.availableQuantity} units</p>
+                        <button
+                          onClick={() => addToCart(glassware, 'glassware')}
+                          className="w-full bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition-colors"
+                        >
+                          Add to Cart
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
           )}
 
           {(categoryFilter === 'All' || categoryFilter === 'Plasticware') && (
             <div>
               <h3 className="text-xl font-semibold mb-4 text-purple-800">Available Plasticware</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {getFilteredItems(plasticwares, 'Plasticware')
-                  .filter(plasticware => plasticware._id !== undefined && plasticware._id !== null)
-                  .map(plasticware => (
-                    <div key={`plasticware-${plasticware._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                    <h4 className="font-semibold text-gray-800">{plasticware.name}</h4>
-                    <p className="text-sm text-gray-600 mb-2">Available: {plasticware.availableQuantity} units</p>
-                    <button
-                      onClick={() => addToCart(plasticware, 'plasticware')}
-                      className="w-full bg-purple-500 text-white px-3 py-2 rounded hover:bg-purple-600 transition-colors"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                ))}
-              </div>
+              {!isDataLoading && getFilteredItems(plasticwares, 'Plasticware').length === 0 ? (
+                <div className="text-center py-6 text-gray-500">
+                  <p>No plasticware available at the moment.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {getFilteredItems(plasticwares, 'Plasticware')
+                    .filter(plasticware => plasticware._id !== undefined && plasticware._id !== null)
+                    .map(plasticware => (
+                      <div key={`plasticware-${plasticware._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <h4 className="font-semibold text-gray-800">{plasticware.name}</h4>
+                        <p className="text-sm text-gray-600 mb-2">Available: {plasticware.availableQuantity} units</p>
+                        <button
+                          onClick={() => addToCart(plasticware, 'plasticware')}
+                          className="w-full bg-purple-500 text-white px-3 py-2 rounded hover:bg-purple-600 transition-colors"
+                        >
+                          Add to Cart
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
           )}
 
           {(categoryFilter === 'All' || categoryFilter === 'Instruments') && (
             <div>
               <h3 className="text-xl font-semibold mb-4 text-orange-800">Available Instruments</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {getFilteredItems(instruments, 'Instruments')
-                  .filter(instrument => instrument._id !== undefined && instrument._id !== null)
-                  .map(instrument => (
-                    <div key={`instrument-${instrument._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                    <h4 className="font-semibold text-gray-800">{instrument.name}</h4>
-                    <p className="text-sm text-gray-600 mb-2">Available: {instrument.availableQuantity} units</p>
-                    <button
-                      onClick={() => addToCart(instrument, 'instrument')}
-                      className="w-full bg-orange-500 text-white px-3 py-2 rounded hover:bg-orange-600 transition-colors"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                ))}
-              </div>
+              {!isDataLoading && getFilteredItems(instruments, 'Instruments').length === 0 ? (
+                <div className="text-center py-6 text-gray-500">
+                  <p>No instruments available at the moment.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {getFilteredItems(instruments, 'Instruments')
+                    .filter(instrument => instrument._id !== undefined && instrument._id !== null)
+                    .map(instrument => (
+                      <div key={`instrument-${instrument._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <h4 className="font-semibold text-gray-800">{instrument.name}</h4>
+                        <p className="text-sm text-gray-600 mb-2">Available: {instrument.availableQuantity} units</p>
+                        <button
+                          onClick={() => addToCart(instrument, 'instrument')}
+                          className="w-full bg-orange-500 text-white px-3 py-2 rounded hover:bg-orange-600 transition-colors"
+                        >
+                          Add to Cart
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -417,88 +514,112 @@ const StudentDashboard = () => {
           {(categoryFilter === 'All' || categoryFilter === 'Miscellaneous') && (
             <div>
               <h3 className="text-xl font-semibold mb-4 text-gray-800">Available Miscellaneous</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {getFilteredItems(miscellaneous, 'Miscellaneous')
-                  .filter(item => item._id !== undefined && item._id !== null)
-                  .map(item => (
-                    <div key={`miscellaneous-${item._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                    <h4 className="font-semibold text-gray-800">{item.name}</h4>
-                    <p className="text-sm text-gray-600 mb-2">Available: {item.availableQuantity} units</p>
-                    <p className="text-sm text-gray-600 mb-3">Description: {item.description}</p>
-                    <button
-                      onClick={() => addToCart(item, 'miscellaneous')}
-                      className="w-full bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 transition-colors"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                ))}
-              </div>
+              {!isDataLoading && getFilteredItems(miscellaneous, 'Miscellaneous').length === 0 ? (
+                <div className="text-center py-6 text-gray-500">
+                  <p>No miscellaneous items available at the moment.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {getFilteredItems(miscellaneous, 'Miscellaneous')
+                    .filter(item => item._id !== undefined && item._id !== null)
+                    .map(item => (
+                      <div key={`miscellaneous-${item._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <h4 className="font-semibold text-gray-800">{item.name}</h4>
+                        <p className="text-sm text-gray-600 mb-2">Available: {item.availableQuantity} units</p>
+                        <p className="text-sm text-gray-600 mb-3">Description: {item.description}</p>
+                        <button
+                          onClick={() => addToCart(item, 'miscellaneous')}
+                          className="w-full bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 transition-colors"
+                        >
+                          Add to Cart
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
           )}
           {(categoryFilter === 'All' || categoryFilter === 'Specimens') && (
             <div>
               <h3 className="text-xl font-semibold mb-4 text-green-900">Available Specimens</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {getFilteredItems(specimens, 'Specimens')
-                  .filter(specimen => specimen._id !== undefined && specimen._id !== null)
-                  .map(specimen => (
-                    <div key={`specimen-${specimen._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                    <h4 className="font-semibold text-gray-800">{specimen.name}</h4>
-                    <p className="text-sm text-gray-600 mb-2">Type: {specimen.type}</p>
-                    <p className="text-sm text-gray-600 mb-2">Available: {specimen.availableQuantity} units</p>
-                    <button
-                      onClick={() => addToCart(specimen, 'specimen')}
-                      className="w-full bg-green-700 text-white px-3 py-2 rounded hover:bg-green-800 transition-colors"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                ))}
-              </div>
+              {!isDataLoading && getFilteredItems(specimens, 'Specimens').length === 0 ? (
+                <div className="text-center py-6 text-gray-500">
+                  <p>No specimens available at the moment.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {getFilteredItems(specimens, 'Specimens')
+                    .filter(specimen => specimen._id !== undefined && specimen._id !== null)
+                    .map(specimen => (
+                      <div key={`specimen-${specimen._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <h4 className="font-semibold text-gray-800">{specimen.name}</h4>
+                        <p className="text-sm text-gray-600 mb-2">Type: {specimen.type}</p>
+                        <p className="text-sm text-gray-600 mb-2">Available: {specimen.availableQuantity} units</p>
+                        <button
+                          onClick={() => addToCart(specimen, 'specimen')}
+                          className="w-full bg-green-700 text-white px-3 py-2 rounded hover:bg-green-800 transition-colors"
+                        >
+                          Add to Cart
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
           )}
           {(categoryFilter === 'All' || categoryFilter === 'Slides') && (
             <div>
               <h3 className="text-xl font-semibold mb-4 text-cyan-900">Available Slides</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {getFilteredItems(slides, 'Slides')
-                  .filter(slide => slide._id !== undefined && slide._id !== null)
-                  .map(slide => (
-                    <div key={`slide-${slide._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                    <h4 className="font-semibold text-gray-800">{slide.name}</h4>
-                    <p className="text-sm text-gray-600 mb-2">Available: {slide.availableQuantity} units</p>
-                    <button
-                      onClick={() => addToCart(slide, 'slide')}
-                      className="w-full bg-cyan-700 text-white px-3 py-2 rounded hover:bg-cyan-800 transition-colors"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                ))}
-              </div>
+              {!isDataLoading && getFilteredItems(slides, 'Slides').length === 0 ? (
+                <div className="text-center py-6 text-gray-500">
+                  <p>No slides available at the moment.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {getFilteredItems(slides, 'Slides')
+                    .filter(slide => slide._id !== undefined && slide._id !== null)
+                    .map(slide => (
+                      <div key={`slide-${slide._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <h4 className="font-semibold text-gray-800">{slide.name}</h4>
+                        <p className="text-sm text-gray-600 mb-2">Available: {slide.availableQuantity} units</p>
+                        <button
+                          onClick={() => addToCart(slide, 'slide')}
+                          className="w-full bg-cyan-700 text-white px-3 py-2 rounded hover:bg-cyan-800 transition-colors"
+                        >
+                          Add to Cart
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
           )}
           {(categoryFilter === 'All' || categoryFilter === 'Minor Instruments') && (
             <div>
               <h3 className="text-xl font-semibold mb-4 text-fuchsia-900">Available Minor Instruments</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {getFilteredItems(minorinstruments, 'Minor Instruments')
-                  .filter(minor => minor._id !== undefined && minor._id !== null)
-                  .map(minor => (
-                    <div key={`minorinstrument-${minor._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                    <h4 className="font-semibold text-gray-800">{minor.name}</h4>
-                    <p className="text-sm text-gray-600 mb-2">Type: {minor.type}</p>
-                    <p className="text-sm text-gray-600 mb-2">Available: {minor.availableQuantity} units</p>
-                    <button
-                      onClick={() => addToCart(minor, 'minorinstrument')}
-                      className="w-full bg-fuchsia-700 text-white px-3 py-2 rounded hover:bg-fuchsia-800 transition-colors"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                ))}
-              </div>
+              {!isDataLoading && getFilteredItems(minorinstruments, 'Minor Instruments').length === 0 ? (
+                <div className="text-center py-6 text-gray-500">
+                  <p>No minor instruments available at the moment.</p>
+                </div>
+                ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {getFilteredItems(minorinstruments, 'Minor Instruments')
+                    .filter(minor => minor._id !== undefined && minor._id !== null)
+                    .map(minor => (
+                      <div key={`minorinstrument-${minor._id}`} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <h4 className="font-semibold text-gray-800">{minor.name}</h4>
+                        <p className="text-sm text-gray-600 mb-2">Type: {minor.type}</p>
+                        <p className="text-sm text-gray-600 mb-2">Available: {minor.availableQuantity} units</p>
+                        <button
+                          onClick={() => addToCart(minor, 'minorinstrument')}
+                          className="w-full bg-fuchsia-700 text-white px-3 py-2 rounded hover:bg-fuchsia-800 transition-colors"
+                        >
+                          Add to Cart
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
           )}
         </div>

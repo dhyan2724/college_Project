@@ -89,6 +89,18 @@ function App() {
             const [chemicalsData, glasswaresData, plasticwaresData, instrumentsData, pendingRequestsData, issuedItemsData, miscellaneousData, specimensData, slidesData, usersData] =
                 await Promise.all(responses.map(res => res.json()));
 
+            console.log('Fetched data:', {
+                chemicals: chemicalsData,
+                glasswares: glasswaresData,
+                plasticwares: plasticwaresData,
+                instruments: instrumentsData,
+                pendingRequests: pendingRequestsData,
+                issuedItems: issuedItemsData,
+                miscellaneous: miscellaneousData,
+                specimens: specimensData,
+                slides: slidesData
+            });
+
             setChemicals(chemicalsData);
             setGlasswares(glasswaresData);
             setPlasticwares(plasticwaresData);
@@ -103,6 +115,11 @@ function App() {
             }
         } catch (error) {
             console.error('Error fetching data:', error);
+            console.error('Error details:', {
+                message: error.message,
+                stack: error.stack,
+                response: error.response
+            });
             if (error.response && (error.response.status === 401 || error.response.status === 403)) {
                 console.log('Token expired or invalid, logging out...');
                 logout();

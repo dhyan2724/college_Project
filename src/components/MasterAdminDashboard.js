@@ -20,7 +20,9 @@ const MasterAdminDashboard = () => {
     email: '',
     fullName: '',
     rollNo: '',
-    category: 'UG/PG'
+    category: 'UG/PG',
+    year: '',
+    department: ''
   });
 
   // State for changing passwords
@@ -103,7 +105,9 @@ const MasterAdminDashboard = () => {
           email: '',
           fullName: '',
           rollNo: '',
-          category: 'UG/PG'
+          category: 'UG/PG',
+          year: '',
+          department: ''
         });
         fetchUsers();
         fetchStatistics();
@@ -414,27 +418,59 @@ const MasterAdminDashboard = () => {
                       required
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Roll Number</label>
-                    <input
-                      type="text"
-                      value={newUser.rollNo}
-                      onChange={(e) => setNewUser({...newUser, rollNo: e.target.value})}
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Category</label>
-                    <select
-                      value={newUser.category}
-                      onChange={(e) => setNewUser({...newUser, category: e.target.value})}
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    >
-                      <option value="UG/PG">UG/PG</option>
-                      <option value="PhD">PhD</option>
-                      <option value="Project Student">Project Student</option>
-                    </select>
-                  </div>
+                  {['student', 'phd_scholar', 'dissertation_student'].includes(newUser.role) && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Roll Number</label>
+                        <input
+                          type="text"
+                          value={newUser.rollNo}
+                          onChange={(e) => setNewUser({...newUser, rollNo: e.target.value})}
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Category</label>
+                        <select
+                          value={newUser.category}
+                          onChange={(e) => setNewUser({...newUser, category: e.target.value})}
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                          required
+                        >
+                          <option value="UG/PG">UG/PG</option>
+                          <option value="PhD">PhD</option>
+                          <option value="Project Student">Project Student</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Year</label>
+                        <select
+                          value={newUser.year}
+                          onChange={(e) => setNewUser({...newUser, year: e.target.value})}
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                          required
+                        >
+                          <option value="">Select Year</option>
+                          <option value="1st">1st Year</option>
+                          <option value="2nd">2nd Year</option>
+                          <option value="3rd">3rd Year</option>
+                          <option value="4th">4th Year</option>
+                          <option value="5th">5th Year</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Department</label>
+                        <input
+                          type="text"
+                          value={newUser.department}
+                          onChange={(e) => setNewUser({...newUser, department: e.target.value})}
+                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                          required
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
                 <div className="flex justify-end space-x-3 mt-6">
                   <button

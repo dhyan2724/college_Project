@@ -55,7 +55,7 @@ router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) =>
 });
 
 // Update chemical
-router.patch('/:id', authenticateToken, authorizeRoles('admin'), async (req, res) => {
+router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty', 'master_admin'), async (req, res) => {
     try {
         const chemical = await Chemical.findById(req.params.id);
         if (!chemical) {
@@ -87,7 +87,7 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin'), async (req, res
 });
 
 // Delete chemical
-router.delete('/:id', authenticateToken, authorizeRoles('admin'), async (req, res) => {
+router.delete('/:id', authenticateToken, authorizeRoles('admin', 'faculty', 'master_admin'), async (req, res) => {
     try {
         const chemical = await Chemical.findById(req.params.id);
         if (!chemical) {

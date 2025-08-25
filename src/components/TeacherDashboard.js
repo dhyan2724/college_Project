@@ -52,30 +52,55 @@ const TeacherDashboard = () => {
   // Issue item(s) for a request
   const handleIssueItem = async (request) => {
     try {
+      console.log('Issuing items for request:', request);
+      
+      // Check if request.items exists and is an array
+      if (!request.items || !Array.isArray(request.items) || request.items.length === 0) {
+        alert('No items found in this request or invalid request data');
+        return;
+      }
+      
       for (const item of request.items) {
+        console.log('Processing item:', item);
+        
+        // Validate item data
+        if (!item.itemType || !item.itemId) {
+          console.error('Invalid item data:', item);
+          continue;
+        }
+        
         await api.createIssuedItem({
           itemType: item.itemType,
-          itemId: item.itemId || item._id,
-          issuedToId: request.requestedByUser?._id || request.requestedByUser?.id || request.requestedByUser,
-          facultyInCharge: request.facultyInCharge,
-          quantity: item.quantity,
-          totalWeightIssued: item.totalWeightRequested,
+          itemId: item.itemId,
+          issuedToId: request.requestedByUserId || request.requestedByUser?._id || request.requestedByUser?.id || request.requestedByUser,
+          facultyInCharge: request.facultyInChargeId || request.facultyInCharge,
+          quantity: item.quantity || 1,
+          totalWeightIssued: item.totalWeightRequested || 0,
           purpose: request.purpose,
           returnDate: request.desiredReturnTime,
           notes: request.notes,
-          pendingRequestId: request._id || request.id,
-          issuedByRole: user?.role || 'faculty', // Ensure teacher role is sent
+          pendingRequestId: request.id,
+          issuedByRole: user?.role || 'faculty',
         });
       }
-      alert('Item(s) issued!');
+      
+      alert('Item(s) issued successfully!');
+      
       // Refresh issued items and inventory data
       const items = await api.fetchIssuedItems();
       setIssuedItems(items);
+      
       // Refresh inventory data to show updated quantities
       if (fetchData) {
         fetchData();
       }
+      
+      // Refresh pending requests
+      const requests = await api.fetchPendingRequests();
+      setPendingRequests(Array.isArray(requests) ? requests : []);
+      
     } catch (err) {
+      console.error('Error issuing items:', err);
       alert('Failed to issue item: ' + (err.message || err));
     }
   };
@@ -100,7 +125,13 @@ const TeacherDashboard = () => {
   // Helper: Check if a request has already been issued
   const isRequestIssued = (request) => {
     // If any issuedItem has pendingRequestId matching this request's _id or id, consider it issued
-    return issuedItems.some(item => String(item.pendingRequestId) === String(request._id || request.id));
+    const requestId = request.id || request._id;
+    if (!requestId) return false;
+    
+    return issuedItems.some(item => {
+      const itemPendingRequestId = item.pendingRequestId;
+      return itemPendingRequestId && String(itemPendingRequestId) === String(requestId);
+    });
   };
 
   return (
@@ -202,11 +233,11 @@ const TeacherDashboard = () => {
                       {request.status === 'pending' && (
                         <div className="flex gap-2 mt-2">
                           <button
-                            onClick={() => handleRequestAction(request.id, 'approved')}
+                            onClick={() => handleRequestAction(request.id || request._id, 'approved')}
                             className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 text-xs"
                           >Approve</button>
                           <button
-                            onClick={() => handleRequestAction(request.id, 'rejected')}
+                            onClick={() => handleRequestAction(request.id || request._id, 'rejected')}
                             className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 text-xs"
                           >Reject</button>
                         </div>

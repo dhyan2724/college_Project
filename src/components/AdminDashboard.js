@@ -87,6 +87,8 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
   const [newUserRole, setNewUserRole] = useState('student');
   const [newUserRollNo, setNewUserRollNo] = useState('');
   const [newUserCategory, setNewUserCategory] = useState('UG/PG');
+  const [newUserYear, setNewUserYear] = useState('');
+  const [newUserDepartment, setNewUserDepartment] = useState('');
 
   const [showFaqModal, setShowFaqModal] = useState(false);
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
@@ -980,7 +982,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
                     email: newUserEmail,
                     fullName: newUserFullName,
                     role: newUserRole,
-                    ...(newUserRole === 'student' ? { rollNo: newUserRollNo, category: newUserCategory } : {})
+                    ...(newUserRole === 'student' ? { rollNo: newUserRollNo, category: newUserCategory, year: newUserYear, department: newUserDepartment } : {})
                   });
                   alert('User created successfully!');
                   setShowCreateUserForm(false);
@@ -991,6 +993,8 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
                   setNewUserRole('student');
                   setNewUserRollNo('');
                   setNewUserCategory('UG/PG');
+                  setNewUserYear('');
+                  setNewUserDepartment('');
                   fetchData();
                 } catch (err) {
                   alert('Failed to create user: ' + err.message);
@@ -1034,6 +1038,21 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
                       <option value="PhD">PhD</option>
                       <option value="Project Student">Project Student</option>
                     </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Year</label>
+                    <select className="border p-2 rounded w-full" value={newUserYear} onChange={e => setNewUserYear(e.target.value)} required>
+                      <option value="">Select Year</option>
+                      <option value="1st">1st Year</option>
+                      <option value="2nd">2nd Year</option>
+                      <option value="3rd">3rd Year</option>
+                      <option value="4th">4th Year</option>
+                      <option value="5th">5th Year</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Department</label>
+                    <input type="text" className="border p-2 rounded w-full" value={newUserDepartment} onChange={e => setNewUserDepartment(e.target.value)} required />
                   </div>
                 </>
               )}

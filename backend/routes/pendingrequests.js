@@ -13,11 +13,16 @@ const Miscellaneous = require('../models/Miscellaneous');
 // GET all pending requests
 router.get('/', authenticateToken, async (req, res) => {
   try {
+    console.log('🔍 Fetching pending requests for user:', req.user);
     let pendingRequests;
     if (req.user.role === 'faculty') {
+      console.log('🔍 User is faculty, fetching requests assigned to them');
       pendingRequests = await PendingRequest.findByFacultyInCharge(req.user.id);
+      console.log('🔍 Found pending requests for faculty:', pendingRequests);
     } else {
+      console.log('🔍 User is not faculty, fetching all requests');
       pendingRequests = await PendingRequest.findWithUserDetails();
+      console.log('🔍 Found all pending requests:', pendingRequests);
     }
     res.json(pendingRequests);
   } catch (err) {
@@ -146,17 +151,27 @@ router.post('/', authenticateToken, async (req, res) => {
 // PATCH (update) a pending request
 router.patch('/:id', authenticateToken, async (req, res) => {
   try {
+    console.log('🔍 Updating pending request:', req.params.id, 'with data:', req.body);
+    console.log('🔍 User making update:', req.user);
+    
     const pendingRequest = await PendingRequest.findById(req.params.id);
     if (!pendingRequest) return res.status(404).json({ message: 'Pending request not found' });
+
+    console.log('🔍 Found pending request:', pendingRequest);
 
     // Only allow updating status and notes
     const updateData = {};
     if (req.body.status) updateData.status = req.body.status;
     if (req.body.notes) updateData.notes = req.body.notes;
 
+    console.log('🔍 Update data:', updateData);
+
     const updatedPendingRequest = await PendingRequest.updateById(req.params.id, updateData);
+    console.log('🔍 Update result:', updatedPendingRequest);
+    
     res.json({ success: updatedPendingRequest });
   } catch (err) {
+    console.error('🔍 Error updating pending request:', err);
     res.status(400).json({ message: err.message });
   }
 });

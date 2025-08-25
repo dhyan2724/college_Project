@@ -108,17 +108,22 @@ router.get('/:id', authenticateToken, async (req, res) => {
 // POST a new user (registration)
 router.post('/', async (req, res) => {
   try {
-    // Validate required fields
-    const requiredFields = ['username', 'password', 'role', 'email', 'fullName'];
-    const missingFields = requiredFields.filter(field => !req.body[field]);
-    if (missingFields.length > 0) {
-      return res.status(400).json({ message: `Missing required fields: ${missingFields.join(', ')}` });
+    // Validate role-dependent required fields
+    const allowedRoles = ['master_admin', 'admin', 'faculty', 'student', 'phd_scholar', 'dissertation_student'];
+    const role = req.body.role;
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({ message: `Invalid role. Must be one of: ${allowedRoles.join(', ')}` });
     }
 
-    // Validate role value
-    const allowedRoles = ['master_admin', 'admin', 'faculty', 'student', 'phd_scholar', 'dissertation_student'];
-    if (!allowedRoles.includes(req.body.role)) {
-      return res.status(400).json({ message: `Invalid role. Must be one of: ${allowedRoles.join(', ')}` });
+    // Username is always required because of DB constraint and login flow
+    const baseRequired = ['username', 'password', 'role', 'email', 'fullName'];
+    // Students (and student-like roles) must provide full academic details
+    const studentLikeRoles = ['student', 'phd_scholar', 'dissertation_student'];
+    const extendedRequired = baseRequired.concat(studentLikeRoles.includes(role) ? ['rollNo', 'category', 'year', 'department'] : []);
+
+    const missingFields = extendedRequired.filter(field => !req.body[field]);
+    if (missingFields.length > 0) {
+      return res.status(400).json({ message: `Missing required fields: ${missingFields.join(', ')}` });
     }
 
     // Check if username or email already exists
@@ -172,7 +177,7 @@ router.post('/', async (req, res) => {
             newUser.fullName || newUser.username,
             newUser.username,
             req.body.password, // The password from the request
-            newUser.rollNumber || null,
+            newUser.rollNo || null,
             userRole
           );
           console.log('Welcome email with credentials sent successfully');

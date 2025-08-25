@@ -49,6 +49,9 @@ router.get('/:id', authenticateToken, async (req, res) => {
 // POST a new issued item (students, phd, dissertation, faculty)
 router.post('/', authenticateToken, authorizeRoles('student', 'phd_scholar', 'dissertation_student', 'faculty'), async (req, res) => {
   try {
+    console.log('🔍 Creating issued item with data:', req.body);
+    console.log('🔍 User making request:', req.user);
+    
     // NOTE: PendingRequest handling is omitted for MySQL model parity; add if/when PendingRequest is migrated
     const issuedItemData = {
       itemType: req.body.itemType,
