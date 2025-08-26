@@ -28,6 +28,13 @@ router.get('/:id', authenticateToken, async (req, res) => {
 // POST a new specimen
 router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) => {
   try {
+    // Validate required fields according to schema (NOT NULL columns)
+    const requiredFields = ['name', 'storagePlace', 'totalQuantity'];
+    const missing = requiredFields.filter(f => req.body[f] === undefined || req.body[f] === '');
+    if (missing.length > 0) {
+      return res.status(400).json({ message: `Missing required field(s): ${missing.join(', ')}` });
+    }
+
     const specimenData = {
       name: req.body.name,
       description: req.body.description,

@@ -9,8 +9,10 @@ class Specimen {
       // Generate specimenId if not provided
       const specimenId = specimenData.specimenId || `SPEC-${Date.now()}`;
       
-      // Set availableQuantity to totalQuantity if not specified
-      const finalAvailableQuantity = availableQuantity !== undefined ? availableQuantity : totalQuantity;
+      // Set availableQuantity to totalQuantity if not specified, coerce undefined/null safely
+      const finalAvailableQuantity = (availableQuantity !== undefined && availableQuantity !== null)
+        ? availableQuantity
+        : (totalQuantity !== undefined ? totalQuantity : null);
       
       // Convert undefined values to null for MySQL
       const safeName = name !== undefined ? name : null;
@@ -21,7 +23,7 @@ class Specimen {
       
       const [result] = await pool.execute(
         'INSERT INTO specimens (name, description, storagePlace, totalQuantity, availableQuantity, company, specimenId) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [safeName, safeDescription, safeStoragePlace, safeTotalQuantity, finalAvailableQuantity, safeCompany, specimenId]
+        [safeName, safeDescription, safeStoragePlace, safeTotalQuantity, (finalAvailableQuantity !== undefined ? finalAvailableQuantity : null), safeCompany, specimenId]
       );
       
       return { id: result.insertId, ...specimenData, specimenId, availableQuantity: finalAvailableQuantity };
