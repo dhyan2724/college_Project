@@ -19,45 +19,46 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
   const [showEditModal, setShowEditModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState(""); // <-- Add search state
 
-  // Combine all categories for "all" view
+  // Resolve items for the selected category in a deterministic way
+  const resolveItemsByCategory = (key) => {
+    switch (key) {
+      case 'chemicals':
+        return Array.isArray(chemicals) ? chemicals : [];
+      case 'glasswares':
+        return Array.isArray(glasswares) ? glasswares : [];
+      case 'plasticwares':
+        return Array.isArray(plasticwares) ? plasticwares : [];
+      case 'instruments':
+        return Array.isArray(instruments) ? instruments : [];
+      case 'miscellaneous':
+        return Array.isArray(miscellaneous) ? miscellaneous : [];
+      case 'specimens':
+        return Array.isArray(specimens) ? specimens : [];
+      case 'slides':
+        return Array.isArray(slides) ? slides : [];
+      case 'minorinstruments':
+        return Array.isArray(minorinstruments) ? minorinstruments : [];
+      default:
+        return [];
+    }
+  };
+
+  // Combine all categories for "all" view (only category and name to keep it concise)
   const getAllInventory = () => {
-    let all = [];
-    categories.forEach(cat => {
-      const items = (cat.key === "chemicals" ? chemicals :
-                    cat.key === "glasswares" ? glasswares :
-                    cat.key === "plasticwares" ? plasticwares :
-                    cat.key === "instruments" ? instruments :
-                    cat.key === "miscellaneous" ? miscellaneous :
-                    cat.key === "specimens" ? specimens :
-                    cat.key === "slides" ? slides :
-                    cat.key === "minorinstruments" ? minorinstruments : []);
-      if (items && items.length > 0) {
-        all = all.concat(
-          items.map(item => ({
-            ...item,
-            category: cat.label,
-          }))
-        );
-      }
-    });
-    return all;
+    return categories.flatMap(cat =>
+      resolveItemsByCategory(cat.key).map(item => ({
+        id: item.id,
+        name: item.name,
+        category: cat.label,
+      }))
+    );
   };
 
   const getCurrentInventory = () => {
-    if (selectedCategory === "all") return getAllInventory();
-    let items = [];
-    if (selectedCategory === "chemicals") items = chemicals || [];
-    if (selectedCategory === "glasswares") items = glasswares || [];
-    if (selectedCategory === "plasticwares") items = plasticwares || [];
-    if (selectedCategory === "instruments") items = instruments || [];
-    if (selectedCategory === "miscellaneous") items = miscellaneous || [];
-    if (selectedCategory === "specimens") items = specimens || [];
-    if (selectedCategory === "slides") items = slides || [];
-    if (selectedCategory === "minorinstruments") items = minorinstruments || [];
-    return items.map(item => ({
-      ...item,
-      category: categories.find(c => c.key === selectedCategory)?.label || 'Unknown',
-    }));
+    if (selectedCategory === 'all') {
+      return getAllInventory();
+    }
+    return resolveItemsByCategory(selectedCategory);
   };
 
   // Filtered inventory based on search query
@@ -288,7 +289,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
                       <button className="text-blue-600" onClick={() => handleEdit(item, selectedCategory)}>Edit</button>
                     </td>
                   ) : (
-                    <td key={col.key} className="border px-2 py-1">{item[col.key] || ''}</td>
+                    <td key={col.key} className="border px-2 py-1">{item[col.key] ?? ''}</td>
                   )
                 ))}
               </tr>
