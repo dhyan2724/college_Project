@@ -1061,15 +1061,17 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
             ) : recentActivities.length === 0 ? (
               <p className="text-gray-600">No recent activity</p>
             ) : (
-              <ul className="divide-y divide-gray-200">
-                {recentActivities.map((log) => (
-                  <li key={log.id} className="py-2">
-                    <span className="font-semibold capitalize">{log.action}</span> {log.itemType} <span className="font-semibold">{log.itemName}</span>
-                    <span className="text-gray-500 ml-2">by {log.user || 'unknown'}</span>
-                    <span className="text-gray-400 ml-2 text-xs">{new Date(log.timestamp).toLocaleString()}</span>
-                  </li>
-                ))}
-              </ul>
+              <div className="max-h-64 overflow-y-auto pr-2">
+                <ul className="divide-y divide-gray-200">
+                  {recentActivities.map((log) => (
+                    <li key={log.id || `${log.itemType}-${log.itemId}-${log.timestamp}` } className="py-2">
+                      <span className="font-semibold capitalize">{log.action}</span> {log.itemType} <span className="font-semibold">{log.itemName}</span>
+                      <span className="text-gray-500 ml-2">by {log.user || 'unknown'}</span>
+                      <span className="text-gray-400 ml-2 text-xs">{new Date(log.timestamp).toLocaleString()}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
         </div>

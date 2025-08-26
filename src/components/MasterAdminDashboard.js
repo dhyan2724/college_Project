@@ -37,6 +37,9 @@ const MasterAdminDashboard = () => {
     recentUsers: 0
   });
 
+  // Search
+  const [userSearch, setUserSearch] = useState('');
+
   useEffect(() => {
     fetchUsers();
     fetchStatistics();
@@ -275,8 +278,15 @@ const MasterAdminDashboard = () => {
 
         {/* Users Table */}
         <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
+          <div className="px-6 py-4 border-b border-gray-200 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <h2 className="text-xl font-semibold text-gray-900">All Users</h2>
+            <input
+              type="text"
+              value={userSearch}
+              onChange={(e) => setUserSearch(e.target.value)}
+              placeholder="Search by name, username, email, role, or roll no..."
+              className="w-full md:w-80 border border-gray-300 rounded px-3 py-2"
+            />
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -300,7 +310,16 @@ const MasterAdminDashboard = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {users.map((user) => (
+                {(userSearch.trim() ? users.filter(u => {
+                  const q = userSearch.toLowerCase();
+                  return (
+                    (u.fullName && u.fullName.toLowerCase().includes(q)) ||
+                    (u.username && u.username.toLowerCase().includes(q)) ||
+                    (u.email && u.email.toLowerCase().includes(q)) ||
+                    (u.role && u.role.toLowerCase().includes(q)) ||
+                    (u.rollNo && String(u.rollNo).toLowerCase().includes(q))
+                  );
+                }) : users).map((user) => (
                   <tr key={user.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
