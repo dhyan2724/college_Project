@@ -56,11 +56,13 @@ router.post('/', async (req, res) => {
   }
 
   try {
-    // Get all item names from different collections
-    const chemicals = await Chemical.find({}, 'name');
-    const glasswares = await Glassware.find({}, 'name');
-    const plasticwares = await Plasticware.find({}, 'name');
-    const instruments = await Instrument.find({}, 'name');
+    // Get all item names from different tables (MySQL models)
+    const [chemicals, glasswares, plasticwares, instruments] = await Promise.all([
+      Chemical.findAll(),
+      Glassware.findAll(),
+      Plasticware.findAll(),
+      Instrument.findAll()
+    ]);
     
     const allItems = [
       ...chemicals.map(c => ({ name: c.name, type: 'Chemical' })),
@@ -78,27 +80,11 @@ router.post('/', async (req, res) => {
       return res.status(404).json({ error: 'No item name found in question. Please specify an item name.' });
     }
 
-    // Get all issued items for this specific item
-    const issuedItems = await IssuedItem.find({ 
-      itemType: foundItem.type 
-    }).populate('issuedTo', 'fullName rollNo email').populate('issuedByUser', 'fullName role');
+    // Get all issued items for this specific item type
+    const issuedItems = await IssuedItem.findByItemType(foundItem.type);
 
-    // Get the actual item details
-    let itemDetails;
-    switch (foundItem.type) {
-      case 'Chemical':
-        itemDetails = await Chemical.findOne({ name: foundItem.name });
-        break;
-      case 'Glassware':
-        itemDetails = await Glassware.findOne({ name: foundItem.name });
-        break;
-      case 'Plasticware':
-        itemDetails = await Plasticware.findOne({ name: foundItem.name });
-        break;
-      case 'Instrument':
-        itemDetails = await Instrument.findOne({ name: foundItem.name });
-        break;
-    }
+    // No direct DB need for itemDetails here; keeping placeholder for potential future use
+    let itemDetails = null;
 
     // Filter issued items that match the specific item
     const matchingIssuedItems = [];
@@ -118,18 +104,34 @@ router.post('/', async (req, res) => {
     }
 
     // Format the response data
-    const usageData = matchingIssuedItems.map(item => ({
-      itemName: foundItem.name,
-      itemType: foundItem.type,
-      usedBy: item.issuedTo ? item.issuedTo.fullName : 'Unknown User',
-      userRollNo: item.issuedTo ? item.issuedTo.rollNo : 'N/A',
-      approvedBy: item.issuedByUser ? item.issuedByUser.fullName : 'Unknown Approver',
-      approverRole: item.issuedByUser ? item.issuedByUser.role : 'N/A',
-      quantity: item.itemType === 'Chemical' ? `${item.totalWeightIssued}g` : item.quantity,
-      issueDate: new Date(item.issueDate).toLocaleString(),
-      status: item.status,
-      purpose: item.purpose || 'N/A'
-    }));
+    // Enrich with user details where possible
+    const usageData = [];
+    for (const item of matchingIssuedItems) {
+      let usedByName = 'Unknown User';
+      let usedByRoll = 'N/A';
+      try {
+        if (item.issuedToId) {
+          const user = await User.findById(item.issuedToId);
+          if (user) {
+            usedByName = user.fullName || usedByName;
+            usedByRoll = user.rollNo || usedByRoll;
+          }
+        }
+      } catch (_) {}
+
+      usageData.push({
+        itemName: foundItem.name,
+        itemType: foundItem.type,
+        usedBy: usedByName,
+        userRollNo: usedByRoll,
+        approvedBy: item.issuedByName || 'Unknown Approver',
+        approverRole: item.issuedByRole || 'N/A',
+        quantity: item.itemType === 'Chemical' ? `${item.totalWeightIssued || 0}g` : (item.quantity || 0),
+        issueDate: item.issueDate ? new Date(item.issueDate).toLocaleString() : 'N/A',
+        status: item.status || 'N/A',
+        purpose: item.purpose || 'N/A'
+      });
+    }
 
     // Create formatted answer
     const formattedAnswer = usageData.map(data => 
