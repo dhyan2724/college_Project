@@ -9,8 +9,11 @@ class Plasticware {
       // Generate plasticwareId if not provided
       const plasticwareId = plasticwareData.plasticwareId || `PLASTIC-${Date.now()}`;
       
-      // Set availableQuantity to totalQuantity if not specified
-      const finalAvailableQuantity = availableQuantity !== undefined ? availableQuantity : totalQuantity;
+      // Set availableQuantity to totalQuantity if not specified; fall back to 0 if both missing
+      const finalAvailableQuantity =
+        availableQuantity !== undefined && availableQuantity !== null
+          ? availableQuantity
+          : (totalQuantity !== undefined && totalQuantity !== null ? totalQuantity : 0);
       
       // Convert undefined values to null for MySQL
       const safeName = name !== undefined ? name : null;

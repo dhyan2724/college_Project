@@ -268,7 +268,8 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
           onChange={e => setSearchQuery(e.target.value)}
         />
       </div>
-      <div className="overflow-x-auto">
+      {/* Make the inventory area scrollable so it doesn't grow endlessly */}
+      <div className="overflow-x-auto max-h-96 overflow-y-auto">
         <table className="min-w-full border">
           <thead>
             <tr>
@@ -308,13 +309,15 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
                 placeholder="Name"
                 required
               />
-              <input
-                className="border p-2 mb-2 w-full"
-                value={editItem.catalogNumber || ''}
-                onChange={e => setEditItem({ ...editItem, catalogNumber: e.target.value })}
-                placeholder="Catalog Number"
-                required
-              />
+              {editCategory === 'chemicals' && (
+                <input
+                  className="border p-2 mb-2 w-full"
+                  value={editItem.catalogNumber || ''}
+                  onChange={e => setEditItem({ ...editItem, catalogNumber: e.target.value })}
+                  placeholder="Catalog Number"
+                  required
+                />
+              )}
               <input
                 className="border p-2 mb-2 w-full"
                 value={editItem.type || ''}

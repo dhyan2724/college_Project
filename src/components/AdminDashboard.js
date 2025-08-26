@@ -6,7 +6,7 @@ import AIFaqPage from './AIFaqPage';
 import InventorySection from "./InventorySection";
 
 const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], slides = [] }) => {
-  const { chemicals, glasswares, instruments, users, setUsers, fetchData, API_URL, logout } = useContext(AuthContext);
+  const { chemicals, glasswares, plasticwares, instruments, users, setUsers, fetchData, API_URL, logout } = useContext(AuthContext);
   const [showCreateTeacherForm, setShowCreateTeacherForm] = useState(false);
   const [newTeacherUsername, setNewTeacherUsername] = useState('');
   const [newTeacherPassword, setNewTeacherPassword] = useState('');
@@ -603,7 +603,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
           chemicals={chemicals || []} 
           glasswares={glasswares || []} 
           instruments={instruments || []} 
-          plasticwares={miscellaneous || []}
+          plasticwares={plasticwares || []}
           miscellaneous={miscellaneous || []}
           specimens={specimens || []}
           slides={slides || []}

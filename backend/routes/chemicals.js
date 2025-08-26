@@ -36,6 +36,8 @@ router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) =>
             storagePlace: req.body.storagePlace,
             totalWeight: req.body.totalWeight,
             company: req.body.company,
+            // catalogNumber is NOT NULL in schema; ensure it is forwarded from client
+            catalogNumber: req.body.catalogNumber,
         };
 
         const newChemical = await Chemical.create(chemicalData);

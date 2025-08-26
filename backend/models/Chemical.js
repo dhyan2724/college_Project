@@ -9,8 +9,11 @@ class Chemical {
       // Generate chemicalId if not provided
       const chemicalId = chemicalData.chemicalId || `CHEM-${Date.now()}`;
       
-      // Set availableWeight to totalWeight if not specified
-      const finalAvailableWeight = availableWeight !== undefined ? availableWeight : totalWeight;
+      // Set availableWeight to totalWeight if not specified; fall back to 0 if both missing
+      const finalAvailableWeight =
+        availableWeight !== undefined && availableWeight !== null
+          ? availableWeight
+          : (totalWeight !== undefined && totalWeight !== null ? totalWeight : 0);
       
       // Convert undefined values to null for MySQL
       const safeName = name !== undefined ? name : null;
