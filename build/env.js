@@ -8,4 +8,4 @@ window._env_ = window._env_ || {};
 // If you will host the backend on the same domain later, use:
 //   https://nuvsoslabs.in/api
 // Default placeholder is intentionally non-functional so you must set it before public hosting.
-window._env_.REACT_APP_API_URL = window._env_.REACT_APP_API_URL || 'https://nuvsoslabs.in/api';
+window._env_.REACT_APP_API_URL = window._env_.REACT_APP_API_URL || 'https://abcd1234.ngrok.io/api';

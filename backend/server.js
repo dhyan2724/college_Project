@@ -23,8 +23,17 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware
+const allowedOrigins = ['https://nuvsoslabs.netlify.app', 'http://nuvsoslabs.in'];
 app.use(cors({
-  origin: true,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, etc.) always allow
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
