@@ -1,4 +1,8 @@
-const API_URL = process.env.REACT_APP_API_URL || 'http://172.168.2.130:5000/api';
+// Prefer runtime-configured API URL injected via `public/env.js` (window._env_.REACT_APP_API_URL).
+// Fallback to build-time env var REACT_APP_API_URL, then to a local default.
+const API_URL = (typeof window !== 'undefined' && window._env_ && window._env_.REACT_APP_API_URL)
+  || process.env.REACT_APP_API_URL
+  || 'http://localhost:5000/api';
 
 const getToken = () => localStorage.getItem('token');
 
