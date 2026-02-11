@@ -18,6 +18,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
   const [newChemicalType, setNewChemicalType] = useState('Solid');
   const [newChemicalStoragePlace, setNewChemicalStoragePlace] = useState('Cupboard');
   const [newChemicalTotalWeight, setNewChemicalTotalWeight] = useState('');
+  const [newChemicalWeightUnit, setNewChemicalWeightUnit] = useState('g');
   const [newChemicalCompany, setNewChemicalCompany] = useState('');
   const [newChemicalCatalogNumber, setNewChemicalCatalogNumber] = useState("");
 
@@ -150,6 +151,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
           type: newChemicalType,
           storagePlace: newChemicalStoragePlace,
           totalWeight: parseFloat(newChemicalTotalWeight),
+          weightUnit: newChemicalWeightUnit,
           company: newChemicalCompany,
           catalogNumber: newChemicalCatalogNumber,
         }),
@@ -161,9 +163,10 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
         setNewChemicalName('');
         setNewChemicalType('Solid');
         setNewChemicalStoragePlace('Cupboard');
-        setNewChemicalTotalWeight('');
-        setNewChemicalCompany('');
-        setNewChemicalCatalogNumber('');
+  setNewChemicalTotalWeight('');
+  setNewChemicalWeightUnit('g');
+  setNewChemicalCompany('');
+  setNewChemicalCatalogNumber('');
         fetchData();
       } else {
         const errorData = await response.json();
@@ -639,8 +642,31 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
                 </select>
               </div>
               <div>
-                <label htmlFor="chemicalTotalWeight" className="block text-sm font-medium text-gray-700">Total Weight (g/ml)</label>
-                <input type="number" id="chemicalTotalWeight" value={newChemicalTotalWeight} onChange={e => setNewChemicalTotalWeight(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+                <label className="block text-sm font-medium text-gray-700">Total Weight</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    id="chemicalTotalWeight"
+                    value={newChemicalTotalWeight}
+                    onChange={e => setNewChemicalTotalWeight(e.target.value)}
+                    className="mt-1 block flex-1 border border-gray-300 rounded-md shadow-sm p-2"
+                    required
+                  />
+                  <div className="w-28">
+                    <label htmlFor="chemicalWeightUnit" className="sr-only">Unit</label>
+                    <select
+                      id="chemicalWeightUnit"
+                      value={newChemicalWeightUnit}
+                      onChange={e => setNewChemicalWeightUnit(e.target.value)}
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    >
+                      <option value="g">g</option>
+                      <option value="mg">mg</option>
+                      <option value="ml">ml</option>
+                      <option value="L">L</option>
+                    </select>
+                  </div>
+                </div>
               </div>
               <div>
                 <label htmlFor="chemicalCompany" className="block text-sm font-medium text-gray-700">Company (optional)</label>
