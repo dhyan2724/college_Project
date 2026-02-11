@@ -639,7 +639,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
                 </select>
               </div>
               <div>
-                <label htmlFor="chemicalTotalWeight" className="block text-sm font-medium text-gray-700">Total Weight (g)</label>
+                <label htmlFor="chemicalTotalWeight" className="block text-sm font-medium text-gray-700">Total Weight (g/ml)</label>
                 <input type="number" id="chemicalTotalWeight" value={newChemicalTotalWeight} onChange={e => setNewChemicalTotalWeight(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
               <div>
