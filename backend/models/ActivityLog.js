@@ -1,4 +1,4 @@
-const { pool } = require('../config/database');
+const { supabase } = require('../config/supabase');
 
 class ActivityLog {
   // Create a new activity log
@@ -6,12 +6,14 @@ class ActivityLog {
     try {
       const { action, itemType, itemId, itemName, user, details } = activityLogData;
 
-      const [result] = await pool.execute(
-        'INSERT INTO activity_logs (action, itemType, itemId, itemName, user, details) VALUES (?, ?, ?, ?, ?, ?)',
-        [action, itemType, itemId, itemName, user, details]
-      );
-
-      return { id: result.insertId, ...activityLogData };
+      const { data, error } = await supabase
+        .from('activity_logs')
+        .insert([{ action, itemType, itemId, itemName, user, details }])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return { ...data, ...activityLogData };
     } catch (error) {
       throw error;
     }
@@ -20,11 +22,14 @@ class ActivityLog {
   // Find activity log by ID
   static async findById(id) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM activity_logs WHERE id = ?',
-        [id]
-      );
-      return rows[0] || null;
+      const { data, error } = await supabase
+        .from('activity_logs')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
     } catch (error) {
       throw error;
     }
@@ -33,10 +38,13 @@ class ActivityLog {
   // Get all activity logs
   static async findAll() {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM activity_logs ORDER BY timestamp DESC'
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('activity_logs')
+        .select('*')
+        .order('timestamp', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -45,11 +53,14 @@ class ActivityLog {
   // Get activity logs by action
   static async findByAction(action) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM activity_logs WHERE action = ? ORDER BY timestamp DESC',
-        [action]
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('activity_logs')
+        .select('*')
+        .eq('action', action)
+        .order('timestamp', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -58,11 +69,14 @@ class ActivityLog {
   // Get activity logs by item type
   static async findByItemType(itemType) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM activity_logs WHERE itemType = ? ORDER BY timestamp DESC',
-        [itemType]
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('activity_logs')
+        .select('*')
+        .eq('itemType', itemType)
+        .order('timestamp', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -71,11 +85,14 @@ class ActivityLog {
   // Get activity logs by user
   static async findByUser(user) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM activity_logs WHERE user = ? ORDER BY timestamp DESC',
-        [user]
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('activity_logs')
+        .select('*')
+        .eq('user', user)
+        .order('timestamp', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -84,11 +101,15 @@ class ActivityLog {
   // Get activity logs by date range
   static async findByDateRange(startDate, endDate) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM activity_logs WHERE timestamp BETWEEN ? AND ? ORDER BY timestamp DESC',
-        [startDate, endDate]
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('activity_logs')
+        .select('*')
+        .gte('timestamp', startDate)
+        .lte('timestamp', endDate)
+        .order('timestamp', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -97,11 +118,18 @@ class ActivityLog {
   // Get recent activity logs (last N days)
   static async getRecent(days = 7) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM activity_logs WHERE timestamp >= DATE_SUB(NOW(), INTERVAL ? DAY) ORDER BY timestamp DESC',
-        [days]
-      );
-      return rows;
+      const date = new Date();
+      date.setDate(date.getDate() - days);
+      const startDate = date.toISOString();
+      
+      const { data, error } = await supabase
+        .from('activity_logs')
+        .select('*')
+        .gte('timestamp', startDate)
+        .order('timestamp', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -110,11 +138,13 @@ class ActivityLog {
   // Delete activity log
   static async deleteById(id) {
     try {
-      const [result] = await pool.execute(
-        'DELETE FROM activity_logs WHERE id = ?',
-        [id]
-      );
-      return result.affectedRows > 0;
+      const { error } = await supabase
+        .from('activity_logs')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      return true;
     } catch (error) {
       throw error;
     }
@@ -123,11 +153,17 @@ class ActivityLog {
   // Clear old activity logs (older than N days)
   static async clearOld(days = 30) {
     try {
-      const [result] = await pool.execute(
-        'DELETE FROM activity_logs WHERE timestamp < DATE_SUB(NOW(), INTERVAL ? DAY)',
-        [days]
-      );
-      return result.affectedRows;
+      const date = new Date();
+      date.setDate(date.getDate() - days);
+      const cutoffDate = date.toISOString();
+      
+      const { error } = await supabase
+        .from('activity_logs')
+        .delete()
+        .lt('timestamp', cutoffDate);
+      
+      if (error) throw error;
+      return true;
     } catch (error) {
       throw error;
     }
@@ -136,24 +172,36 @@ class ActivityLog {
   // Get activity statistics
   static async getStatistics() {
     try {
-      const [total] = await pool.execute(
-        'SELECT COUNT(*) as total FROM activity_logs'
-      );
-      const [today] = await pool.execute(
-        'SELECT COUNT(*) as today FROM activity_logs WHERE DATE(timestamp) = CURDATE()'
-      );
-      const [thisWeek] = await pool.execute(
-        'SELECT COUNT(*) as thisWeek FROM activity_logs WHERE timestamp >= DATE_SUB(NOW(), INTERVAL 7 DAY)'
-      );
-      const [thisMonth] = await pool.execute(
-        'SELECT COUNT(*) as thisMonth FROM activity_logs WHERE timestamp >= DATE_SUB(NOW(), INTERVAL 30 DAY)'
-      );
+      const { count: total } = await supabase
+        .from('activity_logs')
+        .select('*', { count: 'exact', head: true });
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const { count: todayCount } = await supabase
+        .from('activity_logs')
+        .select('*', { count: 'exact', head: true })
+        .gte('timestamp', today.toISOString());
+      
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const { count: thisWeekCount } = await supabase
+        .from('activity_logs')
+        .select('*', { count: 'exact', head: true })
+        .gte('timestamp', weekAgo.toISOString());
+      
+      const monthAgo = new Date();
+      monthAgo.setDate(monthAgo.getDate() - 30);
+      const { count: thisMonthCount } = await supabase
+        .from('activity_logs')
+        .select('*', { count: 'exact', head: true })
+        .gte('timestamp', monthAgo.toISOString());
 
       return {
-        total: total[0].total,
-        today: today[0].today,
-        thisWeek: thisWeek[0].thisWeek,
-        thisMonth: thisMonth[0].thisMonth
+        total: total || 0,
+        today: todayCount || 0,
+        thisWeek: thisWeekCount || 0,
+        thisMonth: thisMonthCount || 0
       };
     } catch (error) {
       throw error;
@@ -164,22 +212,22 @@ class ActivityLog {
   static async findWithPagination(page = 1, limit = 50) {
     try {
       const offset = (page - 1) * limit;
-      const [rows] = await pool.execute(
-        'SELECT * FROM activity_logs ORDER BY timestamp DESC LIMIT ? OFFSET ?',
-        [limit, offset]
-      );
       
-      const [total] = await pool.execute(
-        'SELECT COUNT(*) as total FROM activity_logs'
-      );
+      const { data, error, count } = await supabase
+        .from('activity_logs')
+        .select('*', { count: 'exact' })
+        .order('timestamp', { ascending: false })
+        .range(offset, offset + limit - 1);
+      
+      if (error) throw error;
 
       return {
-        logs: rows,
+        logs: data || [],
         pagination: {
           page,
           limit,
-          total: total[0].total,
-          totalPages: Math.ceil(total[0].total / limit)
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limit)
         }
       };
     } catch (error) {
@@ -188,4 +236,4 @@ class ActivityLog {
   }
 }
 
-module.exports = ActivityLog; 
+module.exports = ActivityLog;

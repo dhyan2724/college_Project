@@ -1,4 +1,4 @@
-const { pool } = require('../config/database');
+const { supabase } = require('../config/supabase');
 const bcrypt = require('bcryptjs');
 
 class User {
@@ -10,25 +10,28 @@ class User {
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
       
-      // Ensure all parameters are either a value or null, never undefined
-      const params = [
-        username || null,
-        hashedPassword,
-        role ? role.toLowerCase() : null,
-        email ? email.toLowerCase() : null,
-        fullName || null,
-        rollNo || null,
-        typeof category !== 'undefined' ? category : null,
-        typeof year !== 'undefined' ? year : null,
-        typeof department !== 'undefined' ? department : null
-      ];
+      // Prepare data object
+      const userRecord = {
+        username: username || null,
+        password: hashedPassword,
+        role: role ? role.toLowerCase() : null,
+        email: email ? email.toLowerCase() : null,
+        fullName: fullName || null,
+        rollNo: rollNo || null,
+        category: category || null,
+        year: year || null,
+        department: department || null
+      };
 
-      const [result] = await pool.execute(
-        'INSERT INTO users (username, password, role, email, fullName, rollNo, category, year, department) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        params
-      );
+      const { data, error } = await supabase
+        .from('users')
+        .insert([userRecord])
+        .select()
+        .single();
       
-      return { id: result.insertId, ...userData };
+      if (error) throw error;
+      
+      return { ...data, ...userData };
     } catch (error) {
       throw error;
     }
@@ -37,11 +40,14 @@ class User {
   // Find user by ID
   static async findById(id) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM users WHERE id = ?',
-        [id]
-      );
-      return rows[0] || null;
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
     } catch (error) {
       throw error;
     }
@@ -50,11 +56,14 @@ class User {
   // Find user by username
   static async findByUsername(username) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM users WHERE username = ?',
-        [username]
-      );
-      return rows[0] || null;
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('username', username)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
     } catch (error) {
       throw error;
     }
@@ -63,11 +72,14 @@ class User {
   // Find user by email
   static async findByEmail(email) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM users WHERE email = ?',
-        [email.toLowerCase()]
-      );
-      return rows[0] || null;
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', email.toLowerCase())
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
     } catch (error) {
       throw error;
     }
@@ -76,11 +88,14 @@ class User {
   // Find user by roll number
   static async findByRollNo(rollNo) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM users WHERE rollNo = ?',
-        [rollNo]
-      );
-      return rows[0] || null;
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('rollNo', rollNo)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
     } catch (error) {
       throw error;
     }
@@ -89,8 +104,13 @@ class User {
   // Get all users
   static async findAll() {
     try {
-      const [rows] = await pool.execute('SELECT * FROM users ORDER BY created_at DESC');
-      return rows;
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -99,15 +119,22 @@ class User {
   // Update user
   static async updateById(id, updateData) {
     try {
-        const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
-        // Replace undefined with null in values
-        const values = Object.values(updateData).map(v => v === undefined ? null : v);
-        values.push(id);
-        const [result] = await pool.execute(
-          `UPDATE users SET ${fields} WHERE id = ?`,
-          values
-        );
-        return result.affectedRows > 0;
+      // Remove undefined values
+      const cleanData = {};
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] !== undefined) {
+          cleanData[key] = updateData[key];
+        }
+      });
+
+      const { data, error } = await supabase
+        .from('users')
+        .update(cleanData)
+        .eq('id', id)
+        .select();
+      
+      if (error) throw error;
+      return data && data.length > 0;
     } catch (error) {
       throw error;
     }
@@ -116,11 +143,14 @@ class User {
   // Update last login
   static async updateLastLogin(id) {
     try {
-      const [result] = await pool.execute(
-        'UPDATE users SET lastLogin = CURRENT_TIMESTAMP WHERE id = ?',
-        [id]
-      );
-      return result.affectedRows > 0;
+      const { data, error } = await supabase
+        .from('users')
+        .update({ lastLogin: new Date().toISOString() })
+        .eq('id', id)
+        .select();
+      
+      if (error) throw error;
+      return data && data.length > 0;
     } catch (error) {
       throw error;
     }
@@ -129,11 +159,13 @@ class User {
   // Delete user
   static async deleteById(id) {
     try {
-      const [result] = await pool.execute(
-        'DELETE FROM users WHERE id = ?',
-        [id]
-      );
-      return result.affectedRows > 0;
+      const { error } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      return true;
     } catch (error) {
       throw error;
     }
@@ -142,11 +174,14 @@ class User {
   // Get users by role
   static async findByRole(role) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM users WHERE role = ? ORDER BY created_at DESC',
-        [role.toLowerCase()]
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('role', role.toLowerCase())
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -156,13 +191,29 @@ class User {
   static async search(query) {
     try {
       const searchTerm = `%${query}%`;
-      const [rows] = await pool.execute(
-        'SELECT * FROM users WHERE username LIKE ? OR fullName LIKE ? OR email LIKE ? OR rollNo LIKE ? ORDER BY created_at DESC',
-        [searchTerm, searchTerm, searchTerm, searchTerm]
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .or(`username.ilike.${searchTerm},fullName.ilike.${searchTerm},email.ilike.${searchTerm},rollNo.ilike.${searchTerm}`)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
-      throw error;
+      // Fallback to individual LIKE queries if OR doesn't work
+      try {
+        const { data: data1 } = await supabase.from('users').select('*').ilike('username', searchTerm);
+        const { data: data2 } = await supabase.from('users').select('*').ilike('fullName', searchTerm);
+        const { data: data3 } = await supabase.from('users').select('*').ilike('email', searchTerm);
+        const { data: data4 } = await supabase.from('users').select('*').ilike('rollNo', searchTerm);
+        
+        const combined = [...(data1 || []), ...(data2 || []), ...(data3 || []), ...(data4 || [])];
+        // Remove duplicates
+        const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+        return unique.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      } catch (fallbackError) {
+        throw error;
+      }
     }
   }
 
@@ -172,4 +223,4 @@ class User {
   }
 }
 
-module.exports = User; 
+module.exports = User;

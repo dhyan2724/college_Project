@@ -1,4 +1,4 @@
-const { pool } = require('../config/database');
+const { supabase } = require('../config/supabase');
 
 class Specimen {
   // Create a new specimen
@@ -9,24 +9,30 @@ class Specimen {
       // Generate specimenId if not provided
       const specimenId = specimenData.specimenId || `SPEC-${Date.now()}`;
       
-      // Set availableQuantity to totalQuantity if not specified, coerce undefined/null safely
+      // Set availableQuantity to totalQuantity if not specified
       const finalAvailableQuantity = (availableQuantity !== undefined && availableQuantity !== null)
         ? availableQuantity
         : (totalQuantity !== undefined ? totalQuantity : null);
       
-      // Convert undefined values to null for MySQL
-      const safeName = name !== undefined ? name : null;
-      const safeDescription = description !== undefined ? description : null;
-      const safeStoragePlace = storagePlace !== undefined ? storagePlace : null;
-      const safeTotalQuantity = totalQuantity !== undefined ? totalQuantity : null;
-      const safeCompany = company !== undefined ? company : null;
+      const specimenRecord = {
+        name: name !== undefined ? name : null,
+        description: description !== undefined ? description : null,
+        storagePlace: storagePlace !== undefined ? storagePlace : null,
+        totalQuantity: totalQuantity !== undefined ? totalQuantity : null,
+        availableQuantity: finalAvailableQuantity !== undefined ? finalAvailableQuantity : null,
+        company: company !== undefined ? company : null,
+        specimenId: specimenId
+      };
       
-      const [result] = await pool.execute(
-        'INSERT INTO specimens (name, description, storagePlace, totalQuantity, availableQuantity, company, specimenId) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [safeName, safeDescription, safeStoragePlace, safeTotalQuantity, (finalAvailableQuantity !== undefined ? finalAvailableQuantity : null), safeCompany, specimenId]
-      );
+      const { data, error } = await supabase
+        .from('specimens')
+        .insert([specimenRecord])
+        .select()
+        .single();
       
-      return { id: result.insertId, ...specimenData, specimenId, availableQuantity: finalAvailableQuantity };
+      if (error) throw error;
+      
+      return { ...data, ...specimenData, specimenId, availableQuantity: finalAvailableQuantity };
     } catch (error) {
       throw error;
     }
@@ -35,26 +41,30 @@ class Specimen {
   // Find specimen by ID
   static async findById(id) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM specimens WHERE id = ?',
-        [id]
-      );
-      return rows[0] || null;
+      const { data, error } = await supabase
+        .from('specimens')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
     } catch (error) {
       throw error;
     }
   }
 
-  // removed catalog number lookups
-
   // Find specimen by specimenId
   static async findBySpecimenId(specimenId) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM specimens WHERE specimenId = ?',
-        [specimenId]
-      );
-      return rows[0] || null;
+      const { data, error } = await supabase
+        .from('specimens')
+        .select('*')
+        .eq('specimenId', specimenId)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
     } catch (error) {
       throw error;
     }
@@ -63,8 +73,13 @@ class Specimen {
   // Get all specimens
   static async findAll() {
     try {
-      const [rows] = await pool.execute('SELECT * FROM specimens ORDER BY created_at DESC');
-      return rows;
+      const { data, error } = await supabase
+        .from('specimens')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -73,16 +88,21 @@ class Specimen {
   // Update specimen
   static async updateById(id, updateData) {
     try {
-      const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
-      const values = Object.values(updateData);
-      values.push(id);
+      const cleanData = {};
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] !== undefined) {
+          cleanData[key] = updateData[key];
+        }
+      });
+
+      const { data, error } = await supabase
+        .from('specimens')
+        .update(cleanData)
+        .eq('id', id)
+        .select();
       
-      const [result] = await pool.execute(
-        `UPDATE specimens SET ${fields} WHERE id = ?`,
-        values
-      );
-      
-      return result.affectedRows > 0;
+      if (error) throw error;
+      return data && data.length > 0;
     } catch (error) {
       throw error;
     }
@@ -91,11 +111,13 @@ class Specimen {
   // Delete specimen
   static async deleteById(id) {
     try {
-      const [result] = await pool.execute(
-        'DELETE FROM specimens WHERE id = ?',
-        [id]
-      );
-      return result.affectedRows > 0;
+      const { error } = await supabase
+        .from('specimens')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      return true;
     } catch (error) {
       throw error;
     }
@@ -105,11 +127,31 @@ class Specimen {
   static async search(query) {
     try {
       const searchTerm = `%${query}%`;
-      const [rows] = await pool.execute(
-        'SELECT * FROM specimens WHERE name LIKE ? OR description LIKE ? OR specimenId LIKE ? OR company LIKE ? ORDER BY created_at DESC',
-        [searchTerm, searchTerm, searchTerm, searchTerm]
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('specimens')
+        .select('*')
+        .or(`name.ilike.${searchTerm},description.ilike.${searchTerm},specimenId.ilike.${searchTerm},company.ilike.${searchTerm}`)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        // Fallback
+        const [nameResults, descResults, idResults, companyResults] = await Promise.all([
+          supabase.from('specimens').select('*').ilike('name', searchTerm),
+          supabase.from('specimens').select('*').ilike('description', searchTerm),
+          supabase.from('specimens').select('*').ilike('specimenId', searchTerm),
+          supabase.from('specimens').select('*').ilike('company', searchTerm)
+        ]);
+        const combined = [
+          ...(nameResults.data || []),
+          ...(descResults.data || []),
+          ...(idResults.data || []),
+          ...(companyResults.data || [])
+        ];
+        const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+        return unique.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      }
+      
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -118,11 +160,14 @@ class Specimen {
   // Get specimens by storage place
   static async findByStoragePlace(storagePlace) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM specimens WHERE storagePlace = ? ORDER BY created_at DESC',
-        [storagePlace]
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('specimens')
+        .select('*')
+        .eq('storagePlace', storagePlace)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -131,11 +176,14 @@ class Specimen {
   // Update available quantity
   static async updateAvailableQuantity(id, newAvailableQuantity) {
     try {
-      const [result] = await pool.execute(
-        'UPDATE specimens SET availableQuantity = ? WHERE id = ?',
-        [newAvailableQuantity, id]
-      );
-      return result.affectedRows > 0;
+      const { data, error } = await supabase
+        .from('specimens')
+        .update({ availableQuantity: newAvailableQuantity })
+        .eq('id', id)
+        .select();
+      
+      if (error) throw error;
+      return data && data.length > 0;
     } catch (error) {
       throw error;
     }
@@ -144,10 +192,10 @@ class Specimen {
   // Get low stock specimens (available quantity less than 10% of total quantity)
   static async getLowStock() {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM specimens WHERE availableQuantity < (totalQuantity * 0.1) ORDER BY availableQuantity ASC'
-      );
-      return rows;
+      const { data: allSpecimens, error } = await supabase.from('specimens').select('*');
+      if (error) throw error;
+      return (allSpecimens || []).filter(s => s.availableQuantity < (s.totalQuantity * 0.1))
+        .sort((a, b) => a.availableQuantity - b.availableQuantity);
     } catch (error) {
       throw error;
     }

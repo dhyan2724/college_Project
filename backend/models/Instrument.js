@@ -1,4 +1,4 @@
-const { pool } = require('../config/database');
+const { supabase } = require('../config/supabase');
 
 class Instrument {
   // Create a new instrument
@@ -12,19 +12,25 @@ class Instrument {
       // Set availableQuantity to totalQuantity if not specified
       const finalAvailableQuantity = availableQuantity !== undefined ? availableQuantity : totalQuantity;
       
-      // Convert undefined values to null for MySQL
-      const safeName = name !== undefined ? name : null;
-      const safeType = type !== undefined ? type : null;
-      const safeStoragePlace = storagePlace !== undefined ? storagePlace : null;
-      const safeTotalQuantity = totalQuantity !== undefined ? totalQuantity : null;
-      const safeCompany = company !== undefined ? company : null;
+      const instrumentRecord = {
+        name: name !== undefined ? name : null,
+        type: type !== undefined ? type : null,
+        storagePlace: storagePlace !== undefined ? storagePlace : null,
+        totalQuantity: totalQuantity !== undefined ? totalQuantity : null,
+        availableQuantity: finalAvailableQuantity,
+        company: company !== undefined ? company : null,
+        instrumentId: instrumentId
+      };
       
-      const [result] = await pool.execute(
-        'INSERT INTO instruments (name, type, storagePlace, totalQuantity, availableQuantity, company, instrumentId) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [safeName, safeType, safeStoragePlace, safeTotalQuantity, finalAvailableQuantity, safeCompany, instrumentId]
-      );
+      const { data, error } = await supabase
+        .from('instruments')
+        .insert([instrumentRecord])
+        .select()
+        .single();
       
-      return { id: result.insertId, ...instrumentData, instrumentId, availableQuantity: finalAvailableQuantity };
+      if (error) throw error;
+      
+      return { ...data, ...instrumentData, instrumentId, availableQuantity: finalAvailableQuantity };
     } catch (error) {
       throw error;
     }
@@ -33,26 +39,30 @@ class Instrument {
   // Find instrument by ID
   static async findById(id) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM instruments WHERE id = ?',
-        [id]
-      );
-      return rows[0] || null;
+      const { data, error } = await supabase
+        .from('instruments')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
     } catch (error) {
       throw error;
     }
   }
 
-  // removed catalog number lookups
-
   // Find instrument by instrumentId
   static async findByInstrumentId(instrumentId) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM instruments WHERE instrumentId = ?',
-        [instrumentId]
-      );
-      return rows[0] || null;
+      const { data, error } = await supabase
+        .from('instruments')
+        .select('*')
+        .eq('instrumentId', instrumentId)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
     } catch (error) {
       throw error;
     }
@@ -61,8 +71,13 @@ class Instrument {
   // Get all instruments
   static async findAll() {
     try {
-      const [rows] = await pool.execute('SELECT * FROM instruments ORDER BY created_at DESC');
-      return rows;
+      const { data, error } = await supabase
+        .from('instruments')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -71,16 +86,21 @@ class Instrument {
   // Update instrument
   static async updateById(id, updateData) {
     try {
-      const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
-      const values = Object.values(updateData);
-      values.push(id);
+      const cleanData = {};
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] !== undefined) {
+          cleanData[key] = updateData[key];
+        }
+      });
+
+      const { data, error } = await supabase
+        .from('instruments')
+        .update(cleanData)
+        .eq('id', id)
+        .select();
       
-      const [result] = await pool.execute(
-        `UPDATE instruments SET ${fields} WHERE id = ?`,
-        values
-      );
-      
-      return result.affectedRows > 0;
+      if (error) throw error;
+      return data && data.length > 0;
     } catch (error) {
       throw error;
     }
@@ -89,11 +109,13 @@ class Instrument {
   // Delete instrument
   static async deleteById(id) {
     try {
-      const [result] = await pool.execute(
-        'DELETE FROM instruments WHERE id = ?',
-        [id]
-      );
-      return result.affectedRows > 0;
+      const { error } = await supabase
+        .from('instruments')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      return true;
     } catch (error) {
       throw error;
     }
@@ -103,11 +125,25 @@ class Instrument {
   static async search(query) {
     try {
       const searchTerm = `%${query}%`;
-      const [rows] = await pool.execute(
-        'SELECT * FROM instruments WHERE name LIKE ? OR instrumentId LIKE ? OR company LIKE ? ORDER BY created_at DESC',
-        [searchTerm, searchTerm, searchTerm]
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('instruments')
+        .select('*')
+        .or(`name.ilike.${searchTerm},instrumentId.ilike.${searchTerm},company.ilike.${searchTerm}`)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        // Fallback
+        const [nameResults, idResults, companyResults] = await Promise.all([
+          supabase.from('instruments').select('*').ilike('name', searchTerm),
+          supabase.from('instruments').select('*').ilike('instrumentId', searchTerm),
+          supabase.from('instruments').select('*').ilike('company', searchTerm)
+        ]);
+        const combined = [...(nameResults.data || []), ...(idResults.data || []), ...(companyResults.data || [])];
+        const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+        return unique.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      }
+      
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -116,11 +152,14 @@ class Instrument {
   // Get instruments by type
   static async findByType(type) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM instruments WHERE type = ? ORDER BY created_at DESC',
-        [type]
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('instruments')
+        .select('*')
+        .eq('type', type)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -129,11 +168,14 @@ class Instrument {
   // Get instruments by storage place
   static async findByStoragePlace(storagePlace) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM instruments WHERE storagePlace = ? ORDER BY created_at DESC',
-        [storagePlace]
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('instruments')
+        .select('*')
+        .eq('storagePlace', storagePlace)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -142,11 +184,14 @@ class Instrument {
   // Update available quantity
   static async updateAvailableQuantity(id, newAvailableQuantity) {
     try {
-      const [result] = await pool.execute(
-        'UPDATE instruments SET availableQuantity = ? WHERE id = ?',
-        [newAvailableQuantity, id]
-      );
-      return result.affectedRows > 0;
+      const { data, error } = await supabase
+        .from('instruments')
+        .update({ availableQuantity: newAvailableQuantity })
+        .eq('id', id)
+        .select();
+      
+      if (error) throw error;
+      return data && data.length > 0;
     } catch (error) {
       throw error;
     }
@@ -155,14 +200,14 @@ class Instrument {
   // Get low stock instruments (available quantity less than 10% of total quantity)
   static async getLowStock() {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM instruments WHERE availableQuantity < (totalQuantity * 0.1) ORDER BY availableQuantity ASC'
-      );
-      return rows;
+      const { data: allInstruments, error } = await supabase.from('instruments').select('*');
+      if (error) throw error;
+      return (allInstruments || []).filter(i => i.availableQuantity < (i.totalQuantity * 0.1))
+        .sort((a, b) => a.availableQuantity - b.availableQuantity);
     } catch (error) {
       throw error;
     }
   }
 }
 
-module.exports = Instrument; 
+module.exports = Instrument;

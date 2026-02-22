@@ -3,7 +3,7 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-const { testConnection, initializeDatabase } = require('./config/database');
+const { testConnection, initializeDatabase } = require('./config/supabase');
 const usersRouter = require('./routes/users');
 const chemicalsRouter = require('./routes/chemicals');
 const glasswaresRouter = require('./routes/glasswares');
@@ -29,19 +29,23 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Initialize MySQL database
+// Initialize Supabase database
 const initializeApp = async () => {
   try {
     // Test database connection
-    await testConnection();
+    const connected = await testConnection();
+    if (!connected) {
+      console.warn('Warning: Could not connect to Supabase. Please check your environment variables.');
+    }
     
-    // Initialize database schema
+    // Initialize database schema (provides instructions)
     await initializeDatabase();
     
-    console.log('Database initialized successfully');
+    console.log('Supabase connection ready');
   } catch (error) {
-    console.error('Failed to initialize database:', error);
-    process.exit(1);
+    console.error('Failed to initialize Supabase:', error);
+    console.error('Please ensure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set in your .env file');
+    // Don't exit - allow server to start even if Supabase isn't configured yet
   }
 };
 

@@ -1,4 +1,4 @@
-const { pool } = require('../config/database');
+const { supabase } = require('../config/supabase');
 
 class Miscellaneous {
   // Create a new miscellaneous item
@@ -12,20 +12,26 @@ class Miscellaneous {
       // Set availableQuantity to totalQuantity if not specified
       const finalAvailableQuantity = availableQuantity !== undefined ? availableQuantity : totalQuantity;
       
-      // Convert undefined values to null for MySQL
-      const safeName = name !== undefined ? name : null;
-      const safeType = type !== undefined ? type : null;
-      const safeDescription = description !== undefined ? description : null;
-      const safeStoragePlace = storagePlace !== undefined ? storagePlace : null;
-      const safeTotalQuantity = totalQuantity !== undefined ? totalQuantity : null;
-      const safeCompany = company !== undefined ? company : null;
+      const miscellaneousRecord = {
+        name: name !== undefined ? name : null,
+        type: type !== undefined ? type : null,
+        description: description !== undefined ? description : null,
+        storagePlace: storagePlace !== undefined ? storagePlace : null,
+        totalQuantity: totalQuantity !== undefined ? totalQuantity : null,
+        availableQuantity: finalAvailableQuantity,
+        company: company !== undefined ? company : null,
+        miscellaneousId: miscellaneousId
+      };
       
-      const [result] = await pool.execute(
-        'INSERT INTO miscellaneous (name, type, description, storagePlace, totalQuantity, availableQuantity, company, miscellaneousId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [safeName, safeType, safeDescription, safeStoragePlace, safeTotalQuantity, finalAvailableQuantity, safeCompany, miscellaneousId]
-      );
+      const { data, error } = await supabase
+        .from('miscellaneous')
+        .insert([miscellaneousRecord])
+        .select()
+        .single();
       
-      return { id: result.insertId, ...miscellaneousData, miscellaneousId, availableQuantity: finalAvailableQuantity };
+      if (error) throw error;
+      
+      return { ...data, ...miscellaneousData, miscellaneousId, availableQuantity: finalAvailableQuantity };
     } catch (error) {
       throw error;
     }
@@ -34,26 +40,30 @@ class Miscellaneous {
   // Find miscellaneous item by ID
   static async findById(id) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM miscellaneous WHERE id = ?',
-        [id]
-      );
-      return rows[0] || null;
+      const { data, error } = await supabase
+        .from('miscellaneous')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
     } catch (error) {
       throw error;
     }
   }
 
-  // removed catalog number lookups
-
   // Find miscellaneous item by miscellaneousId
   static async findByMiscellaneousId(miscellaneousId) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM miscellaneous WHERE miscellaneousId = ?',
-        [miscellaneousId]
-      );
-      return rows[0] || null;
+      const { data, error } = await supabase
+        .from('miscellaneous')
+        .select('*')
+        .eq('miscellaneousId', miscellaneousId)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
     } catch (error) {
       throw error;
     }
@@ -62,8 +72,13 @@ class Miscellaneous {
   // Get all miscellaneous items
   static async findAll() {
     try {
-      const [rows] = await pool.execute('SELECT * FROM miscellaneous ORDER BY created_at DESC');
-      return rows;
+      const { data, error } = await supabase
+        .from('miscellaneous')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -72,16 +87,21 @@ class Miscellaneous {
   // Update miscellaneous item
   static async updateById(id, updateData) {
     try {
-      const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
-      const values = Object.values(updateData);
-      values.push(id);
+      const cleanData = {};
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] !== undefined) {
+          cleanData[key] = updateData[key];
+        }
+      });
+
+      const { data, error } = await supabase
+        .from('miscellaneous')
+        .update(cleanData)
+        .eq('id', id)
+        .select();
       
-      const [result] = await pool.execute(
-        `UPDATE miscellaneous SET ${fields} WHERE id = ?`,
-        values
-      );
-      
-      return result.affectedRows > 0;
+      if (error) throw error;
+      return data && data.length > 0;
     } catch (error) {
       throw error;
     }
@@ -90,11 +110,13 @@ class Miscellaneous {
   // Delete miscellaneous item
   static async deleteById(id) {
     try {
-      const [result] = await pool.execute(
-        'DELETE FROM miscellaneous WHERE id = ?',
-        [id]
-      );
-      return result.affectedRows > 0;
+      const { error } = await supabase
+        .from('miscellaneous')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      return true;
     } catch (error) {
       throw error;
     }
@@ -104,11 +126,31 @@ class Miscellaneous {
   static async search(query) {
     try {
       const searchTerm = `%${query}%`;
-      const [rows] = await pool.execute(
-        'SELECT * FROM miscellaneous WHERE name LIKE ? OR description LIKE ? OR miscellaneousId LIKE ? OR company LIKE ? ORDER BY created_at DESC',
-        [searchTerm, searchTerm, searchTerm, searchTerm]
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('miscellaneous')
+        .select('*')
+        .or(`name.ilike.${searchTerm},description.ilike.${searchTerm},miscellaneousId.ilike.${searchTerm},company.ilike.${searchTerm}`)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        // Fallback
+        const [nameResults, descResults, idResults, companyResults] = await Promise.all([
+          supabase.from('miscellaneous').select('*').ilike('name', searchTerm),
+          supabase.from('miscellaneous').select('*').ilike('description', searchTerm),
+          supabase.from('miscellaneous').select('*').ilike('miscellaneousId', searchTerm),
+          supabase.from('miscellaneous').select('*').ilike('company', searchTerm)
+        ]);
+        const combined = [
+          ...(nameResults.data || []),
+          ...(descResults.data || []),
+          ...(idResults.data || []),
+          ...(companyResults.data || [])
+        ];
+        const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+        return unique.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      }
+      
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -117,11 +159,14 @@ class Miscellaneous {
   // Get miscellaneous items by storage place
   static async findByStoragePlace(storagePlace) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM miscellaneous WHERE storagePlace = ? ORDER BY created_at DESC',
-        [storagePlace]
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('miscellaneous')
+        .select('*')
+        .eq('storagePlace', storagePlace)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -130,11 +175,14 @@ class Miscellaneous {
   // Update available quantity
   static async updateAvailableQuantity(id, newAvailableQuantity) {
     try {
-      const [result] = await pool.execute(
-        'UPDATE miscellaneous SET availableQuantity = ? WHERE id = ?',
-        [newAvailableQuantity, id]
-      );
-      return result.affectedRows > 0;
+      const { data, error } = await supabase
+        .from('miscellaneous')
+        .update({ availableQuantity: newAvailableQuantity })
+        .eq('id', id)
+        .select();
+      
+      if (error) throw error;
+      return data && data.length > 0;
     } catch (error) {
       throw error;
     }
@@ -143,14 +191,14 @@ class Miscellaneous {
   // Get low stock miscellaneous items (available quantity less than 10% of total quantity)
   static async getLowStock() {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM miscellaneous WHERE availableQuantity < (totalQuantity * 0.1) ORDER BY availableQuantity ASC'
-      );
-      return rows;
+      const { data: allMiscellaneous, error } = await supabase.from('miscellaneous').select('*');
+      if (error) throw error;
+      return (allMiscellaneous || []).filter(m => m.availableQuantity < (m.totalQuantity * 0.1))
+        .sort((a, b) => a.availableQuantity - b.availableQuantity);
     } catch (error) {
       throw error;
     }
   }
 }
 
-module.exports = Miscellaneous; 
+module.exports = Miscellaneous;

@@ -1,4 +1,4 @@
-const { pool } = require('../config/database');
+const { supabase } = require('../config/supabase');
 
 class Chemical {
   // Create a new chemical
@@ -15,20 +15,27 @@ class Chemical {
           ? availableWeight
           : (totalWeight !== undefined && totalWeight !== null ? totalWeight : 0);
       
-      // Convert undefined values to null for MySQL
-      const safeName = name !== undefined ? name : null;
-      const safeType = type !== undefined ? type : null;
-      const safeStoragePlace = storagePlace !== undefined ? storagePlace : null;
-      const safeTotalWeight = totalWeight !== undefined ? totalWeight : null;
-      const safeCompany = company !== undefined ? company : null;
-      const safeCatalogNumber = catalogNumber !== undefined ? catalogNumber : null;
+      // Prepare data object
+      const chemicalRecord = {
+        name: name !== undefined ? name : null,
+        type: type !== undefined ? type : null,
+        storagePlace: storagePlace !== undefined ? storagePlace : null,
+        totalWeight: totalWeight !== undefined ? totalWeight : null,
+        availableWeight: finalAvailableWeight,
+        company: company !== undefined ? company : null,
+        catalogNumber: catalogNumber !== undefined ? catalogNumber : null,
+        chemicalId: chemicalId
+      };
       
-      const [result] = await pool.execute(
-        'INSERT INTO chemicals (name, type, storagePlace, totalWeight, availableWeight, company, catalogNumber, chemicalId) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [safeName, safeType, safeStoragePlace, safeTotalWeight, finalAvailableWeight, safeCompany, safeCatalogNumber, chemicalId]
-      );
+      const { data, error } = await supabase
+        .from('chemicals')
+        .insert([chemicalRecord])
+        .select()
+        .single();
       
-      return { id: result.insertId, ...chemicalData, chemicalId, availableWeight: finalAvailableWeight };
+      if (error) throw error;
+      
+      return { ...data, ...chemicalData, chemicalId, availableWeight: finalAvailableWeight };
     } catch (error) {
       throw error;
     }
@@ -37,11 +44,14 @@ class Chemical {
   // Find chemical by ID
   static async findById(id) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM chemicals WHERE id = ?',
-        [id]
-      );
-      return rows[0] || null;
+      const { data, error } = await supabase
+        .from('chemicals')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
     } catch (error) {
       throw error;
     }
@@ -50,11 +60,14 @@ class Chemical {
   // Find chemical by catalog number
   static async findByCatalogNumber(catalogNumber) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM chemicals WHERE catalogNumber = ?',
-        [catalogNumber]
-      );
-      return rows[0] || null;
+      const { data, error } = await supabase
+        .from('chemicals')
+        .select('*')
+        .eq('catalogNumber', catalogNumber)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
     } catch (error) {
       throw error;
     }
@@ -63,11 +76,14 @@ class Chemical {
   // Find chemical by chemicalId
   static async findByChemicalId(chemicalId) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM chemicals WHERE chemicalId = ?',
-        [chemicalId]
-      );
-      return rows[0] || null;
+      const { data, error } = await supabase
+        .from('chemicals')
+        .select('*')
+        .eq('chemicalId', chemicalId)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
     } catch (error) {
       throw error;
     }
@@ -76,8 +92,13 @@ class Chemical {
   // Get all chemicals
   static async findAll() {
     try {
-      const [rows] = await pool.execute('SELECT * FROM chemicals ORDER BY created_at DESC');
-      return rows;
+      const { data, error } = await supabase
+        .from('chemicals')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -86,16 +107,22 @@ class Chemical {
   // Update chemical
   static async updateById(id, updateData) {
     try {
-      const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
-      const values = Object.values(updateData);
-      values.push(id);
+      // Remove undefined values
+      const cleanData = {};
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] !== undefined) {
+          cleanData[key] = updateData[key];
+        }
+      });
+
+      const { data, error } = await supabase
+        .from('chemicals')
+        .update(cleanData)
+        .eq('id', id)
+        .select();
       
-      const [result] = await pool.execute(
-        `UPDATE chemicals SET ${fields} WHERE id = ?`,
-        values
-      );
-      
-      return result.affectedRows > 0;
+      if (error) throw error;
+      return data && data.length > 0;
     } catch (error) {
       throw error;
     }
@@ -104,11 +131,13 @@ class Chemical {
   // Delete chemical
   static async deleteById(id) {
     try {
-      const [result] = await pool.execute(
-        'DELETE FROM chemicals WHERE id = ?',
-        [id]
-      );
-      return result.affectedRows > 0;
+      const { error } = await supabase
+        .from('chemicals')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      return true;
     } catch (error) {
       throw error;
     }
@@ -118,11 +147,32 @@ class Chemical {
   static async search(query) {
     try {
       const searchTerm = `%${query}%`;
-      const [rows] = await pool.execute(
-        'SELECT * FROM chemicals WHERE name LIKE ? OR catalogNumber LIKE ? OR chemicalId LIKE ? OR company LIKE ? ORDER BY created_at DESC',
-        [searchTerm, searchTerm, searchTerm, searchTerm]
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('chemicals')
+        .select('*')
+        .or(`name.ilike.${searchTerm},catalogNumber.ilike.${searchTerm},chemicalId.ilike.${searchTerm},company.ilike.${searchTerm}`)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        // Fallback to individual queries
+        const [nameResults, catalogResults, idResults, companyResults] = await Promise.all([
+          supabase.from('chemicals').select('*').ilike('name', searchTerm),
+          supabase.from('chemicals').select('*').ilike('catalogNumber', searchTerm),
+          supabase.from('chemicals').select('*').ilike('chemicalId', searchTerm),
+          supabase.from('chemicals').select('*').ilike('company', searchTerm)
+        ]);
+        
+        const combined = [
+          ...(nameResults.data || []),
+          ...(catalogResults.data || []),
+          ...(idResults.data || []),
+          ...(companyResults.data || [])
+        ];
+        const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+        return unique.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      }
+      
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -131,11 +181,14 @@ class Chemical {
   // Get chemicals by type
   static async findByType(type) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM chemicals WHERE type = ? ORDER BY created_at DESC',
-        [type]
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('chemicals')
+        .select('*')
+        .eq('type', type)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -144,11 +197,14 @@ class Chemical {
   // Get chemicals by storage place
   static async findByStoragePlace(storagePlace) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM chemicals WHERE storagePlace = ? ORDER BY created_at DESC',
-        [storagePlace]
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('chemicals')
+        .select('*')
+        .eq('storagePlace', storagePlace)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -157,11 +213,14 @@ class Chemical {
   // Update available weight
   static async updateAvailableWeight(id, newAvailableWeight) {
     try {
-      const [result] = await pool.execute(
-        'UPDATE chemicals SET availableWeight = ? WHERE id = ?',
-        [newAvailableWeight, id]
-      );
-      return result.affectedRows > 0;
+      const { data, error } = await supabase
+        .from('chemicals')
+        .update({ availableWeight: newAvailableWeight })
+        .eq('id', id)
+        .select();
+      
+      if (error) throw error;
+      return data && data.length > 0;
     } catch (error) {
       throw error;
     }
@@ -170,10 +229,19 @@ class Chemical {
   // Get low stock chemicals (available weight less than 10% of total weight)
   static async getLowStock() {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM chemicals WHERE availableWeight < (totalWeight * 0.1) ORDER BY availableWeight ASC'
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('chemicals')
+        .select('*')
+        .lt('availableWeight', supabase.raw('totalWeight * 0.1'));
+      
+      if (error) {
+        // Fallback: fetch all and filter in JavaScript
+        const { data: allChemicals } = await supabase.from('chemicals').select('*');
+        return (allChemicals || []).filter(c => c.availableWeight < (c.totalWeight * 0.1))
+          .sort((a, b) => a.availableWeight - b.availableWeight);
+      }
+      
+      return (data || []).sort((a, b) => a.availableWeight - b.availableWeight);
     } catch (error) {
       throw error;
     }
@@ -182,15 +250,18 @@ class Chemical {
   // Get available quantity (for compatibility with frontend)
   static async getAvailableQuantity(id) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT availableWeight as availableQuantity FROM chemicals WHERE id = ?',
-        [id]
-      );
-      return rows[0]?.availableQuantity || 0;
+      const { data, error } = await supabase
+        .from('chemicals')
+        .select('availableWeight')
+        .eq('id', id)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data?.availableWeight || 0;
     } catch (error) {
       throw error;
     }
   }
 }
 
-module.exports = Chemical; 
+module.exports = Chemical;

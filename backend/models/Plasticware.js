@@ -1,4 +1,4 @@
-const { pool } = require('../config/database');
+const { supabase } = require('../config/supabase');
 
 class Plasticware {
   // Create a new plasticware
@@ -15,19 +15,25 @@ class Plasticware {
           ? availableQuantity
           : (totalQuantity !== undefined && totalQuantity !== null ? totalQuantity : 0);
       
-      // Convert undefined values to null for MySQL
-      const safeName = name !== undefined ? name : null;
-      const safeType = type !== undefined ? type : null;
-      const safeStoragePlace = storagePlace !== undefined ? storagePlace : null;
-      const safeTotalQuantity = totalQuantity !== undefined ? totalQuantity : null;
-      const safeCompany = company !== undefined ? company : null;
+      const plasticwareRecord = {
+        name: name !== undefined ? name : null,
+        type: type !== undefined ? type : null,
+        storagePlace: storagePlace !== undefined ? storagePlace : null,
+        totalQuantity: totalQuantity !== undefined ? totalQuantity : null,
+        availableQuantity: finalAvailableQuantity,
+        company: company !== undefined ? company : null,
+        plasticwareId: plasticwareId
+      };
       
-      const [result] = await pool.execute(
-        'INSERT INTO plasticwares (name, type, storagePlace, totalQuantity, availableQuantity, company, plasticwareId) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [safeName, safeType, safeStoragePlace, safeTotalQuantity, finalAvailableQuantity, safeCompany, plasticwareId]
-      );
+      const { data, error } = await supabase
+        .from('plasticwares')
+        .insert([plasticwareRecord])
+        .select()
+        .single();
       
-      return { id: result.insertId, ...plasticwareData, plasticwareId, availableQuantity: finalAvailableQuantity };
+      if (error) throw error;
+      
+      return { ...data, ...plasticwareData, plasticwareId, availableQuantity: finalAvailableQuantity };
     } catch (error) {
       throw error;
     }
@@ -36,26 +42,30 @@ class Plasticware {
   // Find plasticware by ID
   static async findById(id) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM plasticwares WHERE id = ?',
-        [id]
-      );
-      return rows[0] || null;
+      const { data, error } = await supabase
+        .from('plasticwares')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
     } catch (error) {
       throw error;
     }
   }
 
-  // removed catalog number lookups
-
   // Find plasticware by plasticwareId
   static async findByPlasticwareId(plasticwareId) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM plasticwares WHERE plasticwareId = ?',
-        [plasticwareId]
-      );
-      return rows[0] || null;
+      const { data, error } = await supabase
+        .from('plasticwares')
+        .select('*')
+        .eq('plasticwareId', plasticwareId)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
     } catch (error) {
       throw error;
     }
@@ -64,8 +74,13 @@ class Plasticware {
   // Get all plasticwares
   static async findAll() {
     try {
-      const [rows] = await pool.execute('SELECT * FROM plasticwares ORDER BY created_at DESC');
-      return rows;
+      const { data, error } = await supabase
+        .from('plasticwares')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -74,16 +89,21 @@ class Plasticware {
   // Update plasticware
   static async updateById(id, updateData) {
     try {
-      const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
-      const values = Object.values(updateData);
-      values.push(id);
+      const cleanData = {};
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] !== undefined) {
+          cleanData[key] = updateData[key];
+        }
+      });
+
+      const { data, error } = await supabase
+        .from('plasticwares')
+        .update(cleanData)
+        .eq('id', id)
+        .select();
       
-      const [result] = await pool.execute(
-        `UPDATE plasticwares SET ${fields} WHERE id = ?`,
-        values
-      );
-      
-      return result.affectedRows > 0;
+      if (error) throw error;
+      return data && data.length > 0;
     } catch (error) {
       throw error;
     }
@@ -92,11 +112,13 @@ class Plasticware {
   // Delete plasticware
   static async deleteById(id) {
     try {
-      const [result] = await pool.execute(
-        'DELETE FROM plasticwares WHERE id = ?',
-        [id]
-      );
-      return result.affectedRows > 0;
+      const { error } = await supabase
+        .from('plasticwares')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      return true;
     } catch (error) {
       throw error;
     }
@@ -106,11 +128,25 @@ class Plasticware {
   static async search(query) {
     try {
       const searchTerm = `%${query}%`;
-      const [rows] = await pool.execute(
-        'SELECT * FROM plasticwares WHERE name LIKE ? OR plasticwareId LIKE ? OR company LIKE ? ORDER BY created_at DESC',
-        [searchTerm, searchTerm, searchTerm]
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('plasticwares')
+        .select('*')
+        .or(`name.ilike.${searchTerm},plasticwareId.ilike.${searchTerm},company.ilike.${searchTerm}`)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        // Fallback
+        const [nameResults, idResults, companyResults] = await Promise.all([
+          supabase.from('plasticwares').select('*').ilike('name', searchTerm),
+          supabase.from('plasticwares').select('*').ilike('plasticwareId', searchTerm),
+          supabase.from('plasticwares').select('*').ilike('company', searchTerm)
+        ]);
+        const combined = [...(nameResults.data || []), ...(idResults.data || []), ...(companyResults.data || [])];
+        const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+        return unique.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      }
+      
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -119,11 +155,14 @@ class Plasticware {
   // Get plasticwares by type
   static async findByType(type) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM plasticwares WHERE type = ? ORDER BY created_at DESC',
-        [type]
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('plasticwares')
+        .select('*')
+        .eq('type', type)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -132,11 +171,14 @@ class Plasticware {
   // Get plasticwares by storage place
   static async findByStoragePlace(storagePlace) {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM plasticwares WHERE storagePlace = ? ORDER BY created_at DESC',
-        [storagePlace]
-      );
-      return rows;
+      const { data, error } = await supabase
+        .from('plasticwares')
+        .select('*')
+        .eq('storagePlace', storagePlace)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
     } catch (error) {
       throw error;
     }
@@ -145,11 +187,14 @@ class Plasticware {
   // Update available quantity
   static async updateAvailableQuantity(id, newAvailableQuantity) {
     try {
-      const [result] = await pool.execute(
-        'UPDATE plasticwares SET availableQuantity = ? WHERE id = ?',
-        [newAvailableQuantity, id]
-      );
-      return result.affectedRows > 0;
+      const { data, error } = await supabase
+        .from('plasticwares')
+        .update({ availableQuantity: newAvailableQuantity })
+        .eq('id', id)
+        .select();
+      
+      if (error) throw error;
+      return data && data.length > 0;
     } catch (error) {
       throw error;
     }
@@ -158,14 +203,14 @@ class Plasticware {
   // Get low stock plasticwares (available quantity less than 10% of total quantity)
   static async getLowStock() {
     try {
-      const [rows] = await pool.execute(
-        'SELECT * FROM plasticwares WHERE availableQuantity < (totalQuantity * 0.1) ORDER BY availableQuantity ASC'
-      );
-      return rows;
+      const { data: allPlasticwares, error } = await supabase.from('plasticwares').select('*');
+      if (error) throw error;
+      return (allPlasticwares || []).filter(p => p.availableQuantity < (p.totalQuantity * 0.1))
+        .sort((a, b) => a.availableQuantity - b.availableQuantity);
     } catch (error) {
       throw error;
     }
   }
 }
 
-module.exports = Plasticware; 
+module.exports = Plasticware;
