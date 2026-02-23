@@ -11,7 +11,11 @@ import StudentDashboard from './components/StudentDashboard';
 import StudentRegisterPage from './components/StudentRegisterPage';
 import TeacherDashboard from './components/TeacherDashboard';
 
-const API_URL = process.env.REACT_APP_API_URL || '/api';
+// Prefer runtime-configured API URL injected via `public/env.js` (window._env_.REACT_APP_API_URL).
+// Fallback to build-time env var REACT_APP_API_URL, then to a relative '/api' path.
+const API_URL = (typeof window !== 'undefined' && window._env_ && window._env_.REACT_APP_API_URL)
+    || process.env.REACT_APP_API_URL
+    || '/api';
 
 export const AuthContext = createContext(null);
 
