@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const API_URL = process.env.REACT_APP_API_URL || '/api'; // Set via environment or proxy through /api
+import { createUser } from '../services/api';
 
 const StudentRegisterPage = () => {
   const [username, setUsername] = useState('');
@@ -19,30 +18,21 @@ const StudentRegisterPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/users`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username,
-          password,
-          email,
-          fullName,
-          rollNo,
-          role: 'student',
-          category, // Add category to request
-          year,        // Add year to request
-          department,
-        }),
+      await createUser({
+        username,
+        password,
+        email,
+        fullName,
+        rollNo,
+        role: 'student',
+        category,
+        year,
+        department,
       });
-      if (response.ok) {
-        alert('Registration successful! Please login.');
-        navigate('/login');
-      } else {
-        const errorData = await response.json();
-        alert(`Registration failed: ${errorData.message}`);
-      }
+      alert('Registration successful! Please login.');
+      navigate('/login');
     } catch (error) {
-      alert('An error occurred during registration.');
+      alert(`Registration failed: ${error.message || 'An error occurred'}`);
     }
     setLoading(false);
   };

@@ -3,7 +3,7 @@
 window._env_ = window._env_ || {};
 
 // Backend API URL
-window._env_.REACT_APP_API_URL = window._env_.REACT_APP_API_URL || 'https://abcd1234.ngrok.io/api';
+window._env_.REACT_APP_API_URL = window._env_.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 // Supabase Configuration
 window._env_.REACT_APP_SUPABASE_URL = window._env_.REACT_APP_SUPABASE_URL || 'https://lhhoacasfrqzqdbygmnq.supabase.co';
