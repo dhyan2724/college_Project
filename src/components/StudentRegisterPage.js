@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = 'http://172.168.2.130:5000/api'; // Make sure this matches your backend API URL
+const API_URL = process.env.REACT_APP_API_URL || '/api'; // Set via environment or proxy through /api
 
 const StudentRegisterPage = () => {
   const [username, setUsername] = useState('');

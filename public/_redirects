@@ -1,1 +1,6 @@
+# Netlify redirect rules
+# Proxy API calls to your backend. Replace with your backend's public URL (include scheme).
+# Example: /api/*  https://api.example.com/:splat  200
+/api/*  https://REPLACE_WITH_BACKEND_URL/:splat  200
+
 /*    /index.html   200
