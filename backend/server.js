@@ -23,10 +23,18 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware
-const allowedOrigins = ['https://nuvsoslabs.netlify.app', 'http://nuvsoslabs.in'];
-app.use(cors({
+const allowedOrigins = [
+  'https://nuvsoslabs.netlify.app',
+  'http://nuvsoslabs.in',
+  'https://nuvsoslabs.in',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'https://college-project-ebon-kappa.vercel.app'
+];
+
+const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl, etc.) always allow
+    // Allow requests with no origin (like mobile apps, curl, or server-to-server) always allow
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
@@ -35,7 +43,11 @@ app.use(cors({
     }
   },
   credentials: true
-}));
+};
+
+app.use(cors(corsOptions));
+// Handle preflight across the board
+app.options('*', cors(corsOptions));
 app.use(express.json());
 
 // Initialize Supabase database

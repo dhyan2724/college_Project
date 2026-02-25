@@ -2,6 +2,7 @@
   publish = "build"
   command = "npm run build"
 
+# SPA catch-all for React Router
 [[redirects]]
   from = "/*"
   to = "/index.html"
