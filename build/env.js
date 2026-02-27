@@ -6,7 +6,7 @@ window._env_ = window._env_ || {};
 // Set the production backend API URL here. Edit this file on the server
 // hosting nuvsoslabs.in to point the frontend to the correct backend
 // without rebuilding the app. Use HTTPS in production.
-window._env_.REACT_APP_API_URL = window._env_.REACT_APP_API_URL || 'https://nuvsoslabs.in/api';
+window._env_.REACT_APP_API_URL = window._env_.REACT_APP_API_URL || 'https://college-project-7hup.vercel.app/api';
 
 // Supabase Configuration
 window._env_.REACT_APP_SUPABASE_URL = window._env_.REACT_APP_SUPABASE_URL || 'https://lhhoacasfrqzqdbygmnq.supabase.co';

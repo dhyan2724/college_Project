@@ -11,8 +11,8 @@ window._env_ = window._env_ || {};
 // ===== Prefer runtime-configured API URL here in production. Edit this file on the
 // CDN/server to change the frontend -> backend endpoint without rebuilding.
 // For your deployed app, point to your live backend:
-//   - Current production backend: https://nuvsoslabs.in/api
-window._env_.REACT_APP_API_URL = window._env_.REACT_APP_API_URL || 'http://localhost:5000/api';
+//   - Current production backend: https://college-project-7hup.vercel.app/api
+window._env_.REACT_APP_API_URL = window._env_.REACT_APP_API_URL || 'https://college-project-7hup.vercel.app/api';
 
 // Supabase Configuration (used by backend for database)
 window._env_.REACT_APP_SUPABASE_URL = window._env_.REACT_APP_SUPABASE_URL || 'https://lhhoacasfrqzqdbygmnq.supabase.co';
