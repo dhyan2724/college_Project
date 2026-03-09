@@ -124,14 +124,28 @@ const StudentRegisterPage = () => {
             ))}
           </select>
         )}
-          <input
-            type="text"
-            placeholder="Department"
-            className="w-full mb-4 p-2 border rounded"
-            value={department}
-            onChange={e => setDepartment(e.target.value)}
-            required
-          />
+        <select
+          className="w-full mb-4 p-2 border rounded"
+          value={department}
+          onChange={(e) => setDepartment(e.target.value)}
+          required
+        >
+          <option value="">Department</option>
+          <option value="BSc-Microbiology">BSc-Microbiology</option>
+          <option value="BSc-Zoology & Animal Biotechnology">BSc-Zoology & Animal Biotechnology</option>
+          <option value="BSc-Botany & Plant Biotechnology">BSc-Botany & Plant Biotechnology</option>
+          <option value="BSc-MSc Biomedical">BSc-MSc Biomedical</option>
+          <option value="BSc-MSc Botany">BSc-MSc Botany</option>
+          <option value="BSc-MSc Zoology">BSc-MSc Zoology</option>
+          <option value="BSc-MSc Microbiology">BSc-MSc Microbiology</option>
+          <option value="BSc-MSc Food Science">BSc-MSc Food Science</option>
+          <option value="MSc-Zoology & Biotechnology">MSc-Zoology & Biotechnology</option>
+          <option value="MSc-Botany & Biotechnology">MSc-Botany & Biotechnology</option>
+          <option value="MSc-Microbiology">MSc-Microbiology</option>
+          <option value="MSc-Clinical Embryology">MSc-Clinical Embryology</option>
+          <option value="MSc-Food Science & Dietetics">MSc-Food Science & Dietetics</option>
+          <option value="PhD">PhD</option>
+        </select>
         <button type="submit" className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600" disabled={loading}>
           {loading ? 'Registering...' : 'Register'}
         </button>
