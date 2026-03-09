@@ -119,7 +119,16 @@ router.post('/', async (req, res) => {
     const baseRequired = ['username', 'password', 'role', 'email', 'fullName'];
     // Students (and student-like roles) must provide full academic details
     const studentLikeRoles = ['student', 'phd_scholar', 'dissertation_student'];
-    const extendedRequired = baseRequired.concat(studentLikeRoles.includes(role) ? ['rollNo', 'category', 'year', 'department'] : []);
+    let extendedRequired = baseRequired;
+    if (studentLikeRoles.includes(role)) {
+      extendedRequired = extendedRequired.concat(['rollNo', 'category', 'department']);
+
+      const category = String(req.body.category || '').trim().toLowerCase();
+      const noYearCategories = new Set(['phd', 'project student', 'project_student', 'projectstudent']);
+      if (!noYearCategories.has(category)) {
+        extendedRequired.push('year');
+      }
+    }
 
     const missingFields = extendedRequired.filter(field => !req.body[field]);
     if (missingFields.length > 0) {

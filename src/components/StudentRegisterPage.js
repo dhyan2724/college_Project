@@ -14,11 +14,17 @@ const StudentRegisterPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const needsYear = category === 'UG' || category === 'PG' || category === 'UG/PG';
+  const yearOptions =
+    category === 'PG'
+      ? ['1st', '2nd']
+      : ['1st', '2nd', '3rd', '4th'];
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await createUser({
+      const payload = {
         username,
         password,
         email,
@@ -26,9 +32,11 @@ const StudentRegisterPage = () => {
         rollNo,
         role: 'student',
         category,
-        year,
         department,
-      });
+        ...(needsYear ? { year } : {}),
+      };
+
+      await createUser(payload);
       alert('Registration successful! Please login.');
       navigate('/login');
     } catch (error) {
@@ -89,26 +97,33 @@ const StudentRegisterPage = () => {
         <select
           className="w-full mb-4 p-2 border rounded"
           value={category}
-          onChange={e => setCategory(e.target.value)}
+          onChange={(e) => {
+            setCategory(e.target.value);
+            setYear('');
+          }}
           required
         >
           <option value="">Select Program</option>
-          <option value="UG/PG">UG/PG</option>
+          <option value="UG">UG</option>
+          <option value="PG">PG</option>
           <option value="PhD">PhD</option>
           <option value="Project Student">Project Student</option>
         </select>
-        <select
+        {needsYear && (
+          <select
             className="w-full mb-4 p-2 border rounded"
             value={year}
-            onChange={e => setYear(e.target.value)}
-            required>
+            onChange={(e) => setYear(e.target.value)}
+            required
+          >
             <option value="">Select Year</option>
-            <option value="1st">1st Year</option>
-            <option value="2nd">2nd Year</option>
-            <option value="3rd">3rd Year</option>
-            <option value="4th">4th Year</option>
-            <option value="5th">5th Year</option>
+            {yearOptions.map((y) => (
+              <option key={y} value={y}>
+                {y} Year
+              </option>
+            ))}
           </select>
+        )}
           <input
             type="text"
             placeholder="Department"
