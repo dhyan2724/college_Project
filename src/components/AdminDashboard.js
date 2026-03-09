@@ -1194,7 +1194,28 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
                   )}
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Department</label>
-                    <input type="text" className="border p-2 rounded w-full" value={newUserDepartment} onChange={e => setNewUserDepartment(e.target.value)} required />
+                    <select
+                      className="border p-2 rounded w-full"
+                      value={newUserDepartment}
+                      onChange={(e) => setNewUserDepartment(e.target.value)}
+                      required
+                    >
+                      <option value="">Department</option>
+                      <option value="BSc-Microbiology">BSc-Microbiology</option>
+                      <option value="BSc-Zoology & Animal Biotechnology">BSc-Zoology & Animal Biotechnology</option>
+                      <option value="BSc-Botany & Plant Biotechnology">BSc-Botany & Plant Biotechnology</option>
+                      <option value="BSc-MSc Biomedical">BSc-MSc Biomedical</option>
+                      <option value="BSc-MSc Botany">BSc-MSc Botany</option>
+                      <option value="BSc-MSc Zoology">BSc-MSc Zoology</option>
+                      <option value="BSc-MSc Microbiology">BSc-MSc Microbiology</option>
+                      <option value="BSc-MSc Food Science">BSc-MSc Food Science</option>
+                      <option value="MSc-Zoology & Biotechnology">MSc-Zoology & Biotechnology</option>
+                      <option value="MSc-Botany & Biotechnology">MSc-Botany & Biotechnology</option>
+                      <option value="MSc-Microbiology">MSc-Microbiology</option>
+                      <option value="MSc-Clinical Embryology">MSc-Clinical Embryology</option>
+                      <option value="MSc-Food Science & Dietetics">MSc-Food Science & Dietetics</option>
+                      <option value="PhD">PhD</option>
+                    </select>
                   </div>
                 </>
               )}
