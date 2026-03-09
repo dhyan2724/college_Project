@@ -34,6 +34,7 @@ router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) =>
             name: req.body.name,
             type: req.body.type,
             storagePlace: req.body.storagePlace,
+            roomLocation: req.body.roomLocation,
             totalWeight: req.body.totalWeight,
             company: req.body.company,
             // catalogNumber is NOT NULL in schema; ensure it is forwarded from client
@@ -64,7 +65,7 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty', 'mast
         }
 
         // Only allow updating certain fields
-        const updatableFields = ['name', 'type', 'storagePlace', 'totalWeight', 'company', 'catalogNumber'];
+        const updatableFields = ['name', 'type', 'storagePlace', 'roomLocation', 'totalWeight', 'company', 'catalogNumber'];
         const updateData = {};
         updatableFields.forEach(field => {
             if (req.body[field] !== undefined) {

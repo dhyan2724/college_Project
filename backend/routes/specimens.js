@@ -39,6 +39,7 @@ router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) =>
       name: req.body.name,
       description: req.body.description,
       storagePlace: req.body.storagePlace,
+      roomLocation: req.body.roomLocation,
       totalQuantity: req.body.totalQuantity,
       company: req.body.company,
     };
@@ -65,7 +66,7 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty', 'mast
       return res.status(404).json({ message: 'Specimen not found' });
     }
 
-    const updatableFields = ['name', 'description', 'storagePlace', 'totalQuantity', 'company'];
+    const updatableFields = ['name', 'description', 'storagePlace', 'roomLocation', 'totalQuantity', 'company'];
     const updateData = {};
     updatableFields.forEach(field => {
       if (req.body[field] !== undefined) {

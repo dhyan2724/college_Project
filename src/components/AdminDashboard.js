@@ -5,6 +5,8 @@ import api from '../services/api';
 import AIFaqPage from './AIFaqPage';
 import InventorySection from "./InventorySection";
 
+const ROOM_LOCATION_OPTIONS = ['4th floor BMS Lab', '7th floor CLE Lab'];
+
 const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], slides = [] }) => {
   const { chemicals, glasswares, plasticwares, instruments, users, setUsers, fetchData, API_URL, logout } = useContext(AuthContext);
   const [showCreateTeacherForm, setShowCreateTeacherForm] = useState(false);
@@ -17,6 +19,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
   const [newChemicalName, setNewChemicalName] = useState('');
   const [newChemicalType, setNewChemicalType] = useState('Solid');
   const [newChemicalStoragePlace, setNewChemicalStoragePlace] = useState('Cupboard');
+  const [newChemicalRoomLocation, setNewChemicalRoomLocation] = useState(ROOM_LOCATION_OPTIONS[0]);
   const [newChemicalTotalWeight, setNewChemicalTotalWeight] = useState('');
   const [newChemicalWeightUnit, setNewChemicalWeightUnit] = useState('g');
   const [newChemicalCompany, setNewChemicalCompany] = useState('');
@@ -26,6 +29,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
   const [newGlasswareName, setNewGlasswareName] = useState('');
   const [newGlasswareType, setNewGlasswareType] = useState('');
   const [newGlasswareStoragePlace, setNewGlasswareStoragePlace] = useState('');
+  const [newGlasswareRoomLocation, setNewGlasswareRoomLocation] = useState(ROOM_LOCATION_OPTIONS[0]);
   const [newGlasswareTotalQuantity, setNewGlasswareTotalQuantity] = useState('');
   const [newGlasswareCompany, setNewGlasswareCompany] = useState('');
   // removed catalog number for glassware
@@ -34,6 +38,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
   const [newInstrumentName, setNewInstrumentName] = useState('');
   const [newInstrumentType, setNewInstrumentType] = useState('');
   const [newInstrumentStoragePlace, setNewInstrumentStoragePlace] = useState('');
+  const [newInstrumentRoomLocation, setNewInstrumentRoomLocation] = useState(ROOM_LOCATION_OPTIONS[0]);
   const [newInstrumentTotalQuantity, setNewInstrumentTotalQuantity] = useState('');
   const [newInstrumentCompany, setNewInstrumentCompany] = useState('');
   // removed catalog number for instruments
@@ -42,6 +47,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
   const [newPlasticwareName, setNewPlasticwareName] = useState('');
   const [newPlasticwareType, setNewPlasticwareType] = useState('');
   const [newPlasticwareStoragePlace, setNewPlasticwareStoragePlace] = useState('');
+  const [newPlasticwareRoomLocation, setNewPlasticwareRoomLocation] = useState(ROOM_LOCATION_OPTIONS[0]);
   const [newPlasticwareTotalQuantity, setNewPlasticwareTotalQuantity] = useState('');
   const [newPlasticwareCompany, setNewPlasticwareCompany] = useState('');
   // removed catalog number for plasticware
@@ -51,6 +57,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
   const [newMiscType, setNewMiscType] = useState('');
   const [newMiscDescription, setNewMiscDescription] = useState('');
   const [newMiscStoragePlace, setNewMiscStoragePlace] = useState('');
+  const [newMiscRoomLocation, setNewMiscRoomLocation] = useState(ROOM_LOCATION_OPTIONS[0]);
   const [newMiscTotalQuantity, setNewMiscTotalQuantity] = useState('');
   const [newMiscCompany, setNewMiscCompany] = useState('');
   // removed catalog number for miscellaneous
@@ -64,6 +71,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
   const [newSpecimenType, setNewSpecimenType] = useState('');
   const [newSpecimenDescription, setNewSpecimenDescription] = useState('');
   const [newSpecimenStoragePlace, setNewSpecimenStoragePlace] = useState('');
+  const [newSpecimenRoomLocation, setNewSpecimenRoomLocation] = useState(ROOM_LOCATION_OPTIONS[0]);
   const [newSpecimenTotalQuantity, setNewSpecimenTotalQuantity] = useState('');
   const [newSpecimenCompany, setNewSpecimenCompany] = useState('');
   // removed catalog number for specimens
@@ -72,6 +80,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
   const [newSlideName, setNewSlideName] = useState('');
   const [newSlideDescription, setNewSlideDescription] = useState('');
   const [newSlideStoragePlace, setNewSlideStoragePlace] = useState('');
+  const [newSlideRoomLocation, setNewSlideRoomLocation] = useState(ROOM_LOCATION_OPTIONS[0]);
   const [newSlideTotalQuantity, setNewSlideTotalQuantity] = useState('');
   const [newSlideCompany, setNewSlideCompany] = useState('');
   // removed catalog number for slides
@@ -150,6 +159,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
           name: newChemicalName,
           type: newChemicalType,
           storagePlace: newChemicalStoragePlace,
+          roomLocation: newChemicalRoomLocation,
           totalWeight: parseFloat(newChemicalTotalWeight),
           weightUnit: newChemicalWeightUnit,
           company: newChemicalCompany,
@@ -163,6 +173,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
         setNewChemicalName('');
         setNewChemicalType('Solid');
         setNewChemicalStoragePlace('Cupboard');
+        setNewChemicalRoomLocation(ROOM_LOCATION_OPTIONS[0]);
   setNewChemicalTotalWeight('');
   setNewChemicalWeightUnit('g');
   setNewChemicalCompany('');
@@ -193,6 +204,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
           name: newGlasswareName,
           type: newGlasswareType,
           storagePlace: newGlasswareStoragePlace,
+          roomLocation: newGlasswareRoomLocation,
           totalQuantity: parseFloat(newGlasswareTotalQuantity),
           company: newGlasswareCompany,
         }),
@@ -204,6 +216,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
         setNewGlasswareName('');
         setNewGlasswareType('');
         setNewGlasswareStoragePlace('');
+        setNewGlasswareRoomLocation(ROOM_LOCATION_OPTIONS[0]);
         setNewGlasswareTotalQuantity('');
         setNewGlasswareCompany('');
         fetchData();
@@ -231,6 +244,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
           name: newInstrumentName,
           type: newInstrumentType,
           storagePlace: newInstrumentStoragePlace,
+          roomLocation: newInstrumentRoomLocation,
           totalQuantity: parseFloat(newInstrumentTotalQuantity),
           company: newInstrumentCompany,
         }),
@@ -242,6 +256,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
         setNewInstrumentName('');
         setNewInstrumentType('');
         setNewInstrumentStoragePlace('');
+        setNewInstrumentRoomLocation(ROOM_LOCATION_OPTIONS[0]);
         setNewInstrumentTotalQuantity('');
         setNewInstrumentCompany('');
         fetchData();
@@ -270,6 +285,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
           name: newPlasticwareName,
           type: newPlasticwareType,
           storagePlace: newPlasticwareStoragePlace,
+          roomLocation: newPlasticwareRoomLocation,
           totalQuantity: parseFloat(newPlasticwareTotalQuantity),
           company: newPlasticwareCompany,
         }),
@@ -286,6 +302,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
         setNewPlasticwareName('');
         setNewPlasticwareType('');
         setNewPlasticwareStoragePlace('');
+        setNewPlasticwareRoomLocation(ROOM_LOCATION_OPTIONS[0]);
         setNewPlasticwareTotalQuantity('');
         setNewPlasticwareCompany('');
         fetchData();
@@ -326,6 +343,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
           type: newMiscType,
           description: newMiscDescription,
           storagePlace: newMiscStoragePlace,
+          roomLocation: newMiscRoomLocation,
           totalQuantity: parseFloat(newMiscTotalQuantity),
           company: newMiscCompany,
         }),
@@ -337,6 +355,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
         setNewMiscType('');
         setNewMiscDescription('');
         setNewMiscStoragePlace('');
+        setNewMiscRoomLocation(ROOM_LOCATION_OPTIONS[0]);
         setNewMiscTotalQuantity('');
         setNewMiscCompany('');
         fetchData();
@@ -357,6 +376,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
         type: newSpecimenType,
         description: newSpecimenDescription,
         storagePlace: newSpecimenStoragePlace,
+        roomLocation: newSpecimenRoomLocation,
         totalQuantity: parseFloat(newSpecimenTotalQuantity),
         company: newSpecimenCompany,
       });
@@ -371,6 +391,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
       setNewSpecimenType('');
       setNewSpecimenDescription('');
       setNewSpecimenStoragePlace('');
+      setNewSpecimenRoomLocation(ROOM_LOCATION_OPTIONS[0]);
       setNewSpecimenTotalQuantity('');
       setNewSpecimenCompany('');
       fetchData();
@@ -392,6 +413,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
         name: newSlideName,
         description: newSlideDescription,
         storagePlace: newSlideStoragePlace,
+        roomLocation: newSlideRoomLocation,
         totalQuantity: parseFloat(newSlideTotalQuantity),
         company: newSlideCompany,
       });
@@ -405,6 +427,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
       setNewSlideName('');
       setNewSlideDescription('');
       setNewSlideStoragePlace('');
+      setNewSlideRoomLocation(ROOM_LOCATION_OPTIONS[0]);
       setNewSlideTotalQuantity('');
       setNewSlideCompany('');
       fetchData();
@@ -649,6 +672,20 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
                 </select>
               </div>
               <div>
+                <label htmlFor="chemicalRoomLocation" className="block text-sm font-medium text-gray-700">Room Location</label>
+                <select
+                  id="chemicalRoomLocation"
+                  value={newChemicalRoomLocation}
+                  onChange={e => setNewChemicalRoomLocation(e.target.value)}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  required
+                >
+                  {ROOM_LOCATION_OPTIONS.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700">Total Weight</label>
                 <div className="flex items-center gap-2">
                   <input
@@ -707,6 +744,20 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
                 <input type="text" id="glasswareStoragePlace" value={newGlasswareStoragePlace} onChange={e => setNewGlasswareStoragePlace(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
               <div>
+                <label htmlFor="glasswareRoomLocation" className="block text-sm font-medium text-gray-700">Room Location</label>
+                <select
+                  id="glasswareRoomLocation"
+                  value={newGlasswareRoomLocation}
+                  onChange={e => setNewGlasswareRoomLocation(e.target.value)}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  required
+                >
+                  {ROOM_LOCATION_OPTIONS.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
                 <label htmlFor="glasswareTotalQuantity" className="block text-sm font-medium text-gray-700">Total Quantity</label>
                 <input type="number" id="glasswareTotalQuantity" value={newGlasswareTotalQuantity} onChange={e => setNewGlasswareTotalQuantity(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
@@ -742,6 +793,20 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
                 <input type="text" id="instrumentStoragePlace" value={newInstrumentStoragePlace} onChange={e => setNewInstrumentStoragePlace(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
               <div>
+                <label htmlFor="instrumentRoomLocation" className="block text-sm font-medium text-gray-700">Room Location</label>
+                <select
+                  id="instrumentRoomLocation"
+                  value={newInstrumentRoomLocation}
+                  onChange={e => setNewInstrumentRoomLocation(e.target.value)}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  required
+                >
+                  {ROOM_LOCATION_OPTIONS.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
                 <label htmlFor="instrumentTotalQuantity" className="block text-sm font-medium text-gray-700">Total Quantity</label>
                 <input type="number" id="instrumentTotalQuantity" value={newInstrumentTotalQuantity} onChange={e => setNewInstrumentTotalQuantity(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
@@ -774,6 +839,20 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
               <div>
                 <label htmlFor="plasticwareStoragePlace" className="block text-sm font-medium text-gray-700">Location</label>
                 <input type="text" id="plasticwareStoragePlace" value={newPlasticwareStoragePlace} onChange={e => setNewPlasticwareStoragePlace(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+              </div>
+              <div>
+                <label htmlFor="plasticwareRoomLocation" className="block text-sm font-medium text-gray-700">Room Location</label>
+                <select
+                  id="plasticwareRoomLocation"
+                  value={newPlasticwareRoomLocation}
+                  onChange={e => setNewPlasticwareRoomLocation(e.target.value)}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  required
+                >
+                  {ROOM_LOCATION_OPTIONS.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label htmlFor="plasticwareTotalQuantity" className="block text-sm font-medium text-gray-700">Total Quantity</label>
@@ -813,6 +892,20 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
                 <input type="text" id="miscStoragePlace" value={newMiscStoragePlace} onChange={e => setNewMiscStoragePlace(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
               </div>
               <div>
+                <label htmlFor="miscRoomLocation" className="block text-sm font-medium text-gray-700">Room Location</label>
+                <select
+                  id="miscRoomLocation"
+                  value={newMiscRoomLocation}
+                  onChange={e => setNewMiscRoomLocation(e.target.value)}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  required
+                >
+                  {ROOM_LOCATION_OPTIONS.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
                 <label htmlFor="miscTotalQuantity" className="block text-sm font-medium text-gray-700">Total Quantity</label>
                 <input type="number" id="miscTotalQuantity" value={newMiscTotalQuantity} onChange={e => setNewMiscTotalQuantity(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
@@ -850,6 +943,20 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
                 <input type="text" id="specimenStoragePlace" value={newSpecimenStoragePlace} onChange={e => setNewSpecimenStoragePlace(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
               <div>
+                <label htmlFor="specimenRoomLocation" className="block text-sm font-medium text-gray-700">Room Location</label>
+                <select
+                  id="specimenRoomLocation"
+                  value={newSpecimenRoomLocation}
+                  onChange={e => setNewSpecimenRoomLocation(e.target.value)}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  required
+                >
+                  {ROOM_LOCATION_OPTIONS.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
                 <label htmlFor="specimenTotalQuantity" className="block text-sm font-medium text-gray-700">Total Quantity</label>
                 <input type="number" id="specimenTotalQuantity" value={newSpecimenTotalQuantity} onChange={e => setNewSpecimenTotalQuantity(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
               </div>
@@ -881,6 +988,20 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
               <div>
                 <label htmlFor="slideStoragePlace" className="block text-sm font-medium text-gray-700">Location</label>
                 <input type="text" id="slideStoragePlace" value={newSlideStoragePlace} onChange={e => setNewSlideStoragePlace(e.target.value)} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" required />
+              </div>
+              <div>
+                <label htmlFor="slideRoomLocation" className="block text-sm font-medium text-gray-700">Room Location</label>
+                <select
+                  id="slideRoomLocation"
+                  value={newSlideRoomLocation}
+                  onChange={e => setNewSlideRoomLocation(e.target.value)}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  required
+                >
+                  {ROOM_LOCATION_OPTIONS.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label htmlFor="slideTotalQuantity" className="block text-sm font-medium text-gray-700">Total Quantity</label>

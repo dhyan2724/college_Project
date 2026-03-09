@@ -32,6 +32,7 @@ router.post('/', authenticateToken, authorizeRoles('admin'), async (req, res) =>
       name: req.body.name,
       type: req.body.type,
       storagePlace: req.body.storagePlace,
+      roomLocation: req.body.roomLocation,
       totalQuantity: req.body.totalQuantity,
       company: req.body.company,
     };
@@ -60,7 +61,7 @@ router.patch('/:id', authenticateToken, authorizeRoles('admin', 'faculty', 'mast
     }
 
     // Only allow updating certain fields
-    const updatableFields = ['name', 'type', 'storagePlace', 'totalQuantity', 'company'];
+    const updatableFields = ['name', 'type', 'storagePlace', 'roomLocation', 'totalQuantity', 'company'];
     const updateData = {};
     updatableFields.forEach(field => {
       if (req.body[field] !== undefined) {

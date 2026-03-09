@@ -4,7 +4,7 @@ class Specimen {
   // Create a new specimen
   static async create(specimenData) {
     try {
-      const { name, description, storagePlace, totalQuantity, availableQuantity, company } = specimenData;
+      const { name, description, storagePlace, roomLocation, totalQuantity, availableQuantity, company } = specimenData;
       
       // Generate specimenId if not provided
       const specimenId = specimenData.specimenId || `SPEC-${Date.now()}`;
@@ -18,6 +18,7 @@ class Specimen {
         name: name !== undefined ? name : null,
         description: description !== undefined ? description : null,
         storagePlace: storagePlace !== undefined ? storagePlace : null,
+        roomLocation: roomLocation !== undefined ? roomLocation : null,
         totalQuantity: totalQuantity !== undefined ? totalQuantity : null,
         availableQuantity: finalAvailableQuantity !== undefined ? finalAvailableQuantity : null,
         company: company !== undefined ? company : null,

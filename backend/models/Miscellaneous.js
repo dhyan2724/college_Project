@@ -4,7 +4,7 @@ class Miscellaneous {
   // Create a new miscellaneous item
   static async create(miscellaneousData) {
     try {
-      const { name, type, description, storagePlace, totalQuantity, availableQuantity, company } = miscellaneousData;
+      const { name, type, description, storagePlace, roomLocation, totalQuantity, availableQuantity, company } = miscellaneousData;
       
       // Generate miscellaneousId if not provided
       const miscellaneousId = miscellaneousData.miscellaneousId || `MISC-${Date.now()}`;
@@ -17,6 +17,7 @@ class Miscellaneous {
         type: type !== undefined ? type : null,
         description: description !== undefined ? description : null,
         storagePlace: storagePlace !== undefined ? storagePlace : null,
+        roomLocation: roomLocation !== undefined ? roomLocation : null,
         totalQuantity: totalQuantity !== undefined ? totalQuantity : null,
         availableQuantity: finalAvailableQuantity,
         company: company !== undefined ? company : null,

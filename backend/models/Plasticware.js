@@ -4,7 +4,7 @@ class Plasticware {
   // Create a new plasticware
   static async create(plasticwareData) {
     try {
-      const { name, type, storagePlace, totalQuantity, availableQuantity, company } = plasticwareData;
+      const { name, type, storagePlace, roomLocation, totalQuantity, availableQuantity, company } = plasticwareData;
       
       // Generate plasticwareId if not provided
       const plasticwareId = plasticwareData.plasticwareId || `PLASTIC-${Date.now()}`;
@@ -19,6 +19,7 @@ class Plasticware {
         name: name !== undefined ? name : null,
         type: type !== undefined ? type : null,
         storagePlace: storagePlace !== undefined ? storagePlace : null,
+        roomLocation: roomLocation !== undefined ? roomLocation : null,
         totalQuantity: totalQuantity !== undefined ? totalQuantity : null,
         availableQuantity: finalAvailableQuantity,
         company: company !== undefined ? company : null,

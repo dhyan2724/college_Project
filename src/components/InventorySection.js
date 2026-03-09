@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import * as XLSX from "xlsx";
 import api from '../services/api';
 
+const ROOM_LOCATION_OPTIONS = ['4th floor BMS Lab', '7th floor CLE Lab'];
+
 const categories = [
   { key: "chemicals", label: "Chemicals" },
   { key: "glasswares", label: "Glasswares" },
@@ -89,6 +91,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
       { key: 'catalogNumber', label: 'Catalog Number' },
       { key: 'type', label: 'Type' },
       { key: 'storagePlace', label: 'Location' },
+      { key: 'roomLocation', label: 'Room Location' },
       { key: 'totalWeight', label: 'Total Weight (g/ml)' },
       { key: 'availableWeight', label: 'Available Weight (g/ml)' },
       { key: 'company', label: 'Company' },
@@ -97,6 +100,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
     glasswares: [
       { key: 'name', label: 'Name' },
       { key: 'storagePlace', label: 'Location' },
+      { key: 'roomLocation', label: 'Room Location' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'availableQuantity', label: 'Available Quantity' },
       { key: 'company', label: 'Company' },
@@ -105,6 +109,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
     plasticwares: [
       { key: 'name', label: 'Name' },
       { key: 'storagePlace', label: 'Location' },
+      { key: 'roomLocation', label: 'Room Location' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'availableQuantity', label: 'Available Quantity' },
       { key: 'company', label: 'Company' },
@@ -113,6 +118,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
     instruments: [
       { key: 'name', label: 'Name' },
       { key: 'storagePlace', label: 'Location' },
+      { key: 'roomLocation', label: 'Room Location' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'availableQuantity', label: 'Available Quantity' },
       { key: 'company', label: 'Company' },
@@ -123,6 +129,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
       { key: 'name', label: 'Name' },
       { key: 'type', label: 'Type' },
       { key: 'storagePlace', label: 'Location' },
+      { key: 'roomLocation', label: 'Room Location' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'availableQuantity', label: 'Available Quantity' },
       { key: 'company', label: 'Company' },
@@ -132,6 +139,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
       { key: 'name', label: 'Name' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'storagePlace', label: 'Location' },
+      { key: 'roomLocation', label: 'Room Location' },
       { key: 'availableQuantity', label: 'Available Quantity' },
       { key: 'company', label: 'Company' },
       { key: 'actions', label: 'Actions' },
@@ -139,6 +147,7 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
     specimens: [
       { key: 'name', label: 'Name' },
       { key: 'storagePlace', label: 'Location' },
+      { key: 'roomLocation', label: 'Room Location' },
       { key: 'totalQuantity', label: 'Total Quantity' },
       { key: 'availableQuantity', label: 'Available Quantity' },
       { key: 'company', label: 'Company' },
@@ -333,6 +342,16 @@ const InventorySection = ({ chemicals, glasswares, plasticwares, instruments, mi
                 placeholder="Storage Place"
                 required
               />
+              <select
+                className="border p-2 mb-2 w-full"
+                value={editItem.roomLocation || ROOM_LOCATION_OPTIONS[0]}
+                onChange={e => setEditItem({ ...editItem, roomLocation: e.target.value })}
+                required
+              >
+                {ROOM_LOCATION_OPTIONS.map(opt => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
               {/* Show totalWeight for chemicals, totalQuantity for others */}
               {editCategory === 'chemicals' ? (
                 <input

@@ -4,7 +4,7 @@ class Chemical {
   // Create a new chemical
   static async create(chemicalData) {
     try {
-      const { name, type, storagePlace, totalWeight, availableWeight, company, catalogNumber } = chemicalData;
+      const { name, type, storagePlace, roomLocation, totalWeight, availableWeight, company, catalogNumber } = chemicalData;
       
       // Generate chemicalId if not provided
       const chemicalId = chemicalData.chemicalId || `CHEM-${Date.now()}`;
@@ -20,6 +20,7 @@ class Chemical {
         name: name !== undefined ? name : null,
         type: type !== undefined ? type : null,
         storagePlace: storagePlace !== undefined ? storagePlace : null,
+        roomLocation: roomLocation !== undefined ? roomLocation : null,
         totalWeight: totalWeight !== undefined ? totalWeight : null,
         availableWeight: finalAvailableWeight,
         company: company !== undefined ? company : null,

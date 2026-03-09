@@ -4,7 +4,7 @@ class Slide {
   // Create a new slide
   static async create(slideData) {
     try {
-      const { name, description, storagePlace, totalQuantity, availableQuantity, company } = slideData;
+      const { name, description, storagePlace, roomLocation, totalQuantity, availableQuantity, company } = slideData;
       
       // Generate slideId if not provided
       const slideId = slideData.slideId || `SLIDE-${Date.now()}`;
@@ -16,6 +16,7 @@ class Slide {
       const safeName = name !== undefined ? name : null;
       const safeDescription = description !== undefined ? description : null;
       const safeStoragePlace = storagePlace !== undefined ? storagePlace : null;
+      const safeRoomLocation = roomLocation !== undefined ? roomLocation : null;
       const safeTotalQuantity = totalQuantity !== undefined ? totalQuantity : null;
       const safeCompany = company !== undefined ? company : null;
       
@@ -23,6 +24,7 @@ class Slide {
         name: safeName,
         description: safeDescription,
         storagePlace: safeStoragePlace,
+        roomLocation: safeRoomLocation,
         totalQuantity: safeTotalQuantity,
         availableQuantity: finalAvailableQuantity,
         company: safeCompany,

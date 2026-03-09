@@ -4,7 +4,7 @@ class Glassware {
   // Create a new glassware
   static async create(glasswareData) {
     try {
-      const { name, type, storagePlace, totalQuantity, availableQuantity, company } = glasswareData;
+      const { name, type, storagePlace, roomLocation, totalQuantity, availableQuantity, company } = glasswareData;
       
       // Generate glasswareId if not provided
       const glasswareId = glasswareData.glasswareId || `GLASS-${Date.now()}`;
@@ -16,6 +16,7 @@ class Glassware {
         name: name !== undefined ? name : null,
         type: type !== undefined ? type : null,
         storagePlace: storagePlace !== undefined ? storagePlace : null,
+        roomLocation: roomLocation !== undefined ? roomLocation : null,
         totalQuantity: totalQuantity !== undefined ? totalQuantity : null,
         availableQuantity: finalAvailableQuantity,
         company: company !== undefined ? company : null,

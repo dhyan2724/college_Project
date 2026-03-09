@@ -4,7 +4,7 @@ class Instrument {
   // Create a new instrument
   static async create(instrumentData) {
     try {
-      const { name, type, storagePlace, totalQuantity, availableQuantity, company } = instrumentData;
+      const { name, type, storagePlace, roomLocation, totalQuantity, availableQuantity, company } = instrumentData;
       
       // Generate instrumentId if not provided
       const instrumentId = instrumentData.instrumentId || `INST-${Date.now()}`;
@@ -16,6 +16,7 @@ class Instrument {
         name: name !== undefined ? name : null,
         type: type !== undefined ? type : null,
         storagePlace: storagePlace !== undefined ? storagePlace : null,
+        roomLocation: roomLocation !== undefined ? roomLocation : null,
         totalQuantity: totalQuantity !== undefined ? totalQuantity : null,
         availableQuantity: finalAvailableQuantity,
         company: company !== undefined ? company : null,
