@@ -23,26 +23,39 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware
+const normalizeOrigin = (value) => String(value || '').trim().replace(/\/+$/, '');
+
 const allowedOrigins = [
   'https://nuvsoslabs.netlify.app',
   'http://nuvsoslabs.in',
   'https://nuvsoslabs.in',
   'http://localhost:3000',
   'http://127.0.0.1:3000',
-  'https://college-project-ebon-kappa.vercel.app'
-];
+  'https://college-project-ebon-kappa.vercel.app',
+  // Allow configuring additional origins without code changes
+  ...normalizeOrigin(process.env.FRONTEND_URL).split(',').map(normalizeOrigin).filter(Boolean),
+  ...normalizeOrigin(process.env.ALLOWED_ORIGINS).split(',').map(normalizeOrigin).filter(Boolean),
+].map(normalizeOrigin);
+
+const isDevLocalhostOrigin = (origin) => {
+  const o = normalizeOrigin(origin);
+  return /^http:\/\/localhost:\d+$/.test(o) || /^http:\/\/127\.0\.0\.1:\d+$/.test(o);
+};
 
 const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps, curl, or server-to-server) always allow
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
+    const normalized = normalizeOrigin(origin);
+    if (allowedOrigins.includes(normalized) || isDevLocalhostOrigin(normalized)) {
       return callback(null, true);
     } else {
       return callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 app.use(cors(corsOptions));
