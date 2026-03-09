@@ -87,7 +87,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
   const [newUserFullName, setNewUserFullName] = useState('');
   const [newUserRole, setNewUserRole] = useState('student');
   const [newUserRollNo, setNewUserRollNo] = useState('');
-  const [newUserCategory, setNewUserCategory] = useState('UG/PG');
+  const [newUserCategory, setNewUserCategory] = useState('UG');
   const [newUserYear, setNewUserYear] = useState('');
   const [newUserDepartment, setNewUserDepartment] = useState('');
 
@@ -423,6 +423,13 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
     logout();
     navigate('/login');
   };
+
+  const newUserNeedsYear =
+    newUserCategory === 'UG' || newUserCategory === 'PG' || newUserCategory === 'UG/PG';
+  const newUserYearOptions =
+    newUserCategory === 'PG'
+      ? ['1st', '2nd']
+      : ['1st', '2nd', '3rd', '4th'];
 
   const teachers = users.filter(user => user.role === 'faculty');
 
@@ -973,7 +980,14 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
                     email: newUserEmail,
                     fullName: newUserFullName,
                     role: newUserRole,
-                    ...(newUserRole === 'student' ? { rollNo: newUserRollNo, category: newUserCategory, year: newUserYear, department: newUserDepartment } : {})
+                    ...(newUserRole === 'student'
+                      ? {
+                          rollNo: newUserRollNo,
+                          category: newUserCategory,
+                          department: newUserDepartment,
+                          ...(newUserNeedsYear ? { year: newUserYear } : {}),
+                        }
+                      : {})
                   });
                   alert('User created successfully!');
                   setShowCreateUserForm(false);
@@ -983,7 +997,7 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
                   setNewUserFullName('');
                   setNewUserRole('student');
                   setNewUserRollNo('');
-                  setNewUserCategory('UG/PG');
+                  setNewUserCategory('UG');
                   setNewUserYear('');
                   setNewUserDepartment('');
                   fetchData();
@@ -1024,23 +1038,39 @@ const AdminDashboard = ({ miscellaneous = [], setMiscellaneous, specimens = [], 
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Category</label>
-                    <select className="border p-2 rounded w-full" value={newUserCategory} onChange={e => setNewUserCategory(e.target.value)} required>
-                      <option value="UG/PG">UG/PG</option>
+                    <select
+                      className="border p-2 rounded w-full"
+                      value={newUserCategory}
+                      onChange={(e) => {
+                        setNewUserCategory(e.target.value);
+                        setNewUserYear('');
+                      }}
+                      required
+                    >
+                      <option value="UG">UG</option>
+                      <option value="PG">PG</option>
                       <option value="PhD">PhD</option>
                       <option value="Project Student">Project Student</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Year</label>
-                    <select className="border p-2 rounded w-full" value={newUserYear} onChange={e => setNewUserYear(e.target.value)} required>
-                      <option value="">Select Year</option>
-                      <option value="1st">1st Year</option>
-                      <option value="2nd">2nd Year</option>
-                      <option value="3rd">3rd Year</option>
-                      <option value="4th">4th Year</option>
-                      <option value="5th">5th Year</option>
-                    </select>
-                  </div>
+                  {newUserNeedsYear && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Year</label>
+                      <select
+                        className="border p-2 rounded w-full"
+                        value={newUserYear}
+                        onChange={(e) => setNewUserYear(e.target.value)}
+                        required
+                      >
+                        <option value="">Select Year</option>
+                        {newUserYearOptions.map((y) => (
+                          <option key={y} value={y}>
+                            {y} Year
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Department</label>
                     <input type="text" className="border p-2 rounded w-full" value={newUserDepartment} onChange={e => setNewUserDepartment(e.target.value)} required />
