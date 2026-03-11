@@ -1,19 +1,50 @@
-const { supabase } = require('../config/supabase');
+const { supabase } = require("../config/supabase");
+
+// PostgreSQL lowercases unquoted column names; map app camelCase -> DB lowercase for Supabase
+const ACTIVITYLOG_TO_DB = {
+  itemType: "itemtype",
+  itemId: "itemid",
+  itemName: "itemname",
+};
+const ACTIVITYLOG_FROM_DB = Object.fromEntries(
+  Object.entries(ACTIVITYLOG_TO_DB).map(([k, v]) => [v, k]),
+);
+
+function toDbKeys(obj) {
+  if (!obj || typeof obj !== "object") return obj;
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    out[ACTIVITYLOG_TO_DB[k] ?? k] = v;
+  }
+  return out;
+}
+
+function fromDbKeys(obj) {
+  if (!obj || typeof obj !== "object") return obj;
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    out[ACTIVITYLOG_FROM_DB[k] ?? k] = v;
+  }
+  return out;
+}
 
 class ActivityLog {
   // Create a new activity log
   static async create(activityLogData) {
     try {
-      const { action, itemType, itemId, itemName, user, details } = activityLogData;
+      const { action, itemType, itemId, itemName, user, details } =
+        activityLogData;
 
       const { data, error } = await supabase
-        .from('activity_logs')
-        .insert([{ action, itemType, itemId, itemName, user, details }])
+        .from("activity_logs")
+        .insert([
+          toDbKeys({ action, itemType, itemId, itemName, user, details }),
+        ])
         .select()
         .single();
-      
+
       if (error) throw error;
-      return { ...data, ...activityLogData };
+      return { ...fromDbKeys(data), ...activityLogData };
     } catch (error) {
       throw error;
     }
@@ -23,13 +54,13 @@ class ActivityLog {
   static async findById(id) {
     try {
       const { data, error } = await supabase
-        .from('activity_logs')
-        .select('*')
-        .eq('id', id)
+        .from("activity_logs")
+        .select("*")
+        .eq("id", id)
         .single();
-      
-      if (error && error.code !== 'PGRST116') throw error;
-      return data || null;
+
+      if (error && error.code !== "PGRST116") throw error;
+      return data ? fromDbKeys(data) : null;
     } catch (error) {
       throw error;
     }
@@ -39,12 +70,12 @@ class ActivityLog {
   static async findAll() {
     try {
       const { data, error } = await supabase
-        .from('activity_logs')
-        .select('*')
-        .order('timestamp', { ascending: false });
-      
+        .from("activity_logs")
+        .select("*")
+        .order("timestamp", { ascending: false });
+
       if (error) throw error;
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -54,13 +85,13 @@ class ActivityLog {
   static async findByAction(action) {
     try {
       const { data, error } = await supabase
-        .from('activity_logs')
-        .select('*')
-        .eq('action', action)
-        .order('timestamp', { ascending: false });
-      
+        .from("activity_logs")
+        .select("*")
+        .eq("action", action)
+        .order("timestamp", { ascending: false });
+
       if (error) throw error;
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -70,13 +101,13 @@ class ActivityLog {
   static async findByItemType(itemType) {
     try {
       const { data, error } = await supabase
-        .from('activity_logs')
-        .select('*')
-        .eq('itemType', itemType)
-        .order('timestamp', { ascending: false });
-      
+        .from("activity_logs")
+        .select("*")
+        .eq("itemtype", itemType)
+        .order("timestamp", { ascending: false });
+
       if (error) throw error;
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -86,13 +117,13 @@ class ActivityLog {
   static async findByUser(user) {
     try {
       const { data, error } = await supabase
-        .from('activity_logs')
-        .select('*')
-        .eq('user', user)
-        .order('timestamp', { ascending: false });
-      
+        .from("activity_logs")
+        .select("*")
+        .eq("user", user)
+        .order("timestamp", { ascending: false });
+
       if (error) throw error;
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -102,14 +133,14 @@ class ActivityLog {
   static async findByDateRange(startDate, endDate) {
     try {
       const { data, error } = await supabase
-        .from('activity_logs')
-        .select('*')
-        .gte('timestamp', startDate)
-        .lte('timestamp', endDate)
-        .order('timestamp', { ascending: false });
-      
+        .from("activity_logs")
+        .select("*")
+        .gte("timestamp", startDate)
+        .lte("timestamp", endDate)
+        .order("timestamp", { ascending: false });
+
       if (error) throw error;
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -121,15 +152,15 @@ class ActivityLog {
       const date = new Date();
       date.setDate(date.getDate() - days);
       const startDate = date.toISOString();
-      
+
       const { data, error } = await supabase
-        .from('activity_logs')
-        .select('*')
-        .gte('timestamp', startDate)
-        .order('timestamp', { ascending: false });
-      
+        .from("activity_logs")
+        .select("*")
+        .gte("timestamp", startDate)
+        .order("timestamp", { ascending: false });
+
       if (error) throw error;
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -139,10 +170,10 @@ class ActivityLog {
   static async deleteById(id) {
     try {
       const { error } = await supabase
-        .from('activity_logs')
+        .from("activity_logs")
         .delete()
-        .eq('id', id);
-      
+        .eq("id", id);
+
       if (error) throw error;
       return true;
     } catch (error) {
@@ -156,12 +187,12 @@ class ActivityLog {
       const date = new Date();
       date.setDate(date.getDate() - days);
       const cutoffDate = date.toISOString();
-      
+
       const { error } = await supabase
-        .from('activity_logs')
+        .from("activity_logs")
         .delete()
-        .lt('timestamp', cutoffDate);
-      
+        .lt("timestamp", cutoffDate);
+
       if (error) throw error;
       return true;
     } catch (error) {
@@ -173,35 +204,35 @@ class ActivityLog {
   static async getStatistics() {
     try {
       const { count: total } = await supabase
-        .from('activity_logs')
-        .select('*', { count: 'exact', head: true });
-      
+        .from("activity_logs")
+        .select("*", { count: "exact", head: true });
+
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const { count: todayCount } = await supabase
-        .from('activity_logs')
-        .select('*', { count: 'exact', head: true })
-        .gte('timestamp', today.toISOString());
-      
+        .from("activity_logs")
+        .select("*", { count: "exact", head: true })
+        .gte("timestamp", today.toISOString());
+
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
       const { count: thisWeekCount } = await supabase
-        .from('activity_logs')
-        .select('*', { count: 'exact', head: true })
-        .gte('timestamp', weekAgo.toISOString());
-      
+        .from("activity_logs")
+        .select("*", { count: "exact", head: true })
+        .gte("timestamp", weekAgo.toISOString());
+
       const monthAgo = new Date();
       monthAgo.setDate(monthAgo.getDate() - 30);
       const { count: thisMonthCount } = await supabase
-        .from('activity_logs')
-        .select('*', { count: 'exact', head: true })
-        .gte('timestamp', monthAgo.toISOString());
+        .from("activity_logs")
+        .select("*", { count: "exact", head: true })
+        .gte("timestamp", monthAgo.toISOString());
 
       return {
         total: total || 0,
         today: todayCount || 0,
         thisWeek: thisWeekCount || 0,
-        thisMonth: thisMonthCount || 0
+        thisMonth: thisMonthCount || 0,
       };
     } catch (error) {
       throw error;
@@ -212,23 +243,23 @@ class ActivityLog {
   static async findWithPagination(page = 1, limit = 50) {
     try {
       const offset = (page - 1) * limit;
-      
+
       const { data, error, count } = await supabase
-        .from('activity_logs')
-        .select('*', { count: 'exact' })
-        .order('timestamp', { ascending: false })
+        .from("activity_logs")
+        .select("*", { count: "exact" })
+        .order("timestamp", { ascending: false })
         .range(offset, offset + limit - 1);
-      
+
       if (error) throw error;
 
       return {
-        logs: data || [],
+        logs: (data || []).map(fromDbKeys),
         pagination: {
           page,
           limit,
           total: count || 0,
-          totalPages: Math.ceil((count || 0) / limit)
-        }
+          totalPages: Math.ceil((count || 0) / limit),
+        },
       };
     } catch (error) {
       throw error;
