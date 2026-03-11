@@ -1,9 +1,92 @@
+<<<<<<< HEAD
 
 --
 -- Dumping data for table chemicals
 --
 
 INSERT INTO chemicals (id, name, type, storagePlace, totalWeight, availableWeight, company, catalogNumber, chemicalId, dateOfEntry, created_at, updated_at) VALUES
+=======
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: Mar 09, 2026 at 11:49 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `lab_inventory`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `activity_logs`
+--
+
+CREATE TABLE `activity_logs` (
+  `id` int(11) NOT NULL,
+  `action` varchar(255) NOT NULL,
+  `itemType` varchar(255) NOT NULL,
+  `itemId` int(11) DEFAULT NULL,
+  `itemName` varchar(255) DEFAULT NULL,
+  `user` varchar(255) DEFAULT NULL,
+  `details` text DEFAULT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `activity_logs`
+--
+
+INSERT INTO `activity_logs` (`id`, `action`, `itemType`, `itemId`, `itemName`, `user`, `details`, `timestamp`) VALUES
+(1, 'request', 'pendingRequest', 15, 'Chemical', 'jeel', 'Purpose: dff', '2025-08-23 10:14:21'),
+(2, 'request', 'pendingRequest', 16, 'Chemical', 'jeel', 'Purpose: fglkhmg', '2025-08-23 10:16:50'),
+(3, 'request', 'pendingRequest', 17, 'Chemical', 'jeel', 'Purpose: dfwfgr', '2025-08-25 08:00:34'),
+(4, 'request', 'pendingRequest', 18, 'Chemical, Chemical, Chemical, Chemical', 'jeel', 'Purpose: exp', '2025-08-25 08:10:49'),
+(5, 'request', 'pendingRequest', 19, 'Glassware', 'Jeel Parmar', 'Purpose: exp', '2025-08-26 09:53:07'),
+(6, 'return', 'Glassware', 3, 'Stopper test tube ', 'Dr. Parth Pandya', 'Returned by: undefined, Processed by: Dr. Parth Pandya', '2025-08-26 09:54:29'),
+(7, 'request', 'pendingRequest', 20, 'Chemical, Chemical, Chemical', 'Jeel Parmar', 'Purpose: Experminet xyz', '2025-09-29 10:10:06'),
+(8, 'request', 'pendingRequest', 21, 'Chemical, Chemical', 'Jeel Parmar', 'Purpose: temp', '2026-02-11 09:05:35');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `chemicals`
+--
+
+CREATE TABLE `chemicals` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` enum('Solid','Liquid','Stain') NOT NULL,
+  `storagePlace` enum('Cupboard','Freezer','Deep Freezer') NOT NULL,
+  `totalWeight` decimal(10,2) NOT NULL,
+  `availableWeight` decimal(10,2) NOT NULL,
+  `company` varchar(255) DEFAULT NULL,
+  `catalogNumber` varchar(255) NOT NULL,
+  `chemicalId` varchar(255) NOT NULL,
+  `dateOfEntry` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `chemicals`
+--
+
+INSERT INTO `chemicals` (`id`, `name`, `type`, `storagePlace`, `totalWeight`, `availableWeight`, `company`, `catalogNumber`, `chemicalId`, `dateOfEntry`, `created_at`, `updated_at`) VALUES
+>>>>>>> a899522ea55a0087c19dcee7e7195330113975f9
 (34, 'Aluminium Chloride', 'Solid', 'Cupboard', 500.00, 500.00, 'SRL ', '23700', 'CHEM-1756351392119', '2025-08-28 03:23:12', '2025-08-28 03:23:12', '2025-08-28 03:23:12'),
 (35, 'Antimony Potassium Tartarate Hemihydrate ', 'Solid', 'Cupboard', 500.00, 500.00, 'SRL ', '83896', 'CHEM-1756351462178', '2025-08-28 03:24:22', '2025-08-28 03:24:22', '2025-08-28 03:25:13'),
 (36, 'Antifungal Assay Agar ', 'Solid', 'Cupboard', 100.00, 100.00, 'SRL ', '10892', 'CHEM-1756351596378', '2025-08-28 03:26:36', '2025-08-28 03:26:36', '2025-08-28 03:26:36'),
@@ -34,7 +117,11 @@ INSERT INTO chemicals (id, name, type, storagePlace, totalWeight, availableWeigh
 (65, 'Bis acrylamide ', 'Solid', 'Cupboard', 100.00, 100.00, 'Himedia ', 'MB005', 'CHEM-1756354379213', '2025-08-28 04:12:59', '2025-08-28 04:12:59', '2025-08-28 04:12:59'),
 (66, 'Bicine buffer ', 'Solid', 'Cupboard', 100.00, 100.00, '', '2121', 'CHEM-1756354451363', '2025-08-28 04:14:11', '2025-08-28 04:14:11', '2025-08-28 04:14:11'),
 (67, 'BG- 11 broth ', 'Solid', 'Cupboard', 500.00, 500.00, 'Himedia ', 'klmnb', 'CHEM-1756354600814', '2025-08-28 04:16:40', '2025-08-28 04:16:40', '2025-08-28 04:16:40'),
+<<<<<<< HEAD
 (68, 'Burk ''s medium ', 'Solid', 'Cupboard', 100.00, 100.00, 'SRL ', '61882', 'CHEM-1756354797203', '2025-08-28 04:19:57', '2025-08-28 04:19:57', '2025-08-28 04:19:57'),
+=======
+(68, 'Burk \'s medium ', 'Solid', 'Cupboard', 100.00, 100.00, 'SRL ', '61882', 'CHEM-1756354797203', '2025-08-28 04:19:57', '2025-08-28 04:19:57', '2025-08-28 04:19:57'),
+>>>>>>> a899522ea55a0087c19dcee7e7195330113975f9
 (69, 'Beef  extract powder ', 'Solid', 'Cupboard', 500.00, 500.00, 'LOBA', 'GHGHG', 'CHEM-1756355913580', '2025-08-28 04:38:33', '2025-08-28 04:38:33', '2025-08-28 04:38:33'),
 (70, 'Blood  agar base ', 'Solid', 'Cupboard', 500.00, 500.00, 'SRL', '90935', 'CHEM-1756356299658', '2025-08-28 04:44:59', '2025-08-28 04:44:59', '2025-08-28 04:44:59'),
 (71, 'CTAB', 'Solid', 'Cupboard', 100.00, 100.00, 'SRL', '84483', 'CHEM-1756356376829', '2025-08-28 04:46:16', '2025-08-28 04:46:16', '2025-08-28 04:46:16'),
@@ -124,7 +211,11 @@ INSERT INTO chemicals (id, name, type, storagePlace, totalWeight, availableWeigh
 (168, 'Phenyl alanine agar ', 'Solid', 'Cupboard', 300.00, 300.00, 'SRL ', 'PH0JN', 'CHEM-1756453806595', '2025-08-29 07:50:06', '2025-08-29 07:50:06', '2025-08-29 07:50:06'),
 (169, 'Plate count agar', 'Solid', 'Cupboard', 400.00, 400.00, 'SRL ', 'PH089', 'CHEM-1756453878863', '2025-08-29 07:51:18', '2025-08-29 07:51:18', '2025-08-29 07:51:18'),
 (170, 'Potassium nitrate ', 'Solid', 'Cupboard', 400.00, 400.00, 'SRL ', 'PH0NJ', 'CHEM-1756454153004', '2025-08-29 07:55:53', '2025-08-29 07:55:53', '2025-08-29 07:55:53'),
+<<<<<<< HEAD
 (172, 'Potassium chromate', 'Solid', 'Cupboard', 200.00, 200.00, 'srl ', 'PH0N/k', 'CHEM-1756454380702', '2025-08-29 07:59:40', '2025-08-29 07:59:40', '2025-08-29 07:59:40'),
+=======
+(172, 'Potassium chromate', 'Solid', 'Cupboard', 200.00, 200.00, 'srl ', 'PH0N\\k', 'CHEM-1756454380702', '2025-08-29 07:59:40', '2025-08-29 07:59:40', '2025-08-29 07:59:40'),
+>>>>>>> a899522ea55a0087c19dcee7e7195330113975f9
 (174, 'Pseudomonas Agar base ', 'Solid', 'Cupboard', 400.00, 400.00, 'srl ', '55523', 'CHEM-1756454573011', '2025-08-29 08:02:53', '2025-08-29 08:02:53', '2025-08-29 08:02:53'),
 (175, 'TCAA ', 'Liquid', 'Cupboard', 100.00, 100.00, 'srl', '25136', 'CHEM-1756454635194', '2025-08-29 08:03:55', '2025-08-29 08:03:55', '2025-09-01 06:09:01'),
 (176, 'Potassium Dichromate ', 'Solid', 'Cupboard', 400.00, 400.00, '', '55528', 'CHEM-1756454645503', '2025-08-29 08:04:05', '2025-08-29 08:04:05', '2025-08-29 08:04:05'),
@@ -279,11 +370,19 @@ INSERT INTO chemicals (id, name, type, storagePlace, totalWeight, availableWeigh
 (345, 'DPX mountant ', 'Liquid', 'Cupboard', 100.00, 100.00, 'SDFCL', '46029-L05', 'CHEM-1756704050850', '2025-09-01 05:20:50', '2025-09-01 05:20:50', '2025-09-01 05:20:50'),
 (346, 'Propionic acid', 'Liquid', 'Cupboard', 300.00, 300.00, 'Molychem', '20011', 'CHEM-1756704358133', '2025-09-01 05:25:58', '2025-09-01 05:25:58', '2025-09-01 05:25:58'),
 (347, 'orthophosphoric acid', 'Liquid', 'Cupboard', 100.00, 100.00, 'SDFCL', '39416-L50', 'CHEM-1756704509339', '2025-09-01 05:28:29', '2025-09-01 05:28:29', '2025-09-01 05:28:29'),
+<<<<<<< HEAD
 (348, 'molisch''s reagent', 'Liquid', 'Cupboard', 8.00, 8.00, 'Qualikem', 'M042810', 'CHEM-1756705237728', '2025-09-01 05:40:37', '2025-09-01 05:40:37', '2025-09-01 05:40:37'),
 (349, 'fehling''s solution B', 'Liquid', 'Cupboard', 200.00, 200.00, 'SRL', '12603', 'CHEM-1756705445009', '2025-09-01 05:44:05', '2025-09-01 05:44:05', '2025-09-01 05:44:05'),
 (350, 'ammonia solution', 'Liquid', 'Cupboard', 200.00, 200.00, 'SDFCL', '10011-L10', 'CHEM-1756705540827', '2025-09-01 05:45:40', '2025-09-01 05:45:40', '2025-09-01 05:45:40'),
 (351, 'Fehling''s solution A', 'Liquid', 'Cupboard', 15.00, 15.00, 'SDFCL', '33023-L05', 'CHEM-1756705684835', '2025-09-01 05:48:04', '2025-09-01 05:48:04', '2025-09-01 05:48:04'),
 (352, 'Fehling''s solution', 'Liquid', 'Cupboard', 50.00, 50.00, 'CDH', '834200', 'CHEM-1756705765826', '2025-09-01 05:49:25', '2025-09-01 05:49:25', '2025-09-01 05:49:25'),
+=======
+(348, 'molisch\'s reagent', 'Liquid', 'Cupboard', 8.00, 8.00, 'Qualikem', 'M042810', 'CHEM-1756705237728', '2025-09-01 05:40:37', '2025-09-01 05:40:37', '2025-09-01 05:40:37'),
+(349, 'fehling\'s solution B', 'Liquid', 'Cupboard', 200.00, 200.00, 'SRL', '12603', 'CHEM-1756705445009', '2025-09-01 05:44:05', '2025-09-01 05:44:05', '2025-09-01 05:44:05'),
+(350, 'ammonia solution', 'Liquid', 'Cupboard', 200.00, 200.00, 'SDFCL', '10011-L10', 'CHEM-1756705540827', '2025-09-01 05:45:40', '2025-09-01 05:45:40', '2025-09-01 05:45:40'),
+(351, 'Fehling\'s solution A', 'Liquid', 'Cupboard', 15.00, 15.00, 'SDFCL', '33023-L05', 'CHEM-1756705684835', '2025-09-01 05:48:04', '2025-09-01 05:48:04', '2025-09-01 05:48:04'),
+(352, 'Fehling\'s solution', 'Liquid', 'Cupboard', 50.00, 50.00, 'CDH', '834200', 'CHEM-1756705765826', '2025-09-01 05:49:25', '2025-09-01 05:49:25', '2025-09-01 05:49:25'),
+>>>>>>> a899522ea55a0087c19dcee7e7195330113975f9
 (354, 'Lactic acid', 'Liquid', 'Cupboard', 250.00, 250.00, 'SDFCL', '39001-L05', 'CHEM-1756705904650', '2025-09-01 05:51:44', '2025-09-01 05:51:44', '2025-09-01 05:51:44'),
 (355, 'Benedict solution', 'Liquid', 'Cupboard', 4.00, 4.00, 'Qualikem', 'SSSQ20259', 'CHEM-1756706030729', '2025-09-01 05:53:50', '2025-09-01 05:53:50', '2025-09-01 05:53:50'),
 (356, 'Glycerine', 'Liquid', 'Cupboard', 300.00, 300.00, 'SRL', '42595', 'CHEM-1756706619548', '2025-09-01 06:03:39', '2025-09-01 06:03:39', '2025-09-01 06:03:39'),
@@ -296,7 +395,11 @@ INSERT INTO chemicals (id, name, type, storagePlace, totalWeight, availableWeigh
 (366, 'polysorbate 80', 'Liquid', 'Cupboard', 400.00, 400.00, 'SRL', '9005-64-5', 'CHEM-1756707788704', '2025-09-01 06:23:08', '2025-09-01 06:23:08', '2025-09-01 06:23:08'),
 (367, 'Ninhydrin ', 'Stain', 'Cupboard', 10.00, 10.00, 'SDFCL', '74654', 'CHEM-1756707798921', '2025-09-01 06:23:18', '2025-09-01 06:23:18', '2025-09-01 06:23:18'),
 (370, 'Solochrome black T', 'Stain', 'Cupboard', 50.00, 50.00, 'SDFCL', '392543', 'CHEM-1756707881697', '2025-09-01 06:24:41', '2025-09-01 06:24:41', '2025-09-01 06:24:41');
+<<<<<<< HEAD
 INSERT INTO chemicals (id, name, type, storagePlace, totalWeight, availableWeight, company, catalogNumber, chemicalId, dateOfEntry, created_at, updated_at) VALUES
+=======
+INSERT INTO `chemicals` (`id`, `name`, `type`, `storagePlace`, `totalWeight`, `availableWeight`, `company`, `catalogNumber`, `chemicalId`, `dateOfEntry`, `created_at`, `updated_at`) VALUES
+>>>>>>> a899522ea55a0087c19dcee7e7195330113975f9
 (373, 'Ferroin Indicator', 'Stain', 'Cupboard', 50.00, 50.00, 'SDFCL', '56778', 'CHEM-1756707995804', '2025-09-01 06:26:35', '2025-09-01 06:26:35', '2025-09-01 06:26:35'),
 (374, 'toluene', 'Liquid', 'Cupboard', 150.00, 150.00, 'SRL', '83662', 'CHEM-1756708025206', '2025-09-01 06:27:05', '2025-09-01 06:27:05', '2025-09-01 06:27:05'),
 (375, 'Ferroin solution', 'Stain', 'Cupboard', 50.00, 50.00, 'SDFCL', '98345', 'CHEM-1756708029359', '2025-09-01 06:27:09', '2025-09-01 06:27:09', '2025-09-01 06:27:09'),
@@ -333,13 +436,22 @@ INSERT INTO chemicals (id, name, type, storagePlace, totalWeight, availableWeigh
 (408, ' Brillant blue g 250 ', 'Stain', 'Cupboard', 3.00, 3.00, 'SRL', '43676', 'CHEM-1756720668790', '2025-09-01 09:57:48', '2025-09-01 09:57:48', '2025-09-01 09:57:48'),
 (410, ' Immersion oil ', 'Stain', 'Cupboard', 10.00, 10.00, 'SRL', '73017', 'CHEM-1756721203478', '2025-09-01 10:06:43', '2025-09-01 10:06:43', '2025-09-01 10:06:43'),
 (411, 'Methyl red	', 'Stain', 'Cupboard', 8.00, 8.00, 'LOBA', '04675', 'CHEM-1756721580593', '2025-09-01 10:13:00', '2025-09-01 10:13:00', '2025-09-01 10:13:00'),
+<<<<<<< HEAD
 (413, 'Barritt''s reagent A', 'Stain', 'Cupboard', 50.00, 50.00, 'Oxford', 'B-01320', 'CHEM-1756721749630', '2025-09-01 10:15:49', '2025-09-01 10:15:49', '2025-09-01 10:15:49'),
 (414, 'Barritt''s reagent B', 'Stain', 'Cupboard', 50.00, 50.00, 'Oxford', 'B-01321', 'CHEM-1756721781775', '2025-09-01 10:16:21', '2025-09-01 10:16:21', '2025-09-01 10:16:21'),
+=======
+(413, 'Barritt\'s reagent A', 'Stain', 'Cupboard', 50.00, 50.00, 'Oxford', 'B-01320', 'CHEM-1756721749630', '2025-09-01 10:15:49', '2025-09-01 10:15:49', '2025-09-01 10:15:49'),
+(414, 'Barritt\'s reagent B', 'Stain', 'Cupboard', 50.00, 50.00, 'Oxford', 'B-01321', 'CHEM-1756721781775', '2025-09-01 10:16:21', '2025-09-01 10:16:21', '2025-09-01 10:16:21'),
+>>>>>>> a899522ea55a0087c19dcee7e7195330113975f9
 (415, 'Eosin yellow', 'Stain', 'Cupboard', 55.00, 55.00, 'LOBA', '3660D 00125', 'CHEM-1756721877842', '2025-09-01 10:17:57', '2025-09-01 10:17:57', '2025-09-01 10:18:31'),
 (417, 'Toludiene blue', 'Stain', 'Cupboard', 10.00, 10.00, 'LOBA', '6348A', 'CHEM-1756722093899', '2025-09-01 10:21:33', '2025-09-01 10:21:33', '2025-09-01 10:21:33'),
 (418, 'Neutral red	', 'Stain', 'Cupboard', 2.00, 2.00, 'LOBA', '04840', 'CHEM-1756722245077', '2025-09-01 10:24:05', '2025-09-01 10:24:05', '2025-09-01 10:24:05'),
 (419, 'safranin', 'Stain', 'Cupboard', 50.00, 50.00, 'LOBA', '05625', 'CHEM-1756722325833', '2025-09-01 10:25:25', '2025-09-01 10:25:25', '2025-09-01 10:25:25'),
+<<<<<<< HEAD
 (420, 'Bial''s reagent	', 'Stain', 'Cupboard', 103.00, 103.00, 'LOBA', '1927F	', 'CHEM-1756722457272', '2025-09-01 10:27:37', '2025-09-01 10:27:37', '2025-09-01 10:27:37'),
+=======
+(420, 'Bial\'s reagent	', 'Stain', 'Cupboard', 103.00, 103.00, 'LOBA', '1927F	', 'CHEM-1756722457272', '2025-09-01 10:27:37', '2025-09-01 10:27:37', '2025-09-01 10:27:37'),
+>>>>>>> a899522ea55a0087c19dcee7e7195330113975f9
 (421, 'Methylene blue', 'Stain', 'Cupboard', 70.00, 70.00, 'LOBA', '04630', 'CHEM-1756722589282', '2025-09-01 10:29:49', '2025-09-01 10:29:49', '2025-09-01 10:29:49'),
 (423, 'Aceto orcein	', 'Stain', 'Cupboard', 50.00, 50.00, 'LOBA', '00537', 'CHEM-1756723034147', '2025-09-01 10:37:14', '2025-09-01 10:37:14', '2025-09-01 10:37:59'),
 (426, 'Carmine aceto', 'Stain', 'Cupboard', 49.00, 49.00, 'LOBA', '36536', 'CHEM-1756723319417', '2025-09-01 10:41:59', '2025-09-01 10:41:59', '2025-09-01 10:41:59'),
@@ -349,7 +461,11 @@ INSERT INTO chemicals (id, name, type, storagePlace, totalWeight, availableWeigh
 (430, 'Eosin Y disodium salt ', 'Stain', 'Cupboard', 10.00, 10.00, 'SDFCL', '44027-K01', 'CHEM-1756724209685', '2025-09-01 10:56:49', '2025-09-01 10:56:49', '2025-09-01 10:56:49'),
 (431, 'Phenolphthalein ', 'Stain', 'Cupboard', 10.00, 10.00, 'SDFCL', '30089-K01', 'CHEM-1756724423930', '2025-09-01 11:00:23', '2025-09-01 11:00:23', '2025-09-01 11:00:23'),
 (432, 'Comassie Brillant blue ', 'Stain', 'Cupboard', 10.00, 10.00, 'SDFCL', '54329-G25', 'CHEM-1756724553466', '2025-09-01 11:02:33', '2025-09-01 11:02:33', '2025-09-01 11:02:33'),
+<<<<<<< HEAD
 (433, 'molisch''s reagent	', 'Stain', 'Cupboard', 40.00, 40.00, 'Qualikem', '458657', 'CHEM-1756724696995', '2025-09-01 11:04:56', '2025-09-01 11:04:56', '2025-09-01 11:04:56'),
+=======
+(433, 'molisch\'s reagent	', 'Stain', 'Cupboard', 40.00, 40.00, 'Qualikem', '458657', 'CHEM-1756724696995', '2025-09-01 11:04:56', '2025-09-01 11:04:56', '2025-09-01 11:04:56'),
+>>>>>>> a899522ea55a0087c19dcee7e7195330113975f9
 (434, 'Aniline blue ', 'Stain', 'Cupboard', 8.00, 8.00, 'SRL', '28983-56-4', 'CHEM-1756724994191', '2025-09-01 11:09:54', '2025-09-01 11:09:54', '2025-09-01 11:09:54'),
 (435, 'Ninhydrin ', 'Stain', 'Cupboard', 1.00, 1.00, 'Qualikem', 'N027208', 'CHEM-1756725109903', '2025-09-01 11:11:49', '2025-09-01 11:11:49', '2025-09-01 11:11:49'),
 (436, 'crystal violet ', 'Stain', 'Cupboard', 7.00, 7.00, 'SRL', '17610', 'CHEM-1756725192009', '2025-09-01 11:13:12', '2025-09-01 11:13:12', '2025-09-01 11:13:12'),
@@ -481,7 +597,11 @@ INSERT INTO chemicals (id, name, type, storagePlace, totalWeight, availableWeigh
 (585, 'EBT ', 'Solid', 'Cupboard', 25.00, 25.00, '', 'NAM', 'CHEM-1756873153072', '2025-09-03 04:19:13', '2025-09-03 04:19:13', '2025-09-03 04:19:13'),
 (586, 'Luria broth ', 'Solid', 'Cupboard', 500.00, 500.00, 'SRL ', '14593', 'CHEM-1756960426015', '2025-09-04 04:33:46', '2025-09-04 04:33:46', '2025-09-04 04:33:46'),
 (587, 'Nutrient Agar', 'Solid', 'Cupboard', 500.00, 500.00, 'SRL ', '63971', 'CHEM-1756960480031', '2025-09-04 04:34:40', '2025-09-04 04:34:40', '2025-09-04 04:34:40'),
+<<<<<<< HEAD
 (590, 'Nutrient Agar-1', 'Solid', 'Cupboard', 500.00, 500.00, 'SRL ', 'NA01', 'CHEM-1756960509047', '2025-09-04 04:35:09', '2025-09-04 04:35:09', '2025-09-04 04:35:09'),
+=======
+(590, 'Nutrient Agar-1', 'Solid', 'Cupboard', 500.00, 500.00, 'SRL ', 'NA01`', 'CHEM-1756960509047', '2025-09-04 04:35:09', '2025-09-04 04:35:09', '2025-09-04 04:35:09'),
+>>>>>>> a899522ea55a0087c19dcee7e7195330113975f9
 (591, 'LB Broth ', 'Solid', 'Cupboard', 500.00, 500.00, 'SRL ', 'lb1', 'CHEM-1756960545929', '2025-09-04 04:35:45', '2025-09-04 04:35:45', '2025-09-04 04:35:45'),
 (593, 'Nutrient Broth ', 'Solid', 'Cupboard', 500.00, 500.00, 'SRL ', 'NB1', 'CHEM-1756960761846', '2025-09-04 04:39:21', '2025-09-04 04:39:21', '2025-09-04 04:39:21'),
 (594, 'Nutrient Broth ', 'Solid', 'Cupboard', 500.00, 500.00, 'SRL ', '55427', 'CHEM-1756960852473', '2025-09-04 04:40:52', '2025-09-04 04:40:52', '2025-09-04 04:40:52'),
@@ -526,10 +646,50 @@ INSERT INTO chemicals (id, name, type, storagePlace, totalWeight, availableWeigh
 -- --------------------------------------------------------
 
 --
+<<<<<<< HEAD
 -- Table structure for table glasswares
 
 
 INSERT INTO glasswares (id, name, type, storagePlace, totalQuantity, availableQuantity, company, glasswareId, dateOfEntry, created_at, updated_at) VALUES
+=======
+-- Table structure for table `faqs`
+--
+
+CREATE TABLE `faqs` (
+  `id` int(11) NOT NULL,
+  `question` text NOT NULL,
+  `answer` text NOT NULL,
+  `category` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `glasswares`
+--
+
+CREATE TABLE `glasswares` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `storagePlace` varchar(255) NOT NULL,
+  `totalQuantity` int(11) NOT NULL,
+  `availableQuantity` int(11) NOT NULL,
+  `company` varchar(255) DEFAULT NULL,
+  `glasswareId` varchar(255) NOT NULL,
+  `dateOfEntry` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `glasswares`
+--
+
+INSERT INTO `glasswares` (`id`, `name`, `type`, `storagePlace`, `totalQuantity`, `availableQuantity`, `company`, `glasswareId`, `dateOfEntry`, `created_at`, `updated_at`) VALUES
+>>>>>>> a899522ea55a0087c19dcee7e7195330113975f9
 (4, 'Glass Beaker 250 ml', 'Beaker', ' A-305', 7, 15, 'Durasil', 'GLASS-1756111867992', '2025-08-25 08:51:07', '2025-08-25 08:51:07', '2025-08-29 07:46:31'),
 (6, 'Beaker 500 ml', 'Beaker ', ' A-305', 10, 20, 'Durasil', 'GLASS-1756112422172', '2025-08-25 09:00:22', '2025-08-25 09:00:22', '2025-08-29 07:45:52'),
 (7, 'Test tube 15 ml', 'Test tube ', ' A-305', 100, 200, 'Durasil', 'GLASS-1756112500502', '2025-08-25 09:01:40', '2025-08-25 09:01:40', '2025-08-29 07:45:17'),
@@ -620,10 +780,35 @@ INSERT INTO glasswares (id, name, type, storagePlace, totalQuantity, availableQu
 -- --------------------------------------------------------
 
 --
+<<<<<<< HEAD
 -- Dumping data for table instruments
 --
 
 INSERT INTO instruments (id, name, type, storagePlace, totalQuantity, availableQuantity, company, instrumentId, dateOfEntry, created_at, updated_at) VALUES
+=======
+-- Table structure for table `instruments`
+--
+
+CREATE TABLE `instruments` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `storagePlace` varchar(255) NOT NULL,
+  `totalQuantity` int(11) NOT NULL,
+  `availableQuantity` int(11) NOT NULL,
+  `company` varchar(255) DEFAULT NULL,
+  `instrumentId` varchar(255) NOT NULL,
+  `dateOfEntry` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `instruments`
+--
+
+INSERT INTO `instruments` (`id`, `name`, `type`, `storagePlace`, `totalQuantity`, `availableQuantity`, `company`, `instrumentId`, `dateOfEntry`, `created_at`, `updated_at`) VALUES
+>>>>>>> a899522ea55a0087c19dcee7e7195330113975f9
 (3, 'Cooling Centrifuge Neuation(MCTS)', 'centrifuge', 'BMS -1', 1, 1, '', 'INST-1756191055358', '2025-08-26 06:50:55', '2025-08-26 06:50:55', '2025-08-26 10:49:41'),
 (4, 'Cooling Centrifuge Remi ( mcts and falcon)', 'centrifuge', 'BMS -1', 1, 1, '', 'INST-1756191120062', '2025-08-26 06:52:00', '2025-08-26 06:52:00', '2025-08-26 10:49:07'),
 (8, 'Spectrophotometer ', 'Spectrophotometer ', 'bms lab-1', 2, 2, '', 'INST-1756191789677', '2025-08-26 07:03:09', '2025-08-26 07:03:09', '2025-08-26 07:03:09'),
@@ -701,10 +886,94 @@ INSERT INTO instruments (id, name, type, storagePlace, totalQuantity, availableQ
 -- --------------------------------------------------------
 
 --
+<<<<<<< HEAD
 -- Dumping data for table miscellaneous
 --
 
 INSERT INTO miscellaneous (id, name, type, description, storagePlace, totalQuantity, availableQuantity, company, miscellaneousId, dateOfEntry, created_at, updated_at) VALUES
+=======
+-- Table structure for table `issued_items`
+--
+
+CREATE TABLE `issued_items` (
+  `id` int(11) NOT NULL,
+  `itemType` enum('Chemical','Glassware','Plasticware','Instrument') NOT NULL,
+  `itemId` int(11) NOT NULL,
+  `issuedToId` int(11) NOT NULL,
+  `issuedByUserId` int(11) NOT NULL,
+  `issuedByName` varchar(255) DEFAULT NULL,
+  `issuedByRole` varchar(255) DEFAULT NULL,
+  `issuedByRollNo` varchar(255) DEFAULT NULL,
+  `facultyInCharge` varchar(255) DEFAULT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `totalWeightIssued` decimal(10,2) DEFAULT NULL,
+  `purpose` text DEFAULT NULL,
+  `issueDate` timestamp NOT NULL DEFAULT current_timestamp(),
+  `returnDate` datetime DEFAULT NULL,
+  `status` enum('issued','returned') DEFAULT 'issued',
+  `notes` text DEFAULT NULL,
+  `pendingRequestId` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `issued_items`
+--
+
+INSERT INTO `issued_items` (`id`, `itemType`, `itemId`, `issuedToId`, `issuedByUserId`, `issuedByName`, `issuedByRole`, `issuedByRollNo`, `facultyInCharge`, `quantity`, `totalWeightIssued`, `purpose`, `issueDate`, `returnDate`, `status`, `notes`, `pendingRequestId`, `created_at`, `updated_at`) VALUES
+(3, 'Glassware', 48, 25, 28, 'Dr. Parth Pandya', 'faculty', NULL, '28', 6, 0.00, 'exp', '2025-08-26 09:54:09', NULL, 'returned', 'exp', 19, '2025-08-26 09:54:09', '2025-08-26 09:54:09');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `lab_registers`
+--
+
+CREATE TABLE `lab_registers` (
+  `id` int(11) NOT NULL,
+  `registerType` enum('ChemicalItemIssued','GlasswareItemIssued','PlasticwareItemIssued','InstrumentUsed','BreakageCharges','DailyEntry','AnimalCultureLab','PlantCultureLab') NOT NULL,
+  `labType` enum('Common','Research') NOT NULL,
+  `date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `day` varchar(255) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `facultyInCharge` varchar(255) DEFAULT NULL,
+  `item` varchar(255) DEFAULT NULL,
+  `totalWeight` decimal(10,2) DEFAULT NULL,
+  `purpose` text DEFAULT NULL,
+  `inTime` varchar(255) DEFAULT NULL,
+  `outTime` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `miscellaneous`
+--
+
+CREATE TABLE `miscellaneous` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `storagePlace` varchar(255) NOT NULL,
+  `totalQuantity` int(11) NOT NULL,
+  `availableQuantity` int(11) NOT NULL,
+  `company` varchar(255) DEFAULT NULL,
+  `miscellaneousId` varchar(255) NOT NULL,
+  `dateOfEntry` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `miscellaneous`
+--
+
+INSERT INTO `miscellaneous` (`id`, `name`, `type`, `description`, `storagePlace`, `totalQuantity`, `availableQuantity`, `company`, `miscellaneousId`, `dateOfEntry`, `created_at`, `updated_at`) VALUES
+>>>>>>> a899522ea55a0087c19dcee7e7195330113975f9
 (1, 'Tissue Roll ', 'Tissue Roll ', '', '311', 40, 40, '', 'MISC-1756202291457', '2025-08-26 09:58:11', '2025-08-26 09:58:11', '2025-08-26 09:58:11'),
 (2, 'thread', 'roll', '', '311', 12, 12, '', 'MISC-1756202716075', '2025-08-26 10:05:16', '2025-08-26 10:05:16', '2025-08-26 10:12:50'),
 (3, 'hand wash', 'packets', '', '311', 18, 18, '', 'MISC-1756202820263', '2025-08-26 10:07:00', '2025-08-26 10:07:00', '2025-08-26 10:12:31'),
@@ -718,10 +987,97 @@ INSERT INTO miscellaneous (id, name, type, description, storagePlace, totalQuant
 
 -- --------------------------------------------------------
 
+<<<<<<< HEAD
 -- Dumping data for table plasticwares
 --
 
 INSERT INTO plasticwares (id, name, type, storagePlace, totalQuantity, availableQuantity, company, plasticwareId, dateOfEntry, created_at, updated_at) VALUES
+=======
+--
+-- Table structure for table `pending_requests`
+--
+
+CREATE TABLE `pending_requests` (
+  `id` int(11) NOT NULL,
+  `facultyInChargeId` int(11) NOT NULL,
+  `requestedByUserId` int(11) NOT NULL,
+  `requestedByName` varchar(255) DEFAULT NULL,
+  `requestedByRole` varchar(255) DEFAULT NULL,
+  `requestedByRollNo` varchar(255) DEFAULT NULL,
+  `requestedByCollegeEmail` varchar(255) DEFAULT NULL,
+  `purpose` text DEFAULT NULL,
+  `desiredIssueTime` datetime DEFAULT NULL,
+  `desiredReturnTime` datetime DEFAULT NULL,
+  `requestDate` timestamp NOT NULL DEFAULT current_timestamp(),
+  `status` enum('pending','approved','rejected') DEFAULT 'pending',
+  `notes` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `pending_requests`
+--
+
+INSERT INTO `pending_requests` (`id`, `facultyInChargeId`, `requestedByUserId`, `requestedByName`, `requestedByRole`, `requestedByRollNo`, `requestedByCollegeEmail`, `purpose`, `desiredIssueTime`, `desiredReturnTime`, `requestDate`, `status`, `notes`, `created_at`, `updated_at`) VALUES
+(19, 28, 25, 'Jeel Parmar', 'student', '25000853', 'jeel.k.parmar@nuv.ac.in', 'exp', '2025-08-26 15:22:00', '2025-08-26 16:22:00', '2025-08-26 09:53:06', 'approved', 'exp', '2025-08-26 09:53:06', '2025-08-26 09:54:07'),
+(20, 55, 25, 'Jeel Parmar', 'student', '25000853', 'jeel.k.parmar@nuv.ac.in', 'Experminet xyz', '2025-09-29 15:39:00', '2025-09-29 16:39:00', '2025-09-29 10:10:06', 'rejected', '', '2025-09-29 10:10:06', '2025-09-29 10:10:49'),
+(21, 28, 25, 'Jeel Parmar', 'student', '25000853', 'jeel.k.parmar@nuv.ac.in', 'temp', '2026-02-11 04:06:00', '2026-02-12 06:56:00', '2026-02-11 09:05:34', 'rejected', '', '2026-02-11 09:05:34', '2026-02-11 09:06:46');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pending_request_items`
+--
+
+CREATE TABLE `pending_request_items` (
+  `id` int(11) NOT NULL,
+  `pendingRequestId` int(11) NOT NULL,
+  `itemType` enum('Chemical','Glassware','Plasticware','Instrument') NOT NULL,
+  `itemId` int(11) NOT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `totalWeightRequested` decimal(10,2) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `pending_request_items`
+--
+
+INSERT INTO `pending_request_items` (`id`, `pendingRequestId`, `itemType`, `itemId`, `quantity`, `totalWeightRequested`, `created_at`) VALUES
+(8, 19, 'Glassware', 48, 6, NULL, '2025-08-26 09:53:07'),
+(9, 20, 'Chemical', 638, 1, 20.00, '2025-09-29 10:10:06'),
+(10, 20, 'Chemical', 637, 1, 20.00, '2025-09-29 10:10:06'),
+(11, 20, 'Chemical', 635, 1, 20.00, '2025-09-29 10:10:06'),
+(12, 21, 'Chemical', 638, 1, 0.60, '2026-02-11 09:05:34'),
+(13, 21, 'Chemical', 637, 1, 0.80, '2026-02-11 09:05:35');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `plasticwares`
+--
+
+CREATE TABLE `plasticwares` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL,
+  `storagePlace` varchar(255) NOT NULL,
+  `totalQuantity` int(11) NOT NULL,
+  `availableQuantity` int(11) NOT NULL,
+  `company` varchar(255) DEFAULT NULL,
+  `plasticwareId` varchar(255) NOT NULL,
+  `dateOfEntry` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `plasticwares`
+--
+
+INSERT INTO `plasticwares` (`id`, `name`, `type`, `storagePlace`, `totalQuantity`, `availableQuantity`, `company`, `plasticwareId`, `dateOfEntry`, `created_at`, `updated_at`) VALUES
+>>>>>>> a899522ea55a0087c19dcee7e7195330113975f9
 (10, 'dropper', 'dropper', '7 th floor micro', 3, 3, '', 'PLASTIC-1756205279810', '2025-08-26 10:47:59', '2025-08-26 10:47:59', '2025-08-26 10:47:59'),
 (13, 'tray', 'tray', '7 th floor CLE', 2, 2, '', 'PLASTIC-1756205381577', '2025-08-26 10:49:41', '2025-08-26 10:49:41', '2025-08-26 10:49:41'),
 (14, 'tray', 'tray', '7 th floor micro', 2, 2, '', 'PLASTIC-1756205443440', '2025-08-26 10:50:43', '2025-08-26 10:50:43', '2025-08-26 10:50:43'),
@@ -744,10 +1100,35 @@ INSERT INTO plasticwares (id, name, type, storagePlace, totalQuantity, available
 -- --------------------------------------------------------
 
 --
+<<<<<<< HEAD
 -- Dumping data for table slides
 --
 
 INSERT INTO slides (id, name, description, storagePlace, totalQuantity, availableQuantity, company, slideId, dateOfEntry, created_at, updated_at) VALUES
+=======
+-- Table structure for table `slides`
+--
+
+CREATE TABLE `slides` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `storagePlace` varchar(255) NOT NULL,
+  `totalQuantity` int(11) NOT NULL,
+  `availableQuantity` int(11) NOT NULL,
+  `company` varchar(255) DEFAULT NULL,
+  `slideId` varchar(255) NOT NULL,
+  `dateOfEntry` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `slides`
+--
+
+INSERT INTO `slides` (`id`, `name`, `description`, `storagePlace`, `totalQuantity`, `availableQuantity`, `company`, `slideId`, `dateOfEntry`, `created_at`, `updated_at`) VALUES
+>>>>>>> a899522ea55a0087c19dcee7e7195330113975f9
 (6, 'algae and protozoa- Batrachospemum', 'Permanent slides ', '311', 1, 1, '', 'SLIDE-1756187623015', '2025-08-26 05:53:43', '2025-08-26 05:53:43', '2025-08-26 05:53:43'),
 (7, 'algae and protozoa- nostoc', 'Permanent slides ', '311', 1, 1, '', 'SLIDE-1756187640343', '2025-08-26 05:54:00', '2025-08-26 05:54:00', '2025-08-26 05:54:00'),
 (8, 'algae and protozoa- euglena', 'Permanent slides ', '311', 1, 1, '', 'SLIDE-1756187686843', '2025-08-26 05:54:46', '2025-08-26 05:54:46', '2025-08-26 05:54:46'),
@@ -1044,7 +1425,11 @@ INSERT INTO slides (id, name, description, storagePlace, totalQuantity, availabl
 (312, 'protozoan parasites- paramecium ', 'Permanent slides ', '311', 1, 1, '', 'SLIDE-1756363280858', '2025-08-28 06:41:20', '2025-08-28 06:41:20', '2025-08-28 06:41:20'),
 (313, 'protozoan parasites- paramecium conjugation', 'Permanent slides ', '311', 1, 1, '', 'SLIDE-1756363289680', '2025-08-28 06:41:29', '2025-08-28 06:41:29', '2025-08-28 06:41:29'),
 (314, 'protozoan parasites- paramecium with protozoa', 'Permanent slides ', '311', 1, 1, '', 'SLIDE-1756363306206', '2025-08-28 06:41:46', '2025-08-28 06:41:46', '2025-08-28 06:41:46');
+<<<<<<< HEAD
 INSERT INTO slides (id, name, description, storagePlace, totalQuantity, availableQuantity, company, slideId, dateOfEntry, created_at, updated_at) VALUES
+=======
+INSERT INTO `slides` (`id`, `name`, `description`, `storagePlace`, `totalQuantity`, `availableQuantity`, `company`, `slideId`, `dateOfEntry`, `created_at`, `updated_at`) VALUES
+>>>>>>> a899522ea55a0087c19dcee7e7195330113975f9
 (315, 'helminths- tape worm scolex', 'Permanent slides ', '311', 1, 1, '', 'SLIDE-1756363362608', '2025-08-28 06:42:42', '2025-08-28 06:42:42', '2025-08-28 06:42:42'),
 (316, 'helminths- liver fluke', 'Permanent slides ', '311', 1, 1, '', 'SLIDE-1756363388517', '2025-08-28 06:43:08', '2025-08-28 06:43:08', '2025-08-28 06:43:08'),
 (317, 'helminths- enterobius', 'Permanent slides ', '311', 1, 1, '', 'SLIDE-1756363412661', '2025-08-28 06:43:32', '2025-08-28 06:43:32', '2025-08-28 06:43:32'),
@@ -1127,11 +1512,37 @@ INSERT INTO slides (id, name, description, storagePlace, totalQuantity, availabl
 
 -- --------------------------------------------------------
 
+<<<<<<< HEAD
 
 -- Dumping data for table specimens
 --
 
 INSERT INTO specimens (id, name, description, storagePlace, totalQuantity, availableQuantity, company, specimenId, dateOfEntry, created_at, updated_at) VALUES
+=======
+--
+-- Table structure for table `specimens`
+--
+
+CREATE TABLE `specimens` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `storagePlace` varchar(255) NOT NULL,
+  `totalQuantity` int(11) NOT NULL,
+  `availableQuantity` int(11) NOT NULL,
+  `company` varchar(255) DEFAULT NULL,
+  `specimenId` varchar(255) NOT NULL,
+  `dateOfEntry` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `specimens`
+--
+
+INSERT INTO `specimens` (`id`, `name`, `description`, `storagePlace`, `totalQuantity`, `availableQuantity`, `company`, `specimenId`, `dateOfEntry`, `created_at`, `updated_at`) VALUES
+>>>>>>> a899522ea55a0087c19dcee7e7195330113975f9
 (6, 'porifera - colonical marine sponge ', 'specimen', '305', 1, 1, '', 'SPEC-1756701298932', '2025-09-01 04:34:58', '2025-09-01 04:34:58', '2025-09-01 04:34:58'),
 (7, 'porifera - bath sponge ', 'specimen', '305', 1, 1, '', 'SPEC-1756701320795', '2025-09-01 04:35:20', '2025-09-01 04:35:20', '2025-09-01 04:35:20'),
 (8, 'porifera - sycon sponge ', 'specimen', '305', 1, 1, '', 'SPEC-1756701333676', '2025-09-01 04:35:33', '2025-09-01 04:35:33', '2025-09-01 04:35:33'),
@@ -1154,7 +1565,11 @@ INSERT INTO specimens (id, name, description, storagePlace, totalQuantity, avail
 (25, 'mollusca - grooved razor shell', 'specimen', '305', 1, 1, '', 'SPEC-1756702280365', '2025-09-01 04:51:20', '2025-09-01 04:51:20', '2025-09-01 04:51:20'),
 (26, 'mollusca - tusk shell', 'specimen', '305', 1, 1, '', 'SPEC-1756702303038', '2025-09-01 04:51:43', '2025-09-01 04:51:43', '2025-09-01 04:51:43'),
 (27, 'mollusca - pond water snail', 'specimen', '305', 1, 1, '', 'SPEC-1756702321444', '2025-09-01 04:52:01', '2025-09-01 04:52:01', '2025-09-01 04:52:01'),
+<<<<<<< HEAD
 (28, 'mollusca - ram''s horn  snail', 'specimen', '305', 1, 1, '', 'SPEC-1756702347631', '2025-09-01 04:52:27', '2025-09-01 04:52:27', '2025-09-01 04:52:27'),
+=======
+(28, 'mollusca - ram\'s horn  snail', 'specimen', '305', 1, 1, '', 'SPEC-1756702347631', '2025-09-01 04:52:27', '2025-09-01 04:52:27', '2025-09-01 04:52:27'),
+>>>>>>> a899522ea55a0087c19dcee7e7195330113975f9
 (29, 'mollusca - sea cradles', 'specimen', '305', 1, 1, '', 'SPEC-1756702374774', '2025-09-01 04:52:54', '2025-09-01 04:52:54', '2025-09-01 04:52:54'),
 (30, 'mollusca - blue mussel', 'specimen', '305', 1, 1, '', 'SPEC-1756702390123', '2025-09-01 04:53:10', '2025-09-01 04:53:10', '2025-09-01 04:53:10'),
 (31, 'mollusca - sea hare', 'specimen', '305', 1, 1, '', 'SPEC-1756702451328', '2025-09-01 04:54:11', '2025-09-01 04:54:11', '2025-09-01 04:54:11'),
@@ -1246,7 +1661,11 @@ INSERT INTO specimens (id, name, description, storagePlace, totalQuantity, avail
 (118, 'Chordata pisces - butterfly fish', 'specimen', '305', 1, 1, '', 'SPEC-1756711644098', '2025-09-01 07:27:24', '2025-09-01 07:27:24', '2025-09-01 07:27:24'),
 (119, 'Chordata pisces - bronze feather back', 'specimen', '305', 1, 1, '', 'SPEC-1756711666311', '2025-09-01 07:27:46', '2025-09-01 07:27:46', '2025-09-01 07:27:46'),
 (120, 'Chordata pisces - frog fish', 'specimen', '305', 1, 1, '', 'SPEC-1756711678287', '2025-09-01 07:27:58', '2025-09-01 07:27:58', '2025-09-01 07:27:58'),
+<<<<<<< HEAD
 (121, 'Chordata pisces - commerson''s sole', 'specimen', '305', 1, 1, '', 'SPEC-1756711697525', '2025-09-01 07:28:17', '2025-09-01 07:28:17', '2025-09-01 07:28:17'),
+=======
+(121, 'Chordata pisces - commerson\'s sole', 'specimen', '305', 1, 1, '', 'SPEC-1756711697525', '2025-09-01 07:28:17', '2025-09-01 07:28:17', '2025-09-01 07:28:17'),
+>>>>>>> a899522ea55a0087c19dcee7e7195330113975f9
 (122, 'Chordata pisces - pufferfish', 'specimen', '305', 1, 1, '', 'SPEC-1756711709917', '2025-09-01 07:28:29', '2025-09-01 07:28:29', '2025-09-01 07:28:29'),
 (123, 'Chordata pisces - common barbel', 'specimen', '305', 1, 1, '', 'SPEC-1756711726468', '2025-09-01 07:28:46', '2025-09-01 07:28:46', '2025-09-01 07:28:46'),
 (124, 'Chordata pisces - walking catfish', 'specimen', '305', 1, 1, '', 'SPEC-1756711739404', '2025-09-01 07:28:59', '2025-09-01 07:28:59', '2025-09-01 07:28:59'),
@@ -1323,6 +1742,7 @@ INSERT INTO specimens (id, name, description, storagePlace, totalQuantity, avail
 (195, 'Plant- Bryophytes- Polytrichum vegetative', 'specimen', '305', 1, 1, '', 'SPEC-1756717050001', '2025-09-01 08:57:30', '2025-09-01 08:57:30', '2025-09-01 08:57:30'),
 (196, 'Plant- Bryophytes- Polytrichum archegonia', 'specimen', '305', 1, 1, '', 'SPEC-1756717064918', '2025-09-01 08:57:44', '2025-09-01 08:57:44', '2025-09-01 08:57:44');
 
+<<<<<<< HEAD
 -- Set room location for all seeded data (Supabase/Postgres uses case-sensitive "roomLocation")
 UPDATE chemicals SET "roomLocation" = '4th floor BMS Lab';
 UPDATE glasswares SET "roomLocation" = '4th floor BMS Lab';
@@ -1331,3 +1751,310 @@ UPDATE instruments SET "roomLocation" = '4th floor BMS Lab';
 UPDATE miscellaneous SET "roomLocation" = '4th floor BMS Lab';
 UPDATE slides SET "roomLocation" = '4th floor BMS Lab';
 UPDATE specimens SET "roomLocation" = '4th floor BMS Lab';
+=======
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('master_admin','admin','faculty','student','phd_scholar','dissertation_student') NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `fullName` varchar(255) NOT NULL,
+  `rollNo` varchar(255) DEFAULT NULL,
+  `category` enum('UG/PG','PhD','Project Student') DEFAULT NULL,
+  `lastLogin` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `year` varchar(20) DEFAULT NULL,
+  `department` varchar(100) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `username`, `password`, `role`, `email`, `fullName`, `rollNo`, `category`, `lastLogin`, `created_at`, `updated_at`, `year`, `department`) VALUES
+(1, 'master_admin', '$2b$10$TqV9CAbvoyTziEGvyaWLyu9YMghb7IWvmoeMcW3c4fhku9YV98rou', 'master_admin', 'master.admin@nuv.ac.in', 'Master Administrator', NULL, NULL, '2026-02-11 10:34:14', '2025-08-21 09:19:22', '2026-02-11 10:34:14', NULL, NULL),
+(13, 'admin_numa', '$2b$10$is1AxlJkyXdGDYTAuDfZZuZvlTdvdawCcFvNOctpSak.mIBUQGkdG', 'admin', 'numa.diwan@nuv.ac.in', 'Numa Diwan', '11111', 'UG/PG', '2025-09-26 05:06:22', '2025-08-22 07:35:06', '2025-09-26 05:06:22', NULL, NULL),
+(14, 'admin_aparna', '$2b$10$ltuGhKHRQHi0jnPaBPmCbO703uFr33ccmygLNVY912oHKR0dtgyie', 'admin', 'aparna.dingre@nuv.ac.in', 'Aparna Dingre', '00000', 'UG/PG', '2025-09-12 06:08:11', '2025-08-22 07:52:38', '2025-09-12 06:08:11', NULL, NULL),
+(25, 'okayjeel', '$2b$10$K/Cw7nPH0I4mXSgEfQ7dm.GQ6kt84TZWDa8rRQDIvxhcRJkmijonW', 'student', 'jeel.k.parmar@nuv.ac.in', 'Jeel Parmar', '25000853', 'UG/PG', '2026-02-11 09:04:26', '2025-08-26 05:22:00', '2026-02-11 09:04:26', '1st', 'MSc. Animal Biotechnology'),
+(26, 'dhyan patel', '$2b$10$WZg1Tfong/dJq9c.iVxan.piFlEstBYwy.3MhS.S8l9K76Yb3qBfG', 'admin', 'dhyan.k.patel@nuv.ac.in', 'Dhyan Patel', NULL, 'UG/PG', '2026-02-11 09:07:00', '2025-08-26 07:52:22', '2026-02-11 09:07:00', '', ''),
+(28, 'Parth Pandya', '$2b$10$.u4BX.HlF3z5q58RKIWaJuagu2/.y3C8/z6PwV1134.Q7FXZZTaoy', 'faculty', 'parthp@nuv.ac.in', 'Dr. Parth Pandya', NULL, 'UG/PG', '2026-02-11 09:06:35', '2025-08-26 09:03:38', '2026-02-11 09:06:35', '', ''),
+(29, 'Drashti Mehta', '$2b$10$OUUTac29S4nFp4rPEB6jMeM.KjGvpMarnL7qxKwX9syz4m7wlFP0e', 'faculty', 'drashti.mehta@nuv.ac.in', 'Drashti Mehta', NULL, 'UG/PG', '2025-08-26 09:04:18', '2025-08-26 09:04:18', '2025-08-26 09:04:18', '', ''),
+(30, 'Drashti Shah', '$2b$10$WxATmCRLa0z/yBe5o9u.duPP7LAqekKul3UmjQab1AoZHjXPiKQ9e', 'faculty', 'drashti.shah@nuv.ac.in', 'Drashti Shah', NULL, 'UG/PG', '2025-08-26 09:10:31', '2025-08-26 09:10:31', '2025-08-26 09:10:31', '', ''),
+(31, 'Dhruvin Pastagia', '$2b$10$cTcTI9x3qrS4Y4hLZrTMieubz98Pvu1D..B7gIJJc.FJLbTc07itu', 'faculty', 'dhruvin.pastagia@nuv.ac.in', 'Dhruvin Pastagia', NULL, 'UG/PG', '2025-08-26 09:12:10', '2025-08-26 09:12:10', '2025-08-26 09:12:10', '', ''),
+(32, 'Harsh Shah', '$2b$10$PR8aW0CafPPYWljN1D/XDO91dTDTxb1k1ZDusIBQcJUq0s1qGcK2.', 'faculty', 'harshs@nuv.ac.in', 'Dr. Harsh Shah', NULL, 'UG/PG', '2025-08-26 09:13:32', '2025-08-26 09:13:32', '2025-08-26 09:13:32', '', ''),
+(33, 'Dhruvita Bhatt', '$2b$10$rZO0sb892A.G6k3fF6wIeuGdcpS4xB0AYP3xki9nhcSw.fO5wAEwi', 'faculty', 'dhruvita.bhatt@nuv.ac.in', 'Dhruvita Bhatt', NULL, 'UG/PG', '2025-08-26 09:14:32', '2025-08-26 09:14:32', '2025-08-26 09:14:32', '', ''),
+(34, 'Harshita Johari', '$2b$10$Gdf9XaBaJqzAQ8sToYvlIuomtxrY/OaazcN85rBIVqlZyekwSqhOS', 'faculty', 'harshita.johari@nuv.ac.in', 'Harshita Johari', NULL, 'UG/PG', '2025-08-26 09:16:01', '2025-08-26 09:16:01', '2025-08-26 09:16:01', '', ''),
+(35, 'Joy Panchal', '$2b$10$3O.9ZZzq2uRbQpIhwsF3b.OqmarqEhtveYWzfbortP/TsNIwRPR/i', 'faculty', 'joy.panchal@nuv.ac.in', 'Joy Panchal', NULL, 'UG/PG', '2025-08-26 09:17:36', '2025-08-26 09:17:36', '2025-08-26 09:17:36', '', ''),
+(36, 'Nehareeka Dan', '$2b$10$qxu2d5Ntbopuq/H2bPaYgOzOkAF7uY/JurERPQCQN6wCd53cZjK/O', 'faculty', 'nehareeka.dan@nuv.ac.in', 'Dr. Nehareeka Dan', NULL, 'UG/PG', '2025-08-26 09:18:41', '2025-08-26 09:18:41', '2025-08-26 09:18:41', '', ''),
+(37, 'Rutvi Vaja', '$2b$10$HGAl9ZRlr0ZHhJgya1YSGuStKvwBYbetdSIZtzf44GcY1BMVPFkT2', 'faculty', 'rutvi.vaja@nuv.ac.in', 'Rutvi Vaja', NULL, 'UG/PG', '2025-08-26 09:20:04', '2025-08-26 09:20:04', '2025-08-26 09:20:04', '', ''),
+(39, 'Riya Rupadia', '$2b$10$TUjOxoYsYzdOlli7bqmBjO4L9tBLgbyYaNFCQGjtmVbNNaw5XqVSy', 'faculty', 'riya.rupadia@nuv.ac.in', 'Riya Rupadia', NULL, 'UG/PG', '2025-08-26 09:22:46', '2025-08-26 09:22:46', '2025-08-26 09:22:46', '', ''),
+(40, 'Shilpi Pillai', '$2b$10$jYVbBFtmHuCpBHtaCyf2COiKaV/CKDylTaqm8nTmRSsRvIvnW/H2O', 'faculty', 'shilpi.pillai@nuv.ac.in', 'Shilpi Pillai', NULL, 'UG/PG', '2025-08-26 09:23:43', '2025-08-26 09:23:43', '2025-08-26 09:23:43', '', ''),
+(41, 'Sneha Chauhan', '$2b$10$JV.Wkg3UzBmCfiDBDDyH/.IIyYvbVm1g6p4rTgVtOG6AcVu3AzSaa', 'faculty', 'sneha.chauhan@nuv.ac.in', 'Sneha Chauhan', NULL, 'UG/PG', '2025-08-26 09:24:28', '2025-08-26 09:24:28', '2025-08-26 09:24:28', '', ''),
+(42, 'Srimita Ghosh', '$2b$10$6JF3gGJeCI0HO4rTag9.6eNNiMcEqaxuGgtzGSNgChoaoSW7ydoUS', 'faculty', 'srimita.ghosh@nuv.ac.in', 'Srimita Ghosh', NULL, 'UG/PG', '2025-08-26 09:25:15', '2025-08-26 09:25:15', '2025-08-26 09:25:15', '', ''),
+(43, 'Darshee Baxi', '$2b$10$.uNPsHfi6abox8MQc0oSx.fcjlqkqDC2ppAKnpbbWVvQ/cTXHzk8y', 'faculty', 'darsheeb@nuv.ac.in', 'Dr. Darshee Baxi', NULL, 'UG/PG', '2025-08-26 09:26:42', '2025-08-26 09:26:42', '2025-08-26 09:26:42', '', ''),
+(44, 'Dr. Elizabeth Robin', '$2b$10$AFs2I3n9ahDHnUbUkEkWKO1PYLsyeUaHLcGiUhY6bLkj46AdrKDWy', 'faculty', 'elizabethr@nuv.ac.in', 'Dr. Elizabeth Robin', NULL, 'UG/PG', '2025-08-26 09:27:38', '2025-08-26 09:27:38', '2025-08-26 09:27:38', '', ''),
+(45, 'Gaurav Parashar', '$2b$10$JN9XPu/94GMs3.JzP9JfBeUb4KGON65exh/agc/CFRQ9ijyQRyYo.', 'faculty', 'gaurav.parashar@nuv.ac.in', 'Dr. Gaurav Parashar', NULL, 'UG/PG', '2025-08-26 09:29:28', '2025-08-26 09:29:28', '2025-08-26 09:29:28', '', ''),
+(46, 'Jagruti Rathod', '$2b$10$xZY5rwADLF8oAzlU8lbu5e0vP2oYY5zq79V3kTvh7BvqNKC0PQmom', 'faculty', 'jagruti.rathod@nuv.ac.in', 'Dr. Jagruti Rathod', NULL, 'UG/PG', '2025-08-26 09:31:14', '2025-08-26 09:31:14', '2025-08-26 09:31:14', '', ''),
+(47, 'Khushali Upadhyay', '$2b$10$JzCz/nixemde17Y1R6T99.zKoiWRuYS6z01IZLcPusSA3WrUMIrE.', 'faculty', 'khushaliu@nuv.ac.in', 'Dr. Khushali Upadhyay', NULL, 'UG/PG', '2025-08-26 09:32:25', '2025-08-26 09:32:25', '2025-08-26 09:32:25', '', ''),
+(48, 'Krutika Abhyankar', '$2b$10$7dVNQ/gJ94ZbkLAgdRgO0usApYvFndVDl0uPvQ.1NHbRhXE9sTk.i', 'faculty', 'krutikaa@nuv.ac.in', 'Dr. Krutika Abhyankar', NULL, 'UG/PG', '2025-08-26 09:33:31', '2025-08-26 09:33:31', '2025-08-26 09:33:31', '', ''),
+(49, 'Monisha Kottayi', '$2b$10$cmSvVyyEx3/VT9rI.SMAJ.NKsLHm0Z4asux3huUTICdyM6H7fcqYq', 'faculty', 'monishak@nuv.ac.in', 'Dr. Monisha Kottayi', NULL, 'UG/PG', '2025-08-26 09:35:06', '2025-08-26 09:35:06', '2025-08-26 09:35:06', '', ''),
+(50, 'Sneha Joseph', '$2b$10$7owAE56L9qtj2oruNtwWb.0xMWAba.6K6JVLLxmn0/q9bovxKYHtW', 'faculty', 'sneha.joseph@nuv.ac.in', 'Dr. Sneha Joseph', NULL, 'UG/PG', '2025-08-26 09:41:03', '2025-08-26 09:41:03', '2025-08-26 09:41:03', '', ''),
+(51, 'Tejal Gajaria', '$2b$10$A00QaqWYjkiZtZZYyzodKONpL2S0HzVHWKRFCxVEmebJ70UA2eRpi', 'faculty', 'tejal.gajaria@nuv.ac.in', 'Dr. Tejal Gajaria', NULL, 'UG/PG', '2025-08-26 09:43:08', '2025-08-26 09:43:08', '2025-08-26 09:43:08', '', ''),
+(52, 'Foram Patel', '$2b$10$9pjedjNTW7JSZeVk7FPvp.SLh9EJpAWvqWagW7pCzph3bhettmHk2', 'faculty', 'foramp@nuv.ac.in', 'Dr. Foram Patel', NULL, 'UG/PG', '2025-08-26 09:43:43', '2025-08-26 09:43:43', '2025-08-26 09:43:43', '', ''),
+(53, 'Ankita Doshi', '$2b$10$hwQ385u.2spanXUENiNx3ufxnZrB6WE5hOR0MjTmtt7LCEyPzEyX6', 'faculty', 'ankitad@nuv.ac.in', 'Dr. Ankita Doshi', NULL, 'UG/PG', '2025-08-26 09:45:11', '2025-08-26 09:45:11', '2025-08-26 09:45:11', '', ''),
+(54, 'admin_sheethu', '$2b$10$6Ov/ZoaREdyH49qRioxP/.eIfvtdRsuuns3.5bhZs75BOnNZFhRcy', 'admin', 'sheethu.damodaran@nuv.ac.in', 'Sheethu Damodaran', NULL, 'UG/PG', '2025-08-28 08:46:58', '2025-08-28 08:46:58', '2025-08-28 08:46:58', '', ''),
+(55, 'AVR', '$2b$10$VT1F/4wqDEOHfeOcz68TCePF3.eUmHbxTwwqIJzBQY8yBiqR867Yy', 'faculty', 'avramachandran@nuv.ac.in', 'Prof. A. V. Ramachandran', NULL, 'UG/PG', '2025-09-29 10:10:37', '2025-09-29 10:06:36', '2025-09-29 10:10:37', '', '');
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `activity_logs`
+--
+ALTER TABLE `activity_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_action` (`action`),
+  ADD KEY `idx_itemType` (`itemType`),
+  ADD KEY `idx_timestamp` (`timestamp`);
+
+--
+-- Indexes for table `chemicals`
+--
+ALTER TABLE `chemicals`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `catalogNumber` (`catalogNumber`),
+  ADD UNIQUE KEY `chemicalId` (`chemicalId`),
+  ADD KEY `idx_catalog` (`catalogNumber`),
+  ADD KEY `idx_chemicalId` (`chemicalId`);
+
+--
+-- Indexes for table `faqs`
+--
+ALTER TABLE `faqs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_category` (`category`);
+
+--
+-- Indexes for table `glasswares`
+--
+ALTER TABLE `glasswares`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `glasswareId` (`glasswareId`),
+  ADD KEY `idx_glasswareId` (`glasswareId`);
+
+--
+-- Indexes for table `instruments`
+--
+ALTER TABLE `instruments`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `instrumentId` (`instrumentId`),
+  ADD KEY `idx_instrumentId` (`instrumentId`);
+
+--
+-- Indexes for table `issued_items`
+--
+ALTER TABLE `issued_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `issuedToId` (`issuedToId`),
+  ADD KEY `issuedByUserId` (`issuedByUserId`),
+  ADD KEY `pendingRequestId` (`pendingRequestId`),
+  ADD KEY `idx_status` (`status`),
+  ADD KEY `idx_issueDate` (`issueDate`),
+  ADD KEY `idx_itemType` (`itemType`);
+
+--
+-- Indexes for table `lab_registers`
+--
+ALTER TABLE `lab_registers`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_registerType` (`registerType`),
+  ADD KEY `idx_date` (`date`);
+
+--
+-- Indexes for table `miscellaneous`
+--
+ALTER TABLE `miscellaneous`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `miscellaneousId` (`miscellaneousId`),
+  ADD KEY `idx_miscellaneousId` (`miscellaneousId`);
+
+--
+-- Indexes for table `pending_requests`
+--
+ALTER TABLE `pending_requests`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `facultyInChargeId` (`facultyInChargeId`),
+  ADD KEY `requestedByUserId` (`requestedByUserId`),
+  ADD KEY `idx_status` (`status`),
+  ADD KEY `idx_requestDate` (`requestDate`);
+
+--
+-- Indexes for table `pending_request_items`
+--
+ALTER TABLE `pending_request_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `pendingRequestId` (`pendingRequestId`),
+  ADD KEY `idx_itemType` (`itemType`),
+  ADD KEY `idx_itemId` (`itemId`);
+
+--
+-- Indexes for table `plasticwares`
+--
+ALTER TABLE `plasticwares`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `plasticwareId` (`plasticwareId`),
+  ADD KEY `idx_plasticwareId` (`plasticwareId`);
+
+--
+-- Indexes for table `slides`
+--
+ALTER TABLE `slides`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `slideId` (`slideId`),
+  ADD KEY `idx_slideId` (`slideId`);
+
+--
+-- Indexes for table `specimens`
+--
+ALTER TABLE `specimens`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `specimenId` (`specimenId`),
+  ADD KEY `idx_specimenId` (`specimenId`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`username`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `rollNo` (`rollNo`),
+  ADD KEY `idx_rollno` (`rollNo`),
+  ADD KEY `idx_role` (`role`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `activity_logs`
+--
+ALTER TABLE `activity_logs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `chemicals`
+--
+ALTER TABLE `chemicals`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=641;
+
+--
+-- AUTO_INCREMENT for table `faqs`
+--
+ALTER TABLE `faqs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `glasswares`
+--
+ALTER TABLE `glasswares`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
+
+--
+-- AUTO_INCREMENT for table `instruments`
+--
+ALTER TABLE `instruments`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=95;
+
+--
+-- AUTO_INCREMENT for table `issued_items`
+--
+ALTER TABLE `issued_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `lab_registers`
+--
+ALTER TABLE `lab_registers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `miscellaneous`
+--
+ALTER TABLE `miscellaneous`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `pending_requests`
+--
+ALTER TABLE `pending_requests`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+
+--
+-- AUTO_INCREMENT for table `pending_request_items`
+--
+ALTER TABLE `pending_request_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
+-- AUTO_INCREMENT for table `plasticwares`
+--
+ALTER TABLE `plasticwares`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+
+--
+-- AUTO_INCREMENT for table `slides`
+--
+ALTER TABLE `slides`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=399;
+
+--
+-- AUTO_INCREMENT for table `specimens`
+--
+ALTER TABLE `specimens`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=197;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `issued_items`
+--
+ALTER TABLE `issued_items`
+  ADD CONSTRAINT `issued_items_ibfk_1` FOREIGN KEY (`issuedToId`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `issued_items_ibfk_2` FOREIGN KEY (`issuedByUserId`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `issued_items_ibfk_3` FOREIGN KEY (`pendingRequestId`) REFERENCES `pending_requests` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `pending_requests`
+--
+ALTER TABLE `pending_requests`
+  ADD CONSTRAINT `pending_requests_ibfk_1` FOREIGN KEY (`facultyInChargeId`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `pending_requests_ibfk_2` FOREIGN KEY (`requestedByUserId`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `pending_request_items`
+--
+ALTER TABLE `pending_request_items`
+  ADD CONSTRAINT `pending_request_items_ibfk_1` FOREIGN KEY (`pendingRequestId`) REFERENCES `pending_requests` (`id`) ON DELETE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+>>>>>>> a899522ea55a0087c19dcee7e7195330113975f9
