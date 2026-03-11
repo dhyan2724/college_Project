@@ -1,5 +1,36 @@
 const { supabase } = require('../config/supabase');
 
+// PostgreSQL lowercases unquoted column names; map app camelCase -> DB lowercase for Supabase
+const PLASTICWARE_TO_DB = {
+  availableQuantity: 'availablequantity',
+  totalQuantity: 'totalquantity',
+  storagePlace: 'storageplace',
+  roomLocation: 'roomlocation',
+  plasticwareId: 'plasticwareid',
+  dateOfEntry: 'dateofentry'
+};
+const PLASTICWARE_FROM_DB = Object.fromEntries(
+  Object.entries(PLASTICWARE_TO_DB).map(([k, v]) => [v, k])
+);
+
+function toDbKeys(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    out[PLASTICWARE_TO_DB[k] ?? k] = v;
+  }
+  return out;
+}
+
+function fromDbKeys(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    out[PLASTICWARE_FROM_DB[k] ?? k] = v;
+  }
+  return out;
+}
+
 class Plasticware {
   // Create a new plasticware
   static async create(plasticwareData) {
@@ -15,7 +46,7 @@ class Plasticware {
           ? availableQuantity
           : (totalQuantity !== undefined && totalQuantity !== null ? totalQuantity : 0);
       
-      const plasticwareRecord = {
+      const plasticwareRecord = toDbKeys({
         name: name !== undefined ? name : null,
         type: type !== undefined ? type : null,
         storagePlace: storagePlace !== undefined ? storagePlace : null,
@@ -24,7 +55,7 @@ class Plasticware {
         availableQuantity: finalAvailableQuantity,
         company: company !== undefined ? company : null,
         plasticwareId: plasticwareId
-      };
+      });
       
       const { data, error } = await supabase
         .from('plasticwares')
@@ -34,7 +65,7 @@ class Plasticware {
       
       if (error) throw error;
       
-      return { ...data, ...plasticwareData, plasticwareId, availableQuantity: finalAvailableQuantity };
+      return { ...fromDbKeys(data), ...plasticwareData, plasticwareId, availableQuantity: finalAvailableQuantity };
     } catch (error) {
       throw error;
     }
@@ -50,7 +81,7 @@ class Plasticware {
         .single();
       
       if (error && error.code !== 'PGRST116') throw error;
-      return data || null;
+      return data ? fromDbKeys(data) : null;
     } catch (error) {
       throw error;
     }
@@ -62,11 +93,11 @@ class Plasticware {
       const { data, error } = await supabase
         .from('plasticwares')
         .select('*')
-        .eq('plasticwareId', plasticwareId)
+        .eq('plasticwareid', plasticwareId)
         .single();
       
       if (error && error.code !== 'PGRST116') throw error;
-      return data || null;
+      return data ? fromDbKeys(data) : null;
     } catch (error) {
       throw error;
     }
@@ -81,7 +112,7 @@ class Plasticware {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -99,7 +130,7 @@ class Plasticware {
 
       const { data, error } = await supabase
         .from('plasticwares')
-        .update(cleanData)
+        .update(toDbKeys(cleanData))
         .eq('id', id)
         .select();
       
@@ -132,22 +163,22 @@ class Plasticware {
       const { data, error } = await supabase
         .from('plasticwares')
         .select('*')
-        .or(`name.ilike.${searchTerm},plasticwareId.ilike.${searchTerm},company.ilike.${searchTerm}`)
+        .or(`name.ilike.${searchTerm},plasticwareid.ilike.${searchTerm},company.ilike.${searchTerm}`)
         .order('created_at', { ascending: false });
       
       if (error) {
         // Fallback
         const [nameResults, idResults, companyResults] = await Promise.all([
           supabase.from('plasticwares').select('*').ilike('name', searchTerm),
-          supabase.from('plasticwares').select('*').ilike('plasticwareId', searchTerm),
+          supabase.from('plasticwares').select('*').ilike('plasticwareid', searchTerm),
           supabase.from('plasticwares').select('*').ilike('company', searchTerm)
         ]);
         const combined = [...(nameResults.data || []), ...(idResults.data || []), ...(companyResults.data || [])];
         const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
-        return unique.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        return unique.map(fromDbKeys).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       }
       
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -163,7 +194,7 @@ class Plasticware {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -175,11 +206,11 @@ class Plasticware {
       const { data, error } = await supabase
         .from('plasticwares')
         .select('*')
-        .eq('storagePlace', storagePlace)
+        .eq('storageplace', storagePlace)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -190,7 +221,7 @@ class Plasticware {
     try {
       const { data, error } = await supabase
         .from('plasticwares')
-        .update({ availableQuantity: newAvailableQuantity })
+        .update(toDbKeys({ availableQuantity: newAvailableQuantity }))
         .eq('id', id)
         .select();
       
@@ -206,7 +237,8 @@ class Plasticware {
     try {
       const { data: allPlasticwares, error } = await supabase.from('plasticwares').select('*');
       if (error) throw error;
-      return (allPlasticwares || []).filter(p => p.availableQuantity < (p.totalQuantity * 0.1))
+      const mapped = (allPlasticwares || []).map(fromDbKeys);
+      return mapped.filter(p => p.availableQuantity < (p.totalQuantity * 0.1))
         .sort((a, b) => a.availableQuantity - b.availableQuantity);
     } catch (error) {
       throw error;

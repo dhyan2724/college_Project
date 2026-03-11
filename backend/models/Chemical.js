@@ -1,5 +1,37 @@
 const { supabase } = require('../config/supabase');
 
+// PostgreSQL lowercases unquoted column names; map app camelCase -> DB lowercase for Supabase
+const CHEMICAL_TO_DB = {
+  availableWeight: 'availableweight',
+  totalWeight: 'totalweight',
+  storagePlace: 'storageplace',
+  roomLocation: 'roomlocation',
+  catalogNumber: 'catalognumber',
+  chemicalId: 'chemicalid',
+  dateOfEntry: 'dateofentry'
+};
+const CHEMICAL_FROM_DB = Object.fromEntries(
+  Object.entries(CHEMICAL_TO_DB).map(([k, v]) => [v, k])
+);
+
+function toDbKeys(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    out[CHEMICAL_TO_DB[k] ?? k] = v;
+  }
+  return out;
+}
+
+function fromDbKeys(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    out[CHEMICAL_FROM_DB[k] ?? k] = v;
+  }
+  return out;
+}
+
 class Chemical {
   // Create a new chemical
   static async create(chemicalData) {
@@ -15,8 +47,8 @@ class Chemical {
           ? availableWeight
           : (totalWeight !== undefined && totalWeight !== null ? totalWeight : 0);
       
-      // Prepare data object
-      const chemicalRecord = {
+      // Prepare data object with DB column names (lowercase for PostgreSQL)
+      const chemicalRecord = toDbKeys({
         name: name !== undefined ? name : null,
         type: type !== undefined ? type : null,
         storagePlace: storagePlace !== undefined ? storagePlace : null,
@@ -26,7 +58,7 @@ class Chemical {
         company: company !== undefined ? company : null,
         catalogNumber: catalogNumber !== undefined ? catalogNumber : null,
         chemicalId: chemicalId
-      };
+      });
       
       const { data, error } = await supabase
         .from('chemicals')
@@ -36,7 +68,7 @@ class Chemical {
       
       if (error) throw error;
       
-      return { ...data, ...chemicalData, chemicalId, availableWeight: finalAvailableWeight };
+      return { ...fromDbKeys(data), ...chemicalData, chemicalId, availableWeight: finalAvailableWeight };
     } catch (error) {
       throw error;
     }
@@ -52,7 +84,7 @@ class Chemical {
         .single();
       
       if (error && error.code !== 'PGRST116') throw error;
-      return data || null;
+      return data ? fromDbKeys(data) : null;
     } catch (error) {
       throw error;
     }
@@ -64,11 +96,11 @@ class Chemical {
       const { data, error } = await supabase
         .from('chemicals')
         .select('*')
-        .eq('catalogNumber', catalogNumber)
+        .eq('catalognumber', catalogNumber)
         .single();
       
       if (error && error.code !== 'PGRST116') throw error;
-      return data || null;
+      return data ? fromDbKeys(data) : null;
     } catch (error) {
       throw error;
     }
@@ -80,11 +112,11 @@ class Chemical {
       const { data, error } = await supabase
         .from('chemicals')
         .select('*')
-        .eq('chemicalId', chemicalId)
+        .eq('chemicalid', chemicalId)
         .single();
       
       if (error && error.code !== 'PGRST116') throw error;
-      return data || null;
+      return data ? fromDbKeys(data) : null;
     } catch (error) {
       throw error;
     }
@@ -99,7 +131,7 @@ class Chemical {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -108,7 +140,7 @@ class Chemical {
   // Update chemical
   static async updateById(id, updateData) {
     try {
-      // Remove undefined values
+      // Remove undefined values and convert to DB column names
       const cleanData = {};
       Object.keys(updateData).forEach(key => {
         if (updateData[key] !== undefined) {
@@ -118,7 +150,7 @@ class Chemical {
 
       const { data, error } = await supabase
         .from('chemicals')
-        .update(cleanData)
+        .update(toDbKeys(cleanData))
         .eq('id', id)
         .select();
       
@@ -151,15 +183,15 @@ class Chemical {
       const { data, error } = await supabase
         .from('chemicals')
         .select('*')
-        .or(`name.ilike.${searchTerm},catalogNumber.ilike.${searchTerm},chemicalId.ilike.${searchTerm},company.ilike.${searchTerm}`)
+        .or(`name.ilike.${searchTerm},catalognumber.ilike.${searchTerm},chemicalid.ilike.${searchTerm},company.ilike.${searchTerm}`)
         .order('created_at', { ascending: false });
       
       if (error) {
-        // Fallback to individual queries
+        // Fallback to individual queries (use DB column names)
         const [nameResults, catalogResults, idResults, companyResults] = await Promise.all([
           supabase.from('chemicals').select('*').ilike('name', searchTerm),
-          supabase.from('chemicals').select('*').ilike('catalogNumber', searchTerm),
-          supabase.from('chemicals').select('*').ilike('chemicalId', searchTerm),
+          supabase.from('chemicals').select('*').ilike('catalognumber', searchTerm),
+          supabase.from('chemicals').select('*').ilike('chemicalid', searchTerm),
           supabase.from('chemicals').select('*').ilike('company', searchTerm)
         ]);
         
@@ -170,10 +202,10 @@ class Chemical {
           ...(companyResults.data || [])
         ];
         const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
-        return unique.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        return unique.map(fromDbKeys).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       }
       
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -189,7 +221,7 @@ class Chemical {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -201,11 +233,11 @@ class Chemical {
       const { data, error } = await supabase
         .from('chemicals')
         .select('*')
-        .eq('storagePlace', storagePlace)
+        .eq('storageplace', storagePlace)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -216,7 +248,7 @@ class Chemical {
     try {
       const { data, error } = await supabase
         .from('chemicals')
-        .update({ availableWeight: newAvailableWeight })
+        .update(toDbKeys({ availableWeight: newAvailableWeight }))
         .eq('id', id)
         .select();
       
@@ -230,19 +262,11 @@ class Chemical {
   // Get low stock chemicals (available weight less than 10% of total weight)
   static async getLowStock() {
     try {
-      const { data, error } = await supabase
-        .from('chemicals')
-        .select('*')
-        .lt('availableWeight', supabase.raw('totalWeight * 0.1'));
-      
-      if (error) {
-        // Fallback: fetch all and filter in JavaScript
-        const { data: allChemicals } = await supabase.from('chemicals').select('*');
-        return (allChemicals || []).filter(c => c.availableWeight < (c.totalWeight * 0.1))
-          .sort((a, b) => a.availableWeight - b.availableWeight);
-      }
-      
-      return (data || []).sort((a, b) => a.availableWeight - b.availableWeight);
+      const { data: allChemicals, error } = await supabase.from('chemicals').select('*');
+      if (error) throw error;
+      const mapped = (allChemicals || []).map(fromDbKeys);
+      return mapped.filter(c => c.availableWeight < (c.totalWeight * 0.1))
+        .sort((a, b) => a.availableWeight - b.availableWeight);
     } catch (error) {
       throw error;
     }
@@ -253,12 +277,12 @@ class Chemical {
     try {
       const { data, error } = await supabase
         .from('chemicals')
-        .select('availableWeight')
+        .select('availableweight')
         .eq('id', id)
         .single();
       
       if (error && error.code !== 'PGRST116') throw error;
-      return data?.availableWeight || 0;
+      return data?.availableweight ?? data?.availableWeight ?? 0;
     } catch (error) {
       throw error;
     }

@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) NOT NULL UNIQUE,
     fullName VARCHAR(255) NOT NULL,
     rollNo VARCHAR(255) UNIQUE,
-    category VARCHAR(50) CHECK (category IN ('UG/PG', 'PhD', 'Project Student')),
+    category VARCHAR(50) CHECK (category IN ('UG', 'PG', 'PhD', 'Project Student')),
     lastLogin TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
