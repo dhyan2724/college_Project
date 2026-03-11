@@ -74,64 +74,11 @@ router.post(
         department,
       } = req.body;
 
-    // Validate required fields
-    if (!username || !password || !role || !email || !fullName) {
-      return res.status(400).json({
-        message: 'Username, password, role, email, and fullName are required'
-      });
-    }
-
-    // Validate role
-    const validRoles = ['admin', 'faculty', 'student', 'phd_scholar', 'dissertation_student'];
-    if (!validRoles.includes(role)) {
-      return res.status(400).json({
-        message: 'Invalid role. Must be one of: admin, faculty, student, phd_scholar, dissertation_student'
-      });
-    }
-
-    // Check if username or email already exists
-    const existingUsername = await User.findByUsername(username);
-    const existingEmail = await User.findByEmail(email);
-
-    if (existingUsername || existingEmail) {
-      return res.status(400).json({
-        message: 'Username or email already exists'
-      });
-    }
-
-    // Create user
-    const newUser = await User.create({
-      username,
-      password,
-      role,
-      email,
-      fullName,
-      rollNo,
-      category,
-      year: typeof year !== 'undefined' ? year : null,
-      department: typeof department !== 'undefined' ? department : null
-    });
-
-    // Send welcome email with credentials
-    if (newUser.email) {
-      try {
-        const emailUtils = require('../utils/emailUtils');
-
-        if (emailUtils.isEmailServiceConfigured()) {
-          await emailUtils.sendWelcomeEmailWithCredentials(
-            newUser.email,
-            newUser.fullName || newUser.username,
-            newUser.username,
-            password, // The original password from request
-            newUser.rollNo || null,
-            role
-          );
-          console.log('Welcome email with credentials sent successfully');
-        } else {
-          console.log('Email service not configured. Skipping welcome email.');
-        }
-      } catch (emailError) {
-        console.error('Error sending welcome email:', emailError);
+      // Validate required fields
+      if (!username || !password || !role || !email || !fullName) {
+        return res.status(400).json({
+          message: "Username, password, role, email, and fullName are required",
+        });
       }
 
       // Validate role
@@ -176,12 +123,12 @@ router.post(
         rollNo: isStudentRole ? rollNo || null : null,
         category: isStudentRole ? category || null : null,
         year: isStudentRole
-          ? typeof year !== "undefined"
+          ? typeof year !== "undefined" && year !== ""
             ? year
             : null
           : null,
         department: isStudentRole
-          ? typeof department !== "undefined"
+          ? typeof department !== "undefined" && department !== ""
             ? department
             : null
           : null,
