@@ -1,5 +1,36 @@
 const { supabase } = require('../config/supabase');
 
+// PostgreSQL lowercases unquoted column names; map app camelCase -> DB lowercase for Supabase
+const INSTRUMENT_TO_DB = {
+  availableQuantity: 'availablequantity',
+  totalQuantity: 'totalquantity',
+  storagePlace: 'storageplace',
+  roomLocation: 'roomlocation',
+  instrumentId: 'instrumentid',
+  dateOfEntry: 'dateofentry'
+};
+const INSTRUMENT_FROM_DB = Object.fromEntries(
+  Object.entries(INSTRUMENT_TO_DB).map(([k, v]) => [v, k])
+);
+
+function toDbKeys(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    out[INSTRUMENT_TO_DB[k] ?? k] = v;
+  }
+  return out;
+}
+
+function fromDbKeys(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    out[INSTRUMENT_FROM_DB[k] ?? k] = v;
+  }
+  return out;
+}
+
 class Instrument {
   // Create a new instrument
   static async create(instrumentData) {
@@ -12,7 +43,7 @@ class Instrument {
       // Set availableQuantity to totalQuantity if not specified
       const finalAvailableQuantity = availableQuantity !== undefined ? availableQuantity : totalQuantity;
       
-      const instrumentRecord = {
+      const instrumentRecord = toDbKeys({
         name: name !== undefined ? name : null,
         type: type !== undefined ? type : null,
         storagePlace: storagePlace !== undefined ? storagePlace : null,
@@ -21,7 +52,7 @@ class Instrument {
         availableQuantity: finalAvailableQuantity,
         company: company !== undefined ? company : null,
         instrumentId: instrumentId
-      };
+      });
       
       const { data, error } = await supabase
         .from('instruments')
@@ -31,7 +62,7 @@ class Instrument {
       
       if (error) throw error;
       
-      return { ...data, ...instrumentData, instrumentId, availableQuantity: finalAvailableQuantity };
+      return { ...fromDbKeys(data), ...instrumentData, instrumentId, availableQuantity: finalAvailableQuantity };
     } catch (error) {
       throw error;
     }
@@ -47,7 +78,7 @@ class Instrument {
         .single();
       
       if (error && error.code !== 'PGRST116') throw error;
-      return data || null;
+      return data ? fromDbKeys(data) : null;
     } catch (error) {
       throw error;
     }
@@ -59,11 +90,11 @@ class Instrument {
       const { data, error } = await supabase
         .from('instruments')
         .select('*')
-        .eq('instrumentId', instrumentId)
+        .eq('instrumentid', instrumentId)
         .single();
       
       if (error && error.code !== 'PGRST116') throw error;
-      return data || null;
+      return data ? fromDbKeys(data) : null;
     } catch (error) {
       throw error;
     }
@@ -78,7 +109,7 @@ class Instrument {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -96,7 +127,7 @@ class Instrument {
 
       const { data, error } = await supabase
         .from('instruments')
-        .update(cleanData)
+        .update(toDbKeys(cleanData))
         .eq('id', id)
         .select();
       
@@ -129,22 +160,22 @@ class Instrument {
       const { data, error } = await supabase
         .from('instruments')
         .select('*')
-        .or(`name.ilike.${searchTerm},instrumentId.ilike.${searchTerm},company.ilike.${searchTerm}`)
+        .or(`name.ilike.${searchTerm},instrumentid.ilike.${searchTerm},company.ilike.${searchTerm}`)
         .order('created_at', { ascending: false });
       
       if (error) {
         // Fallback
         const [nameResults, idResults, companyResults] = await Promise.all([
           supabase.from('instruments').select('*').ilike('name', searchTerm),
-          supabase.from('instruments').select('*').ilike('instrumentId', searchTerm),
+          supabase.from('instruments').select('*').ilike('instrumentid', searchTerm),
           supabase.from('instruments').select('*').ilike('company', searchTerm)
         ]);
         const combined = [...(nameResults.data || []), ...(idResults.data || []), ...(companyResults.data || [])];
         const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
-        return unique.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        return unique.map(fromDbKeys).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       }
       
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -160,7 +191,7 @@ class Instrument {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -172,11 +203,11 @@ class Instrument {
       const { data, error } = await supabase
         .from('instruments')
         .select('*')
-        .eq('storagePlace', storagePlace)
+        .eq('storageplace', storagePlace)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -187,7 +218,7 @@ class Instrument {
     try {
       const { data, error } = await supabase
         .from('instruments')
-        .update({ availableQuantity: newAvailableQuantity })
+        .update(toDbKeys({ availableQuantity: newAvailableQuantity }))
         .eq('id', id)
         .select();
       
@@ -203,7 +234,8 @@ class Instrument {
     try {
       const { data: allInstruments, error } = await supabase.from('instruments').select('*');
       if (error) throw error;
-      return (allInstruments || []).filter(i => i.availableQuantity < (i.totalQuantity * 0.1))
+      const mapped = (allInstruments || []).map(fromDbKeys);
+      return mapped.filter(i => i.availableQuantity < (i.totalQuantity * 0.1))
         .sort((a, b) => a.availableQuantity - b.availableQuantity);
     } catch (error) {
       throw error;

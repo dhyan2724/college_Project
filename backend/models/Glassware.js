@@ -1,5 +1,36 @@
 const { supabase } = require('../config/supabase');
 
+// PostgreSQL lowercases unquoted column names; map app camelCase -> DB lowercase for Supabase
+const GLASSWARE_TO_DB = {
+  availableQuantity: 'availablequantity',
+  totalQuantity: 'totalquantity',
+  storagePlace: 'storageplace',
+  roomLocation: 'roomlocation',
+  glasswareId: 'glasswareid',
+  dateOfEntry: 'dateofentry'
+};
+const GLASSWARE_FROM_DB = Object.fromEntries(
+  Object.entries(GLASSWARE_TO_DB).map(([k, v]) => [v, k])
+);
+
+function toDbKeys(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    out[GLASSWARE_TO_DB[k] ?? k] = v;
+  }
+  return out;
+}
+
+function fromDbKeys(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    out[GLASSWARE_FROM_DB[k] ?? k] = v;
+  }
+  return out;
+}
+
 class Glassware {
   // Create a new glassware
   static async create(glasswareData) {
@@ -12,7 +43,7 @@ class Glassware {
       // Set availableQuantity to totalQuantity if not specified
       const finalAvailableQuantity = availableQuantity !== undefined ? availableQuantity : totalQuantity;
       
-      const glasswareRecord = {
+      const glasswareRecord = toDbKeys({
         name: name !== undefined ? name : null,
         type: type !== undefined ? type : null,
         storagePlace: storagePlace !== undefined ? storagePlace : null,
@@ -21,7 +52,7 @@ class Glassware {
         availableQuantity: finalAvailableQuantity,
         company: company !== undefined ? company : null,
         glasswareId: glasswareId
-      };
+      });
       
       const { data, error } = await supabase
         .from('glasswares')
@@ -31,7 +62,7 @@ class Glassware {
       
       if (error) throw error;
       
-      return { ...data, ...glasswareData, glasswareId, availableQuantity: finalAvailableQuantity };
+      return { ...fromDbKeys(data), ...glasswareData, glasswareId, availableQuantity: finalAvailableQuantity };
     } catch (error) {
       throw error;
     }
@@ -47,7 +78,7 @@ class Glassware {
         .single();
       
       if (error && error.code !== 'PGRST116') throw error;
-      return data || null;
+      return data ? fromDbKeys(data) : null;
     } catch (error) {
       throw error;
     }
@@ -59,11 +90,11 @@ class Glassware {
       const { data, error } = await supabase
         .from('glasswares')
         .select('*')
-        .eq('glasswareId', glasswareId)
+        .eq('glasswareid', glasswareId)
         .single();
       
       if (error && error.code !== 'PGRST116') throw error;
-      return data || null;
+      return data ? fromDbKeys(data) : null;
     } catch (error) {
       throw error;
     }
@@ -78,7 +109,7 @@ class Glassware {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -96,7 +127,7 @@ class Glassware {
 
       const { data, error } = await supabase
         .from('glasswares')
-        .update(cleanData)
+        .update(toDbKeys(cleanData))
         .eq('id', id)
         .select();
       
@@ -129,22 +160,22 @@ class Glassware {
       const { data, error } = await supabase
         .from('glasswares')
         .select('*')
-        .or(`name.ilike.${searchTerm},glasswareId.ilike.${searchTerm},company.ilike.${searchTerm}`)
+        .or(`name.ilike.${searchTerm},glasswareid.ilike.${searchTerm},company.ilike.${searchTerm}`)
         .order('created_at', { ascending: false });
       
       if (error) {
         // Fallback
         const [nameResults, idResults, companyResults] = await Promise.all([
           supabase.from('glasswares').select('*').ilike('name', searchTerm),
-          supabase.from('glasswares').select('*').ilike('glasswareId', searchTerm),
+          supabase.from('glasswares').select('*').ilike('glasswareid', searchTerm),
           supabase.from('glasswares').select('*').ilike('company', searchTerm)
         ]);
         const combined = [...(nameResults.data || []), ...(idResults.data || []), ...(companyResults.data || [])];
         const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
-        return unique.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        return unique.map(fromDbKeys).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       }
       
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -160,7 +191,7 @@ class Glassware {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -172,11 +203,11 @@ class Glassware {
       const { data, error } = await supabase
         .from('glasswares')
         .select('*')
-        .eq('storagePlace', storagePlace)
+        .eq('storageplace', storagePlace)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data || [];
+      return (data || []).map(fromDbKeys);
     } catch (error) {
       throw error;
     }
@@ -187,7 +218,7 @@ class Glassware {
     try {
       const { data, error } = await supabase
         .from('glasswares')
-        .update({ availableQuantity: newAvailableQuantity })
+        .update(toDbKeys({ availableQuantity: newAvailableQuantity }))
         .eq('id', id)
         .select();
       
@@ -203,7 +234,8 @@ class Glassware {
     try {
       const { data: allGlasswares, error } = await supabase.from('glasswares').select('*');
       if (error) throw error;
-      return (allGlasswares || []).filter(g => g.availableQuantity < (g.totalQuantity * 0.1))
+      const mapped = (allGlasswares || []).map(fromDbKeys);
+      return mapped.filter(g => g.availableQuantity < (g.totalQuantity * 0.1))
         .sort((a, b) => a.availableQuantity - b.availableQuantity);
     } catch (error) {
       throw error;

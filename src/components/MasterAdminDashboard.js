@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../App';
+import React, { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../App";
 
 const MasterAdminDashboard = () => {
   const { API_URL, logout } = useContext(AuthContext);
@@ -14,31 +14,31 @@ const MasterAdminDashboard = () => {
   // State for creating new users
   const [showCreateUserForm, setShowCreateUserForm] = useState(false);
   const [newUser, setNewUser] = useState({
-    username: '',
-    password: '',
-    role: 'student',
-    email: '',
-    fullName: '',
-    rollNo: '',
-    category: 'UG',
-    year: '',
-    department: ''
+    username: "",
+    password: "",
+    role: "student",
+    email: "",
+    fullName: "",
+    rollNo: "",
+    category: "UG",
+    year: "",
+    department: "",
   });
 
   // State for changing passwords
   const [showChangePasswordForm, setShowChangePasswordForm] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [newPassword, setNewPassword] = useState('');
+  const [newPassword, setNewPassword] = useState("");
 
   // State for statistics
   const [statistics, setStatistics] = useState({
     totalUsers: 0,
     byRole: {},
-    recentUsers: 0
+    recentUsers: 0,
   });
 
   // Search
-  const [userSearch, setUserSearch] = useState('');
+  const [userSearch, setUserSearch] = useState("");
 
   useEffect(() => {
     fetchUsers();
@@ -47,21 +47,21 @@ const MasterAdminDashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_URL}/master-admin/users`, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (response.ok) {
         const data = await response.json();
         setUsers(data);
       } else {
-        setError('Failed to fetch users');
+        setError("Failed to fetch users");
       }
     } catch (error) {
-      setError('Error fetching users');
+      setError("Error fetching users");
     } finally {
       setLoading(false);
     }
@@ -69,11 +69,11 @@ const MasterAdminDashboard = () => {
 
   const fetchStatistics = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_URL}/master-admin/statistics`, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (response.ok) {
@@ -81,7 +81,7 @@ const MasterAdminDashboard = () => {
         setStatistics(data);
       }
     } catch (error) {
-      console.error('Error fetching statistics:', error);
+      console.error("Error fetching statistics:", error);
     }
   };
 
@@ -90,33 +90,35 @@ const MasterAdminDashboard = () => {
     try {
       const token = localStorage.getItem('token');
       const needsYear =
-        newUser.category === 'UG' || newUser.category === 'PG' || newUser.category === 'UG/PG';
+        newUser.category === "UG" ||
+        newUser.category === "PG" ||
+        newUser.category === "UG/PG";
       const payload = {
         ...newUser,
         ...(needsYear ? {} : { year: '' }),
       };
       const response = await fetch(`${API_URL}/master-admin/create-user`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
-        alert('User created successfully!');
+        alert("User created successfully!");
         setShowCreateUserForm(false);
         setNewUser({
-          username: '',
-          password: '',
-          role: 'student',
-          email: '',
-          fullName: '',
-          rollNo: '',
-          category: 'UG',
-          year: '',
-          department: ''
+          username: "",
+          password: "",
+          role: "student",
+          email: "",
+          fullName: "",
+          rollNo: "",
+          category: "UG",
+          year: "",
+          department: "",
         });
         fetchUsers();
         fetchStatistics();
@@ -125,53 +127,58 @@ const MasterAdminDashboard = () => {
         alert(`Error creating user: ${errorData.message}`);
       }
     } catch (error) {
-      alert('Error creating user');
+      alert("Error creating user");
     }
   };
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/master-admin/users/${selectedUser.id}/change-password`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${API_URL}/master-admin/users/${selectedUser.id}/change-password`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ newPassword }),
         },
-        body: JSON.stringify({ newPassword })
-      });
+      );
 
       if (response.ok) {
-        alert('Password changed successfully!');
+        alert("Password changed successfully!");
         setShowChangePasswordForm(false);
         setSelectedUser(null);
-        setNewPassword('');
+        setNewPassword("");
       } else {
         const errorData = await response.json();
         alert(`Error changing password: ${errorData.message}`);
       }
     } catch (error) {
-      alert('Error changing password');
+      alert("Error changing password");
     }
   };
 
   const handleDeleteUser = async (userId, username) => {
-    if (!window.confirm(`Are you sure you want to delete user "${username}"?`)) {
+    if (
+      !window.confirm(`Are you sure you want to delete user "${username}"?`)
+    ) {
       return;
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_URL}/master-admin/users/${userId}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (response.ok) {
-        alert('User deleted successfully!');
+        alert("User deleted successfully!");
         fetchUsers();
         fetchStatistics();
       } else {
@@ -179,13 +186,13 @@ const MasterAdminDashboard = () => {
         alert(`Error deleting user: ${errorData.message}`);
       }
     } catch (error) {
-      alert('Error deleting user');
+      alert("Error deleting user");
     }
   };
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   if (loading) {
@@ -204,7 +211,7 @@ const MasterAdminDashboard = () => {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600">{error}</p>
-          <button 
+          <button
             onClick={fetchUsers}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
@@ -241,25 +248,35 @@ const MasterAdminDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold text-gray-900">Total Users</h3>
-            <p className="text-3xl font-bold text-blue-600">{statistics.totalUsers}</p>
+            <p className="text-3xl font-bold text-blue-600">
+              {statistics.totalUsers}
+            </p>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold text-gray-900">Admins</h3>
-            <p className="text-3xl font-bold text-red-600">{statistics.byRole.admin || 0}</p>
+            <p className="text-3xl font-bold text-red-600">
+              {statistics.byRole.admin || 0}
+            </p>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold text-gray-900">Faculty</h3>
-            <p className="text-3xl font-bold text-green-600">{statistics.byRole.faculty || 0}</p>
+            <p className="text-3xl font-bold text-green-600">
+              {statistics.byRole.faculty || 0}
+            </p>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-semibold text-gray-900">Students</h3>
-            <p className="text-3xl font-bold text-purple-600">{statistics.byRole.student || 0}</p>
+            <p className="text-3xl font-bold text-purple-600">
+              {statistics.byRole.student || 0}
+            </p>
           </div>
         </div>
 
         {/* Action Buttons */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Master Admin Actions</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Master Admin Actions
+          </h2>
           <div className="flex flex-wrap gap-4">
             <button
               onClick={() => setShowCreateUserForm(true)}
@@ -268,13 +285,13 @@ const MasterAdminDashboard = () => {
               ➕ Create New User
             </button>
             <button
-              onClick={() => navigate('/admin')}
+              onClick={() => navigate("/admin")}
               className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
               🔧 Admin Dashboard
             </button>
             <button
-              onClick={() => navigate('/inventory')}
+              onClick={() => navigate("/inventory")}
               className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
             >
               📦 Inventory Management
@@ -316,33 +333,47 @@ const MasterAdminDashboard = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {(userSearch.trim() ? users.filter(u => {
-                  const q = userSearch.toLowerCase();
-                  return (
-                    (u.fullName && u.fullName.toLowerCase().includes(q)) ||
-                    (u.username && u.username.toLowerCase().includes(q)) ||
-                    (u.email && u.email.toLowerCase().includes(q)) ||
-                    (u.role && u.role.toLowerCase().includes(q)) ||
-                    (u.rollNo && String(u.rollNo).toLowerCase().includes(q))
-                  );
-                }) : users).map((user) => (
+                {(userSearch.trim()
+                  ? users.filter((u) => {
+                      const q = userSearch.toLowerCase();
+                      return (
+                        (u.fullName && u.fullName.toLowerCase().includes(q)) ||
+                        (u.username && u.username.toLowerCase().includes(q)) ||
+                        (u.email && u.email.toLowerCase().includes(q)) ||
+                        (u.role && u.role.toLowerCase().includes(q)) ||
+                        (u.rollNo && String(u.rollNo).toLowerCase().includes(q))
+                      );
+                    })
+                  : users
+                ).map((user) => (
                   <tr key={user.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{user.fullName}</div>
-                        <div className="text-sm text-gray-500">{user.username}</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {user.fullName}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {user.username}
+                        </div>
                         {user.rollNo && (
-                          <div className="text-sm text-gray-500">Roll: {user.rollNo}</div>
+                          <div className="text-sm text-gray-500">
+                            Roll: {user.rollNo}
+                          </div>
                         )}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        user.role === 'master_admin' ? 'bg-purple-100 text-purple-800' :
-                        user.role === 'admin' ? 'bg-red-100 text-red-800' :
-                        user.role === 'faculty' ? 'bg-green-100 text-green-800' :
-                        'bg-blue-100 text-blue-800'
-                      }`}>
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          user.role === "master_admin"
+                            ? "bg-purple-100 text-purple-800"
+                            : user.role === "admin"
+                              ? "bg-red-100 text-red-800"
+                              : user.role === "faculty"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-blue-100 text-blue-800"
+                        }`}
+                      >
                         {user.role}
                       </span>
                     </td>
@@ -363,9 +394,11 @@ const MasterAdminDashboard = () => {
                         >
                           🔑 Change Password
                         </button>
-                        {user.role !== 'master_admin' && (
+                        {user.role !== "master_admin" && (
                           <button
-                            onClick={() => handleDeleteUser(user.id, user.username)}
+                            onClick={() =>
+                              handleDeleteUser(user.id, user.username)
+                            }
                             className="text-red-600 hover:text-red-900"
                           >
                             🗑️ Delete
@@ -386,141 +419,226 @@ const MasterAdminDashboard = () => {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Create New User</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Create New User
+              </h3>
               <form onSubmit={handleCreateUser}>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Username</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Username
+                    </label>
                     <input
                       type="text"
                       value={newUser.username}
-                      onChange={(e) => setNewUser({...newUser, username: e.target.value})}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, username: e.target.value })
+                      }
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Password</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Password
+                    </label>
                     <input
                       type="password"
                       value={newUser.password}
-                      onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, password: e.target.value })
+                      }
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Role</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Role
+                    </label>
                     <select
                       value={newUser.role}
-                      onChange={(e) => setNewUser({...newUser, role: e.target.value})}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, role: e.target.value })
+                      }
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                     >
                       <option value="admin">Admin</option>
                       <option value="faculty">Faculty</option>
                       <option value="student">Student</option>
                       <option value="phd_scholar">PhD Scholar</option>
-                      <option value="dissertation_student">Dissertation Student</option>
+                      <option value="dissertation_student">
+                        Dissertation Student
+                      </option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Email
+                    </label>
                     <input
                       type="email"
                       value={newUser.email}
-                      onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, email: e.target.value })
+                      }
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Full Name
+                    </label>
                     <input
                       type="text"
                       value={newUser.fullName}
-                      onChange={(e) => setNewUser({...newUser, fullName: e.target.value})}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, fullName: e.target.value })
+                      }
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
                       required
                     />
                   </div>
-                  {['student', 'phd_scholar', 'dissertation_student'].includes(newUser.role) && (
+                  {["student", "phd_scholar", "dissertation_student"].includes(
+                    newUser.role,
+                  ) && (
                     <>
                       {(() => {
                         const needsYear =
-                          newUser.category === 'UG' || newUser.category === 'PG' || newUser.category === 'UG/PG';
+                          newUser.category === "UG" ||
+                          newUser.category === "PG" ||
+                          newUser.category === "UG/PG";
                         const yearOptions =
-                          newUser.category === 'PG'
-                            ? ['1st', '2nd']
-                            : ['1st', '2nd', '3rd', '4th'];
+                          newUser.category === "PG"
+                            ? ["1st", "2nd"]
+                            : ["1st", "2nd", "3rd", "4th"];
                         return (
                           <>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Roll Number</label>
-                        <input
-                          type="text"
-                          value={newUser.rollNo}
-                          onChange={(e) => setNewUser({...newUser, rollNo: e.target.value})}
-                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Category</label>
-                        <select
-                          value={newUser.category}
-                          onChange={(e) => setNewUser({...newUser, category: e.target.value, year: ''})}
-                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                          required
-                        >
-                          <option value="UG">UG</option>
-                          <option value="PG">PG</option>
-                          <option value="PhD">PhD</option>
-                          <option value="Project Student">Project Student</option>
-                        </select>
-                      </div>
-                      {needsYear && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700">Year</label>
-                          <select
-                            value={newUser.year}
-                            onChange={(e) => setNewUser({...newUser, year: e.target.value})}
-                            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                            required
-                          >
-                            <option value="">Select Year</option>
-                            {yearOptions.map((y) => (
-                              <option key={y} value={y}>
-                                {y} Year
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      )}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Department</label>
-                        <select
-                          value={newUser.department}
-                          onChange={(e) => setNewUser({ ...newUser, department: e.target.value })}
-                          className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                          required
-                        >
-                          <option value="">Department</option>
-                          <option value="BSc-Microbiology">BSc-Microbiology</option>
-                          <option value="BSc-Zoology & Animal Biotechnology">BSc-Zoology & Animal Biotechnology</option>
-                          <option value="BSc-Botany & Plant Biotechnology">BSc-Botany & Plant Biotechnology</option>
-                          <option value="BSc-MSc Biomedical">BSc-MSc Biomedical</option>
-                          <option value="BSc-MSc Botany">BSc-MSc Botany</option>
-                          <option value="BSc-MSc Zoology">BSc-MSc Zoology</option>
-                          <option value="BSc-MSc Microbiology">BSc-MSc Microbiology</option>
-                          <option value="BSc-MSc Food Science">BSc-MSc Food Science</option>
-                          <option value="MSc-Zoology & Biotechnology">MSc-Zoology & Biotechnology</option>
-                          <option value="MSc-Botany & Biotechnology">MSc-Botany & Biotechnology</option>
-                          <option value="MSc-Microbiology">MSc-Microbiology</option>
-                          <option value="MSc-Clinical Embryology">MSc-Clinical Embryology</option>
-                          <option value="MSc-Food Science & Dietetics">MSc-Food Science & Dietetics</option>
-                          <option value="PhD">PhD</option>
-                        </select>
-                      </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">
+                                Roll Number
+                              </label>
+                              <input
+                                type="text"
+                                value={newUser.rollNo}
+                                onChange={(e) =>
+                                  setNewUser({
+                                    ...newUser,
+                                    rollNo: e.target.value,
+                                  })
+                                }
+                                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">
+                                Category
+                              </label>
+                              <select
+                                value={newUser.category}
+                                onChange={(e) =>
+                                  setNewUser({
+                                    ...newUser,
+                                    category: e.target.value,
+                                    year: "",
+                                  })
+                                }
+                                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                                required
+                              >
+                                <option value="UG">UG</option>
+                                <option value="PG">PG</option>
+                                <option value="PhD">PhD</option>
+                                <option value="Project Student">
+                                  Project Student
+                                </option>
+                              </select>
+                            </div>
+                            {needsYear && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700">
+                                  Year
+                                </label>
+                                <select
+                                  value={newUser.year}
+                                  onChange={(e) =>
+                                    setNewUser({
+                                      ...newUser,
+                                      year: e.target.value,
+                                    })
+                                  }
+                                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                                  required
+                                >
+                                  <option value="">Select Year</option>
+                                  {yearOptions.map((y) => (
+                                    <option key={y} value={y}>
+                                      {y} Year
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            )}
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">
+                                Department
+                              </label>
+                              <select
+                                value={newUser.department}
+                                onChange={(e) =>
+                                  setNewUser({
+                                    ...newUser,
+                                    department: e.target.value,
+                                  })
+                                }
+                                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                                required
+                              >
+                                <option value="">Department</option>
+                                <option value="BSc-Microbiology">
+                                  BSc-Microbiology
+                                </option>
+                                <option value="BSc-Zoology & Animal Biotechnology">
+                                  BSc-Zoology & Animal Biotechnology
+                                </option>
+                                <option value="BSc-Botany & Plant Biotechnology">
+                                  BSc-Botany & Plant Biotechnology
+                                </option>
+                                <option value="BSc-MSc Biomedical">
+                                  BSc-MSc Biomedical
+                                </option>
+                                <option value="BSc-MSc Botany">
+                                  BSc-MSc Botany
+                                </option>
+                                <option value="BSc-MSc Zoology">
+                                  BSc-MSc Zoology
+                                </option>
+                                <option value="BSc-MSc Microbiology">
+                                  BSc-MSc Microbiology
+                                </option>
+                                <option value="BSc-MSc Food Science">
+                                  BSc-MSc Food Science
+                                </option>
+                                <option value="MSc-Zoology & Biotechnology">
+                                  MSc-Zoology & Biotechnology
+                                </option>
+                                <option value="MSc-Botany & Biotechnology">
+                                  MSc-Botany & Biotechnology
+                                </option>
+                                <option value="MSc-Microbiology">
+                                  MSc-Microbiology
+                                </option>
+                                <option value="MSc-Clinical Embryology">
+                                  MSc-Clinical Embryology
+                                </option>
+                                <option value="MSc-Food Science & Dietetics">
+                                  MSc-Food Science & Dietetics
+                                </option>
+                                <option value="PhD">PhD</option>
+                              </select>
+                            </div>
                           </>
                         );
                       })()}
@@ -553,13 +671,18 @@ const MasterAdminDashboard = () => {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Change Password</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Change Password
+              </h3>
               <p className="text-sm text-gray-600 mb-4">
-                Changing password for: <strong>{selectedUser.fullName}</strong> ({selectedUser.username})
+                Changing password for: <strong>{selectedUser.fullName}</strong>{" "}
+                ({selectedUser.username})
               </p>
               <form onSubmit={handleChangePassword}>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">New Password</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    New Password
+                  </label>
                   <input
                     type="password"
                     value={newPassword}
@@ -574,7 +697,7 @@ const MasterAdminDashboard = () => {
                     onClick={() => {
                       setShowChangePasswordForm(false);
                       setSelectedUser(null);
-                      setNewPassword('');
+                      setNewPassword("");
                     }}
                     className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                   >
@@ -596,4 +719,4 @@ const MasterAdminDashboard = () => {
   );
 };
 
-export default MasterAdminDashboard; 
+export default MasterAdminDashboard;
