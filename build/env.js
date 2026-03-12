@@ -13,7 +13,7 @@ window._env_ = window._env_ || {};
 // Default to a relative path so production doesn't accidentally call localhost.
 // If your backend is on a different domain, set window._env_.REACT_APP_API_URL to
 // the full backend URL (ending with /api) on the hosting server.
-window._env_.REACT_APP_API_URL = window._env_.REACT_APP_API_URL || '/api';
+window._env_.REACT_APP_API_URL = window._env_.REACT_APP_API_URL || 'https://college-project-7hup.vercel.app/api';
 
 // Supabase Configuration (used by backend for database)
 window._env_.REACT_APP_SUPABASE_URL = window._env_.REACT_APP_SUPABASE_URL || 'https://lhhoacasfrqzqdbygmnq.supabase.co';

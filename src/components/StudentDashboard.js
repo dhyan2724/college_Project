@@ -136,9 +136,49 @@ const StudentDashboard = () => {
       })
     : [];
 
+  const getInventoryItemForCartLine = (capType, itemId) => {
+    const idStr = String(itemId);
+    const matchById = (i) => String(i?._id ?? i?.id) === idStr;
+    switch (capType) {
+      case 'Chemical':
+        return (chemicals || []).find(matchById);
+      case 'Glassware':
+        return (glasswares || []).find(matchById);
+      case 'Plasticware':
+        return (plasticwares || []).find(matchById);
+      case 'Instrument':
+        return (instruments || []).find(matchById);
+      case 'Minor Instrument':
+        return (minorinstruments || []).find(matchById);
+      case 'Miscellaneous':
+        return (miscellaneous || []).find(matchById);
+      case 'Specimen':
+        return (specimens || []).find(matchById);
+      case 'Slide':
+        return (slides || []).find(matchById);
+      default:
+        return null;
+    }
+  };
+
+  const isOutOfStock = (capType, inventoryItem) => {
+    if (!inventoryItem) return false; // if not loaded / missing, don't hard-block UI
+    if (capType === 'Chemical') {
+      const available = Number(inventoryItem.availableWeight ?? 0);
+      return !(available > 0);
+    }
+    const available = Number(inventoryItem.availableQuantity ?? 0);
+    return !(available > 0);
+  };
+
   const addToCart = (item, type) => {
     const capType = ITEM_TYPE_MAP[type] || type;
     const itemId = item._id || item.id;
+    const inventoryItem = getInventoryItemForCartLine(capType, itemId) || item;
+    if (isOutOfStock(capType, inventoryItem)) {
+      alert('This item is out of stock and cannot be requested right now.');
+      return;
+    }
     const existingItem = cart.find(cartItem => cartItem.id === itemId && cartItem.type === capType);
     if (existingItem) {
       setCart(prev => prev.map(cartItem =>
@@ -192,6 +232,44 @@ const StudentDashboard = () => {
       alert('Your cart is empty.');
       return;
     }
+
+    // Validate cart against current inventory (prevents submitting when availability is 0 / stale)
+    for (const line of cart) {
+      const inventoryItem = getInventoryItemForCartLine(line.type, line.id);
+      if (!inventoryItem) continue; // best-effort: backend will enforce
+
+      if (isOutOfStock(line.type, inventoryItem)) {
+        alert(`"${line.name}" is currently out of stock. Please remove it from the cart.`);
+        return;
+      }
+
+      if (line.type === 'Chemical') {
+        const requested = Number(line.totalWeightRequested ?? 0);
+        const available = Number(inventoryItem.availableWeight ?? 0);
+        if (!(requested > 0)) {
+          alert(`Please enter a valid weight for "${line.name}".`);
+          return;
+        }
+        if (requested > available) {
+          alert(`Insufficient stock for "${line.name}". Available: ${available}g, Requested: ${requested}g`);
+          return;
+        }
+      } else if (line.type === 'Instrument') {
+        // Instruments are issued 1 at a time; availability check above is enough
+      } else {
+        const requested = Number(line.quantity ?? 0);
+        const available = Number(inventoryItem.availableQuantity ?? 0);
+        if (!(requested > 0)) {
+          alert(`Please enter a valid quantity for "${line.name}".`);
+          return;
+        }
+        if (requested > available) {
+          alert(`Insufficient stock for "${line.name}". Available: ${available}, Requested: ${requested}`);
+          return;
+        }
+      }
+    }
+
     const requestData = {
       items: cart.map(item => ({
         itemType: item.type,
@@ -420,7 +498,8 @@ const StudentDashboard = () => {
                         <p className="text-sm text-gray-600 mb-3">Weight: {chemical.weightPerUnit}gm</p>
                         <button
                           onClick={() => addToCart(chemical, 'chemical')}
-                          className="w-full bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition-colors"
+                          disabled={isOutOfStock('Chemical', chemical)}
+                          className="w-full bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                         >
                           Add to Cart
                         </button>
@@ -448,7 +527,8 @@ const StudentDashboard = () => {
                         <p className="text-sm text-gray-600 mb-2">Available: {glassware.availableQuantity} units</p>
                         <button
                           onClick={() => addToCart(glassware, 'glassware')}
-                          className="w-full bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 transition-colors"
+                          disabled={isOutOfStock('Glassware', glassware)}
+                          className="w-full bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                         >
                           Add to Cart
                         </button>
@@ -476,7 +556,8 @@ const StudentDashboard = () => {
                         <p className="text-sm text-gray-600 mb-2">Available: {plasticware.availableQuantity} units</p>
                         <button
                           onClick={() => addToCart(plasticware, 'plasticware')}
-                          className="w-full bg-purple-500 text-white px-3 py-2 rounded hover:bg-purple-600 transition-colors"
+                          disabled={isOutOfStock('Plasticware', plasticware)}
+                          className="w-full bg-purple-500 text-white px-3 py-2 rounded hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                         >
                           Add to Cart
                         </button>
@@ -504,7 +585,8 @@ const StudentDashboard = () => {
                         <p className="text-sm text-gray-600 mb-2">Available: {instrument.availableQuantity} units</p>
                         <button
                           onClick={() => addToCart(instrument, 'instrument')}
-                          className="w-full bg-orange-500 text-white px-3 py-2 rounded hover:bg-orange-600 transition-colors"
+                          disabled={isOutOfStock('Instrument', instrument)}
+                          className="w-full bg-orange-500 text-white px-3 py-2 rounded hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                         >
                           Add to Cart
                         </button>
@@ -534,7 +616,8 @@ const StudentDashboard = () => {
                         <p className="text-sm text-gray-600 mb-3">Description: {item.description}</p>
                         <button
                           onClick={() => addToCart(item, 'miscellaneous')}
-                          className="w-full bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 transition-colors"
+                          disabled={isOutOfStock('Miscellaneous', item)}
+                          className="w-full bg-gray-500 text-white px-3 py-2 rounded hover:bg-gray-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                         >
                           Add to Cart
                         </button>
@@ -562,7 +645,8 @@ const StudentDashboard = () => {
                         <p className="text-sm text-gray-600 mb-2">Available: {specimen.availableQuantity} units</p>
                         <button
                           onClick={() => addToCart(specimen, 'specimen')}
-                          className="w-full bg-green-700 text-white px-3 py-2 rounded hover:bg-green-800 transition-colors"
+                          disabled={isOutOfStock('Specimen', specimen)}
+                          className="w-full bg-green-700 text-white px-3 py-2 rounded hover:bg-green-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                         >
                           Add to Cart
                         </button>
@@ -589,7 +673,8 @@ const StudentDashboard = () => {
                         <p className="text-sm text-gray-600 mb-2">Available: {slide.availableQuantity} units</p>
                         <button
                           onClick={() => addToCart(slide, 'slide')}
-                          className="w-full bg-cyan-700 text-white px-3 py-2 rounded hover:bg-cyan-800 transition-colors"
+                          disabled={isOutOfStock('Slide', slide)}
+                          className="w-full bg-cyan-700 text-white px-3 py-2 rounded hover:bg-cyan-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                         >
                           Add to Cart
                         </button>
@@ -617,7 +702,8 @@ const StudentDashboard = () => {
                         <p className="text-sm text-gray-600 mb-2">Available: {minor.availableQuantity} units</p>
                         <button
                           onClick={() => addToCart(minor, 'minorinstrument')}
-                          className="w-full bg-fuchsia-700 text-white px-3 py-2 rounded hover:bg-fuchsia-800 transition-colors"
+                          disabled={isOutOfStock('Minor Instrument', minor)}
+                          className="w-full bg-fuchsia-700 text-white px-3 py-2 rounded hover:bg-fuchsia-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                         >
                           Add to Cart
                         </button>

@@ -45,6 +45,107 @@ router.get('/:id', authenticateToken, async (req, res) => {
 // POST a new pending request
 router.post('/', authenticateToken, async (req, res) => {
   try {
+    // Validate items against current inventory (prevents requesting when available units = 0)
+    if (!Array.isArray(req.body.items) || req.body.items.length === 0) {
+      return res.status(400).json({ message: 'At least one item is required.' });
+    }
+
+    const normalizeItemType = (t) => {
+      const type = String(t || '').trim();
+      if (type.toLowerCase() === 'minor instrument') return 'Instrument';
+      return type;
+    };
+
+    for (const item of req.body.items) {
+      const itemType = normalizeItemType(item.itemType);
+      const itemId = item.itemId;
+      if (!itemType || !itemId) {
+        return res.status(400).json({ message: 'Each item must include itemType and itemId.' });
+      }
+
+      let inventoryItem = null;
+      switch (itemType) {
+        case 'Chemical':
+          inventoryItem = await Chemical.findById(itemId);
+          if (!inventoryItem) return res.status(404).json({ message: 'Chemical not found.' });
+          {
+            const requested = Number(item.totalWeightRequested ?? 0);
+            const available = Number(inventoryItem.availableWeight ?? 0);
+            if (!(requested > 0)) {
+              return res.status(400).json({ message: `Invalid requested weight for chemical "${inventoryItem.name}".` });
+            }
+            if (!(available > 0) || requested > available) {
+              return res.status(400).json({
+                message: `Insufficient chemical available for "${inventoryItem.name}". Available: ${available}g, Requested: ${requested}g`,
+              });
+            }
+          }
+          break;
+        case 'Glassware':
+          inventoryItem = await Glassware.findById(itemId);
+          if (!inventoryItem) return res.status(404).json({ message: 'Glassware not found.' });
+          {
+            const requested = Number(item.quantity ?? 0);
+            const available = Number(inventoryItem.availableQuantity ?? 0);
+            if (!(requested > 0)) {
+              return res.status(400).json({ message: `Invalid requested quantity for "${inventoryItem.name}".` });
+            }
+            if (!(available > 0) || requested > available) {
+              return res.status(400).json({
+                message: `Insufficient glassware available for "${inventoryItem.name}". Available: ${available}, Requested: ${requested}`,
+              });
+            }
+          }
+          break;
+        case 'Plasticware':
+          inventoryItem = await Plasticware.findById(itemId);
+          if (!inventoryItem) return res.status(404).json({ message: 'Plasticware not found.' });
+          {
+            const requested = Number(item.quantity ?? 0);
+            const available = Number(inventoryItem.availableQuantity ?? 0);
+            if (!(requested > 0)) {
+              return res.status(400).json({ message: `Invalid requested quantity for "${inventoryItem.name}".` });
+            }
+            if (!(available > 0) || requested > available) {
+              return res.status(400).json({
+                message: `Insufficient plasticware available for "${inventoryItem.name}". Available: ${available}, Requested: ${requested}`,
+              });
+            }
+          }
+          break;
+        case 'Instrument':
+          inventoryItem = await Instrument.findById(itemId);
+          if (!inventoryItem) return res.status(404).json({ message: 'Instrument not found.' });
+          {
+            const available = Number(inventoryItem.availableQuantity ?? 0);
+            if (!(available > 0)) {
+              return res.status(400).json({
+                message: `Instrument not available for "${inventoryItem.name}". Available: ${available}`,
+              });
+            }
+          }
+          break;
+        case 'Miscellaneous':
+          inventoryItem = await Miscellaneous.findById(itemId);
+          if (!inventoryItem) return res.status(404).json({ message: 'Miscellaneous item not found.' });
+          {
+            const requested = Number(item.quantity ?? 0);
+            const available = Number(inventoryItem.availableQuantity ?? 0);
+            if (!(requested > 0)) {
+              return res.status(400).json({ message: `Invalid requested quantity for "${inventoryItem.name}".` });
+            }
+            if (!(available > 0) || requested > available) {
+              return res.status(400).json({
+                message: `Insufficient stock available for "${inventoryItem.name}". Available: ${available}, Requested: ${requested}`,
+              });
+            }
+          }
+          break;
+        default:
+          return res.status(400).json({ message: `Unsupported item type: ${item.itemType}` });
+      }
+    }
+
     const pendingRequestData = {
       facultyInChargeId: req.body.facultyInCharge, // teacher's user id
       requestedByUserId: req.user.id,
